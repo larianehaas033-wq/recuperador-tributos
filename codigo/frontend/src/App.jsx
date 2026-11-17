@@ -30,7 +30,13 @@ export default function App() {
   // reabre o programa na mesma janela: o servidor reinicia com a versão nova e a tela recarrega sozinha
   const reiniciar = async (alvo) => {
     setBaixando('reiniciando')
-    try { await api.post('/api/reiniciar') } catch { /* o servidor sai logo em seguida */ }
+    try { await api.post('/api/reiniciar') } catch (e) {
+      if (/Not Found|404/.test(e.message)) {  // servidor de uma versão antiga ainda rodando
+        alert('Para terminar a atualização, feche esta janela e abra o programa de novo pelo atalho.')
+        setBaixando(false)
+        return
+      }
+    }
     const inicio = Date.now()
     await new Promise((ok) => setTimeout(ok, 2500))
     while (Date.now() - inicio < 90000) {
@@ -41,6 +47,7 @@ export default function App() {
       await new Promise((ok) => setTimeout(ok, 1000))
     }
     alert('O programa não voltou sozinho. Feche a janela e abra de novo pelo atalho.')
+    carregarVersao()
     setBaixando(false)
   }
 

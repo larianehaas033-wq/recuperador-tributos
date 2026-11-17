@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.4",
+  "versao": "1.4.5",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.4.zip",
-  "sha256": "5c990bfc16b45a7ce5fa0b85f96faa41479881139c56c9cd66e0c8db6410a90a",
+  "pacote": "atualizacoes/sistema-1.4.5.zip",
+  "sha256": "94c92e2159e3c855c37a02e18ef32754fac858fc4c583cadc74bdadbb970d997",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Atualização em um clique: o programa baixa e se reinicia sozinho na mesma janela; nova versão aparece sem esperar o cache do GitHub"
+    "Corrige atualização presa em 'Reiniciando': ao abrir, o programa fecha o processo de uma versão anterior que ficou rodando em segundo plano"
   ]
 }

@@ -95,6 +95,31 @@ def _ativo(porta: int) -> bool:
         return False
 
 
+def _versao_em(porta: int) -> str | None:
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{porta}/api/status", timeout=5) as r:
+            return json.loads(r.read().decode("utf-8")).get("versao_programa")
+    except Exception:
+        return None
+
+
+def _encerrar(pid, porta: int) -> None:
+    """Fecha o servidor de uma versão anterior que ficou rodando (troca de versão sem reiniciar o computador)."""
+    if pid:
+        try:
+            if sys.platform.startswith("win"):
+                subprocess.run(["taskkill", "/PID", str(pid), "/F", "/T"], capture_output=True,
+                               creationflags=0x08000000, timeout=15)
+            else:
+                os.kill(int(pid), 9)
+        except Exception:
+            pass
+    fim = time.time() + 15
+    while time.time() < fim and _ativo(porta):
+        time.sleep(0.3)
+    time.sleep(1.0)
+
+
 def _porta_disponivel(porta: int) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
@@ -173,10 +198,14 @@ def main() -> None:
     reinicio = _porta_reinicio()
     if LOCK.exists() and reinicio is None:
         try:
-            porta = json.loads(LOCK.read_text())["porta"]
+            info = json.loads(LOCK.read_text())
+            porta = info["porta"]
             if _ativo(porta):
-                abrir_janela(f"http://127.0.0.1:{porta}/")
-                return
+                if _versao_em(porta) == config.VERSION:
+                    abrir_janela(f"http://127.0.0.1:{porta}/")
+                    return
+                # processo de uma versão anterior ficou aberto em segundo plano: encerra e sobe o novo
+                _encerrar(info.get("pid"), porta)
         except Exception:
             pass
 
