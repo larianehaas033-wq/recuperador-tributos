@@ -51,14 +51,17 @@ class MotorPisCofins:
         self.revisoes = revisoes
         self.hoje = hoje
         self.industrial = (empresa.get("ind_ativ") or "") == "0"
-        self.nao_cumulativo = (empresa.get("regime") or "") in ("LUCRO_REAL", "MISTO")
+        # regime por competência (pode mudar de um ano para outro); sem informação do período, vale o atual
+        self.regime_atual = empresa.get("regime") or ""
+        self.regimes = empresa.get("regimes") or {}
+        self.nao_cumulativo = self.regime_atual in ("LUCRO_REAL", "MISTO")
         self.cfop_revenda = base.cfops("saida_revenda")
         self.cfop_producao = base.cfops("saida_producao")
         # só venda efetiva entra nas teses de saída: remessa, bonificação, transferência e devolução de compra não
         self.cfop_venda = self.cfop_revenda | self.cfop_producao
         self.cfop_devolucao = base.cfops("devolucao_venda")
         self.cfop_entrada_revenda = base.cfops("entrada_revenda")
-        self.simples = (empresa.get("regime") or "") == "SIMPLES_NACIONAL"
+        self.simples = self.regime_atual == "SIMPLES_NACIONAL"
         self.cfop_entrada = base.cfops("entrada_credito")
         self.aliq = (Decimal("1.65"), Decimal("7.6")) if self.nao_cumulativo else (Decimal("0.65"), Decimal("3"))
         self.produtos = produtos or {}
@@ -125,6 +128,18 @@ class MotorPisCofins:
             return True
         return not self.industrial
 
+    def regime(self, periodo: str | None) -> str:
+        return self.regimes.get(periodo or "") or self.regime_atual
+
+    def nao_cumulativo_em(self, periodo: str | None) -> bool:
+        return self.regime(periodo) in ("LUCRO_REAL", "MISTO")
+
+    def simples_em(self, periodo: str | None) -> bool:
+        return self.regime(periodo) == "SIMPLES_NACIONAL"
+
+    def aliq_em(self, periodo: str | None) -> tuple[Decimal, Decimal]:
+        return (Decimal("1.65"), Decimal("7.6")) if self.nao_cumulativo_em(periodo) else (Decimal("0.65"), Decimal("3"))
+
     @staticmethod
     def _por_tributo(row: dict):
         """Uma linha C170 tem PIS e COFINS; C181/C191 só PIS; C185/C195 só COFINS."""
@@ -141,18 +156,21 @@ class MotorPisCofins:
         entradas = self.itens.filter(pl.col("ind_oper") == "0")
         devolucoes = entradas.filter(pl.col("cfop").is_in(list(self.cfop_devolucao)))
         mono_zero = self._monofasico_aliq_zero(saidas, marcados)
-        icms_base = [] if self.simples else self._icms_na_base(saidas, marcados)  # Simples: DAS, sem Tema 69
+        icms_base = self._icms_na_base(saidas, marcados)  # períodos do Simples ficam de fora (DAS, sem Tema 69)
         self._deduzir_devolucoes(mono_zero, devolucoes, "mono")
         self._deduzir_devolucoes(icms_base, devolucoes, "icms")
         creditos += mono_zero + icms_base
-        if self.nao_cumulativo and not self.simples:
-            creditos += self._creditos_entradas(entradas)
-            creditos += self._riscos_entradas(entradas)
+        periodos_nc = [p for p in entradas["periodo"].unique().to_list() if self.nao_cumulativo_em(p)]
+        if periodos_nc:  # crédito de entradas só nas competências do regime não cumulativo (Lucro Real)
+            entradas_nc = entradas.filter(pl.col("periodo").is_in(periodos_nc))
+            creditos += self._creditos_entradas(entradas_nc)
+            creditos += self._riscos_entradas(entradas_nc)
         creditos += self._risco_saida_sem_regra(saidas)
         periodos_consolidados = set(
             saidas.filter(pl.col("origem").is_in(["C181", "C185"]))["periodo"].unique().to_list()
         ) - set(saidas.filter(pl.col("origem") == "C170")["periodo"].unique().to_list())
-        if periodos_consolidados and self.xml_saidas.height and not self.simples:
+        periodos_consolidados = {p for p in periodos_consolidados if not self.simples_em(p)}
+        if periodos_consolidados and self.xml_saidas.height:
             creditos += self._icms_na_base_xml(periodos_consolidados)
         return creditos, periodos_consolidados
 
@@ -199,6 +217,8 @@ class MotorPisCofins:
         c170 = saidas.filter((pl.col("origem") == "C170") & (pl.col("vl_icms") > 0)
                              & (pl.col("data") >= INICIO_TEMA_69))
         for row in linhas(c170):
+            if self.simples_em(row["periodo"]):
+                continue
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
                 if cst not in CST_TRIBUTADO or vl <= 0 or (row["rid"], trib) in marcados or aliq <= 0:
@@ -331,7 +351,7 @@ class MotorPisCofins:
                     continue
                 elif zero:
                     continue
-                aliq_c = self.aliq[0] if trib == "PIS" else self.aliq[1]
+                aliq_c = self.aliq_em(row["periodo"])[0 if trib == "PIS" else 1]
                 valor = base_cred * aliq_c / 100
                 if valor < 0.01:
                     continue
@@ -428,7 +448,8 @@ class MotorPisCofins:
                 continue
             if self._revisao(ncm, "RISCO_SAIDA_ZERO_SEM_REGRA") == "DESCARTADO":
                 continue
-            for trib, base_v, aliq in (("PIS", row["_bp"], self.aliq[0]), ("COFINS", row["_bc"], self.aliq[1])):
+            a_pis, a_cof = self.aliq_em(row["periodo"])
+            for trib, base_v, aliq in (("PIS", row["_bp"], a_pis), ("COFINS", row["_bc"], a_cof)):
                 if base_v <= 0:
                     continue
                 out.append(Credito(

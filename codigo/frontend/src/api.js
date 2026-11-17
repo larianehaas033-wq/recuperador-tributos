@@ -62,4 +62,5 @@ export const REGIME = {
   LUCRO_PRESUMIDO: 'Lucro Presumido',
   MISTO: 'Lucro Real (misto)',
   SIMPLES: 'Simples Nacional',
+  SIMPLES_NACIONAL: 'Simples Nacional',
 }

@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.0",
+  "versao": "1.4.1",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.0.zip",
-  "sha256": "e35dac4ec72fb63667e5329351a5f0c42ddf4066847b7f9853322952a2ce3d71",
+  "pacote": "atualizacoes/sistema-1.4.1.zip",
+  "sha256": "fc731a8e5ae36e5a06edc98792a6d4936aa12122ce7ee696c24e42ca27214b80",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.9",
   "notas": [
-    "Valores em Decimal com arredondamento meio para cima; listas de NCM e CFOP fora do código (base de regras)"
+    "Regime identificado por competência (EFD-Contribuições 0110 e CRT dos XMLs); Simples Nacional reconhecido; sem regime, PIS/COFINS não é calculado"
   ]
 }

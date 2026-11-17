@@ -18,13 +18,28 @@ ITEM_COLS = [
 ]
 NOTA_COLS = [
     "empresa_id", "arquivo_id", "origem", "chave", "modelo", "serie", "numero", "data", "periodo", "ind_oper",
-    "ind_emit", "cnpj_emit", "cnpj_part", "cod_sit", "cancelada", "vl_doc", "vl_icms", "vl_icms_st", "vl_pis",
+    "ind_emit", "cnpj_emit", "cnpj_part", "crt_emit", "cod_sit", "cancelada", "vl_doc", "vl_icms", "vl_icms_st", "vl_pis",
     "vl_cofins",
 ]
 
 REGIME = {"1": "LUCRO_REAL", "2": "LUCRO_PRESUMIDO", "3": "MISTO"}
 
 Progress = Callable[[str, float], None]
+
+
+def atualizar_regime(con, empresa_id: int) -> None:
+    """Regime atual da empresa = o do período mais recente. Fonte: EFD-Contribuições (0110); sem ela, o CRT
+    das notas que a própria empresa emitiu (1, 2 ou 4 = Simples Nacional)."""
+    r = con.execute("SELECT regime FROM arquivos_sped WHERE empresa_id=? AND tipo='EFD_CONTRIB' AND regime IS NOT NULL"
+                    " ORDER BY periodo_ini DESC LIMIT 1", (empresa_id,)).fetchone()
+    regime = r["regime"] if r else None
+    if not regime:
+        c = con.execute("SELECT crt_emit FROM notas_fiscais WHERE empresa_id=? AND origem='XML' AND ind_emit='0'"
+                        " AND crt_emit IS NOT NULL ORDER BY data DESC LIMIT 1", (empresa_id,)).fetchone()
+        if c:
+            regime = "SIMPLES_NACIONAL" if c["crt_emit"] in ("1", "2", "4") else None
+    if regime:
+        con.execute("UPDATE empresas SET regime=? WHERE id=?", (regime, empresa_id))
 
 
 def _upsert_empresa(con, cnpj: str, nome: str, uf: str, regime: str | None, ind_ativ: str | None) -> int:
@@ -85,9 +100,10 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
 
         cur = con.execute(
             "INSERT INTO arquivos_sped (empresa_id, tipo, nome, caminho, hash, periodo_ini, periodo_fim, finalidade,"
-            " qtd_registros) VALUES (?,?,?,?,?,?,?,?,?)",
-            (empresa_id, tipo, path.name, str(path), h, r.dt_ini, r.dt_fin, r.finalidade, r.registros),
+            " regime, qtd_registros) VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (empresa_id, tipo, path.name, str(path), h, r.dt_ini, r.dt_fin, r.finalidade, regime, r.registros),
         )
+        atualizar_regime(con, empresa_id)
         arquivo_id = cur.lastrowid
         origem_doc = "SPED_CONTRIB" if tipo == "EFD_CONTRIB" else "SPED_ICMS"
 
@@ -187,6 +203,7 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
                 empresa_id=empresa_id, arquivo_id=arquivos[empresa_id], origem="XML", chave=n["chave"],
                 modelo=n["modelo"], serie=n["serie"], numero=n["numero"], data=n["data"], periodo=n["periodo"],
                 ind_oper=ind_oper, ind_emit=ind_emit, cnpj_emit=n["cnpj_emit"], cnpj_part=part, cod_sit=n["cstat"],
+                crt_emit=n.get("crt_emit") if ind_emit == "0" else None,
                 cancelada=cancelada, vl_doc=n["vl_doc"], vl_icms=n["vl_icms"], vl_icms_st=n["vl_icms_st"],
                 vl_pis=n["vl_pis"], vl_cofins=n["vl_cofins"],
             )
@@ -210,6 +227,8 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
             con.executemany("UPDATE notas_fiscais SET cancelada=1 WHERE chave=? AND origem='XML'",
                             [(c,) for c in cancel])
         resumo["empresas"] = list(arquivos.keys())
+        for eid in arquivos:
+            atualizar_regime(con, eid)
     return resumo
 
 

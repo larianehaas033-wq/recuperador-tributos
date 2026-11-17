@@ -89,3 +89,42 @@ def test_dinheiro_em_decimal_com_arredondamento_meio_para_cima():
     assert c.valor_recuperar == Decimal("0.30") and isinstance(c.valor_recuperar, Decimal)
     c.valor_restituivel = 1.005
     assert c.valor_restituivel == Decimal("1.01")
+
+
+def test_mudanca_de_regime_cada_competencia_pela_sua_regra():
+    """Presumido em 2022 e Real em 2023: crédito de entrada só em 2023; Tema 69 fora do período do Simples."""
+    sem = dict(BISC, ind_oper="0", cfop="1102", cst_pis="70", cst_cofins="70", vl_pis=0.0, vl_cofins=0.0)
+    itens = [item(**sem, periodo="2022-06", data="2022-06-10"), item(**sem, periodo="2023-06", data="2023-06-10"),
+             item(**BISC, periodo="2021-06", data="2021-06-10")]
+    df = to_frame(itens, COLS).with_row_index("rid")
+    emp = {"regime": "LUCRO_REAL", "ind_ativ": "2", "uf": "SC",
+           "regimes": {"2021-06": "SIMPLES_NACIONAL", "2022-06": "LUCRO_PRESUMIDO", "2023-06": "LUCRO_REAL"}}
+    c = MotorPisCofins(BASE, emp, df, to_frame([], COLS), {}, date(2026, 11, 17), PROD, None).executar()[0]
+    assert {x.periodo for x in c if x.tese == "PISCOF_CREDITO_ENTRADA"} == {"2023-06"}
+    assert not [x for x in c if x.tese == "PISCOF_ICMS_BASE"]  # 2021 era Simples
+
+
+def test_regime_identificado_por_competencia_e_conflito():
+    import sqlite3
+    from app.engine.runner import regimes_por_periodo
+    con = sqlite3.connect(":memory:")
+    con.row_factory = sqlite3.Row
+    con.executescript("""
+        CREATE TABLE arquivos_sped (empresa_id, tipo, periodo_ini, regime);
+        CREATE TABLE notas_fiscais (empresa_id, origem, ind_emit, periodo, crt_emit);
+        CREATE TABLE empresas (id, regime);
+        INSERT INTO empresas VALUES (1, NULL);
+        INSERT INTO arquivos_sped VALUES (1,'EFD_CONTRIB','2022-01-01','LUCRO_PRESUMIDO'),
+                                         (1,'EFD_CONTRIB','2023-01-01','LUCRO_REAL');
+        INSERT INTO notas_fiscais VALUES (1,'XML','0','2021-05','1'), (1,'XML','0','2023-01','1');
+    """)
+    reg, av = regimes_por_periodo(con, 1)
+    assert reg == {"2021-05": "SIMPLES_NACIONAL", "2022-01": "LUCRO_PRESUMIDO", "2023-01": "LUCRO_REAL"}
+    assert any("por competência" in a for a in av) and any("2023-01" in a and "CRT" in a for a in av)
+    vazio = sqlite3.connect(":memory:")
+    vazio.row_factory = sqlite3.Row
+    vazio.executescript("CREATE TABLE arquivos_sped (empresa_id, tipo, periodo_ini, regime);"
+                        "CREATE TABLE notas_fiscais (empresa_id, origem, ind_emit, periodo, crt_emit);"
+                        "CREATE TABLE empresas (id, regime);")
+    assert regimes_por_periodo(vazio, 1) == ({}, [regimes_por_periodo(vazio, 1)[1][0]])
+    assert "NÃO IDENTIFICADO" in regimes_por_periodo(vazio, 1)[1][0]

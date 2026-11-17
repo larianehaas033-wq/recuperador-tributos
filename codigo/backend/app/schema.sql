@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS arquivos_sped (
     periodo_ini   TEXT,
     periodo_fim   TEXT,
     finalidade    TEXT,                      -- original / retificadora
+    regime        TEXT,                      -- EFD-Contribuições: regime do período (registro 0110)
     qtd_registros INTEGER,
     importado_em  TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -44,6 +45,7 @@ CREATE TABLE IF NOT EXISTS notas_fiscais (
     ind_emit      TEXT,                      -- 0 emissão própria, 1 terceiros
     cnpj_emit     TEXT,
     cnpj_part     TEXT,
+    crt_emit      TEXT,                      -- XML: regime tributário do emitente (1/2/4 = Simples Nacional)
     cod_sit       TEXT,
     cancelada     INTEGER DEFAULT 0,
     vl_doc        REAL,

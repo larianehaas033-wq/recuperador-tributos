@@ -131,6 +131,82 @@ def _aplicar_limites(creditos: list[Credito], apuracoes: dict, selic: dict, hoje
                       + ". O limite do valor recolhido não foi aplicado nelas.")
 
 
+NOME_REGIME = {"LUCRO_REAL": "Lucro Real (não cumulativo)", "LUCRO_PRESUMIDO": "Lucro Presumido (cumulativo)",
+               "MISTO": "Lucro Real com receitas cumulativas e não cumulativas", "SIMPLES_NACIONAL": "Simples Nacional"}
+
+
+def _preencher_regime_antigo(con, empresa_id: int) -> None:
+    """Arquivos importados antes da 1.4.1 não guardaram o regime do mês: relê o registro 0110 do arquivo original,
+    se ele ainda estiver no mesmo lugar."""
+    from pathlib import Path
+
+    from ..importador import REGIME
+    try:
+        pend = con.execute("SELECT id, caminho FROM arquivos_sped WHERE empresa_id=? AND tipo='EFD_CONTRIB' "
+                           "AND regime IS NULL", (empresa_id,)).fetchall()
+    except Exception:
+        return
+    for r in pend:
+        try:
+            with open(Path(r["caminho"]), encoding="latin-1", errors="ignore") as f:
+                for i, linha in enumerate(f):
+                    if linha.startswith("|0110|"):
+                        reg = REGIME.get(linha.split("|")[2])
+                        if reg:
+                            con.execute("UPDATE arquivos_sped SET regime=? WHERE id=?", (reg, r["id"]))
+                        break
+                    if i > 200:
+                        break
+        except (OSError, TypeError):
+            continue
+
+
+def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
+    """Regime de cada competência. Fonte principal: registro 0110 da EFD-Contribuições do mês. Sem ela, o CRT das
+    notas emitidas pela empresa (1, 2 ou 4 = Simples Nacional). Avisa mudança de regime e informação conflitante."""
+    regimes, avisos = {}, []
+    _preencher_regime_antigo(con, empresa_id)
+    # arquivos importados antes da versão 1.4.1 não guardaram o regime: vale o da empresa (lido do 0110 na época)
+    for r in con.execute("SELECT substr(a.periodo_ini,1,7) p, coalesce(a.regime, e.regime) regime FROM arquivos_sped a "
+                         "JOIN empresas e ON e.id = a.empresa_id WHERE a.empresa_id=? AND a.tipo='EFD_CONTRIB'",
+                         (empresa_id,)):
+        if r["regime"]:
+            regimes[r["p"]] = r["regime"]
+    crt = defaultdict(set)
+    for r in con.execute("SELECT periodo, crt_emit FROM notas_fiscais WHERE empresa_id=? AND origem='XML' "
+                         "AND ind_emit='0' AND crt_emit IS NOT NULL", (empresa_id,)):
+        crt[r["periodo"]].add("SIMPLES_NACIONAL" if r["crt_emit"] in ("1", "2", "4") else "NORMAL")
+    conflito = []
+    for per, tipos in crt.items():
+        if per in regimes:
+            if "SIMPLES_NACIONAL" in tipos and regimes[per] != "SIMPLES_NACIONAL":
+                conflito.append(per)
+        elif tipos == {"SIMPLES_NACIONAL"}:
+            regimes[per] = "SIMPLES_NACIONAL"
+    if not regimes:
+        avisos.append("REGIME NÃO IDENTIFICADO: importe a EFD-Contribuições (registro 0110) ou os XMLs emitidos pela "
+                      "empresa. Sem o regime, as teses de PIS/COFINS não são calculadas; só as de ICMS.")
+        return regimes, avisos
+    faixas, atual = [], None
+    for per in sorted(regimes):
+        if atual and atual[0] == regimes[per]:
+            atual[2] = per
+        else:
+            atual = [regimes[per], per, per]
+            faixas.append(atual)
+    texto = "; ".join(f"{NOME_REGIME.get(r, r)} de {a[5:]}/{a[:4]} a {b[5:]}/{b[:4]}" for r, a, b in faixas)
+    avisos.append(("Regime identificado por competência: " if len(faixas) > 1 else "Regime identificado: ") + texto
+                  + (". Cada competência foi analisada pelas regras do seu regime." if len(faixas) > 1 else "."))
+    if any(r == "LUCRO_PRESUMIDO" for r in regimes.values()):
+        avisos.append("Nas competências do regime cumulativo não há crédito de entradas (Lei 10.637/2002, art. 8º, e "
+                      "Lei 10.833/2003, art. 10).")
+    if conflito:
+        avisos.append("ATENÇÃO: nas competências " + ", ".join(sorted(conflito)) + " a EFD-Contribuições indica "
+                      "regime normal, mas as notas emitidas trazem CRT do Simples Nacional. Confirme o regime antes "
+                      "de entregar o relatório.")
+    return regimes, avisos
+
+
 def _json_num(o):
     """Decimal no JSON do resumo: o texto do número é o mesmo (centavos exatos)."""
     if isinstance(o, Decimal):
@@ -216,6 +292,8 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             "SELECT periodo, tributo, valor_recolher FROM apuracoes WHERE empresa_id=?", (empresa_id,))}
         selic = {r["competencia"]: r["taxa"] for r in con.execute("SELECT competencia, taxa FROM selic")}
         produtos = _produtos(con, empresa_id)
+        regimes, avisos_regime = regimes_por_periodo(con, empresa_id)
+        empresa["regimes"] = regimes
         ultima_atual = con.execute(
             "SELECT max(executado_em) m FROM atualizacoes WHERE status IN ('OK','SEM_MUDANCA','ALTERADA')").fetchone()["m"]
         pendentes = [r["nome"] for r in con.execute("SELECT nome FROM fontes_monitoradas WHERE pendente_revisao=1")]
@@ -227,10 +305,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
 
     if not itens_contrib.height and not xml_itens.height and not entradas_icms.height:
         avisos.append("Nenhum dado importado para esta empresa.")
-    if not empresa.get("regime"):
-        avisos.append("Regime de PIS/COFINS não identificado (falta EFD-Contribuições): créditos de entrada não analisados.")
-    elif empresa["regime"] == "LUCRO_PRESUMIDO":
-        avisos.append("Empresa no regime cumulativo: crédito de entradas não se aplica.")
+    avisos += avisos_regime
     if not selic:
         avisos.append("Tabela Selic não carregada: valores sem correção. Use 'Atualizar base' com internet.")
     if pendentes:
@@ -248,8 +323,11 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
                       "comprovada. Reimporte os arquivos SPED.")
     if progress:
         progress("Analisando PIS/COFINS", 0.35)
-    creditos, consolidados = MotorPisCofins(base, empresa, itens_contrib, xml_saidas, revisoes, hoje, produtos,
-                                            evidencias).executar()
+    if regimes:
+        creditos, consolidados = MotorPisCofins(base, empresa, itens_contrib, xml_saidas, revisoes, hoje, produtos,
+                                                evidencias).executar()
+    else:  # sem regime não há como saber quais regras de PIS/COFINS valem: nada é calculado
+        creditos, consolidados = [], set()
     if consolidados and not xml_saidas.height:
         avisos.append("EFD-Contribuições consolidada (C180/C181) em " + ", ".join(sorted(consolidados))
                       + " sem XMLs de venda: a exclusão do ICMS da base não pôde ser verificada nesses meses.")
@@ -310,6 +388,8 @@ def gerar_cadastro(empresa_id: int, hoje: date | None = None) -> list[dict]:
         entradas_icms = _itens(con, empresa_id, "EFD_ICMS_IPI", "AND i.ind_oper='0'")
         xml_itens = _itens(con, empresa_id, "XML_NFE")
         produtos = _produtos(con, empresa_id)
+        regimes, avisos_regime = regimes_por_periodo(con, empresa_id)
+        empresa["regimes"] = regimes
     xml_entradas = xml_itens.filter(pl.col("ind_oper") == "0")
     evidencias = {
         "MONOFASICO": set(xml_entradas.filter(pl.col("cst_pis").is_in(["02", "04"]))["ncm"].drop_nulls().to_list()),

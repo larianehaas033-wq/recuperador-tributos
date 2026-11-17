@@ -45,7 +45,7 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
           xml_itens: pl.DataFrame, revisoes: dict, evidencias: dict, hoje) -> list[dict]:
     motor = MotorPisCofins(base, empresa, itens_contrib, xml_itens.filter(pl.col("ind_oper") == "1"), revisoes, hoje,
                            produtos, evidencias)
-    simples = (empresa.get("regime") or "") == "SIMPLES"
+    simples = (empresa.get("regime") or "").startswith("SIMPLES")
 
     # o que o cliente usa hoje nas vendas, por produto
     uso = defaultdict(lambda: {"cst_pis": [], "cst_icms": [], "cclasstrib": [], "cst_ibscbs": [], "valor": 0.0,

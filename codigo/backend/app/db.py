@@ -25,7 +25,8 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     return con
 
 
-MIGRACOES = {"itens_nota": [("cst_ibscbs", "TEXT"), ("cclasstrib", "TEXT")]}
+MIGRACOES = {"itens_nota": [("cst_ibscbs", "TEXT"), ("cclasstrib", "TEXT")],
+             "arquivos_sped": [("regime", "TEXT")], "notas_fiscais": [("crt_emit", "TEXT")]}
 
 
 def init(path: Path | None = None) -> None:
