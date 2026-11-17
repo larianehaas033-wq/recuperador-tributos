@@ -138,7 +138,15 @@ def carregar() -> BaseRegras:
         try:
             local = json.loads(config.RULES_LOCAL.read_text(encoding="utf-8"))
             compativel = config.versao_tupla(local.get("programa_minimo", "0")) <= config.versao_tupla(config.VERSION)
-            if compativel and not validar(local) and local["versao"] >= embutida["versao"]:
+            # compara numericamente: "2026.11.17.10" é mais nova que "2026.11.17.9"
+            if (compativel and not validar(local)
+                    and config.versao_tupla(local["versao"]) >= config.versao_tupla(embutida["versao"])):
+                # o que a versão baixada não trouxer (tese, seção nova) vem da base embutida no programa
+                for k, v in embutida.items():
+                    if k not in local:
+                        local[k] = v
+                    elif isinstance(v, dict) and isinstance(local[k], dict):
+                        local[k] = {**v, **local[k]}
                 return _parse(local, "atualizada")
         except (json.JSONDecodeError, KeyError):
             pass

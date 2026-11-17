@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.2",
+  "versao": "1.4.3",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.2.zip",
-  "sha256": "c79de69240236983de76016b2289e24f353073fe628d25fc9f145a208e98c6c9",
+  "pacote": "atualizacoes/sistema-1.4.3.zip",
+  "sha256": "4c4a8dc63895bb2c0e4727965f9e82dfdb5e505fee35d26223202f8c37c45ffa",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Carne e peixe temperados com NCM do capítulo 2/3: Revisar NCM (preparação de carne, 16.02); venda com CST 06 vira risco a conferir"
+    "Corrige erro 'RISCO_CRED_ALIQ_ZERO' na análise: versão das regras comparada como número, e regras baixadas completadas pela base do programa"
   ]
 }

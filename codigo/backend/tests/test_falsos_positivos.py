@@ -128,3 +128,25 @@ def test_regime_identificado_por_competencia_e_conflito():
                         "CREATE TABLE empresas (id, regime);")
     assert regimes_por_periodo(vazio, 1) == ({}, [regimes_por_periodo(vazio, 1)[1][0]])
     assert "NÃO IDENTIFICADO" in regimes_por_periodo(vazio, 1)[1][0]
+
+
+def test_regras_comparadas_numericamente_e_completadas_pela_base_embutida(tmp_path, monkeypatch):
+    import json
+    from app import config
+    from app.rules import loader
+    emb = json.loads(open(config.RULES_BUNDLED, encoding="utf-8").read())
+    antiga = dict(emb, versao="2026.11.17.9", teses={k: v for k, v in emb["teses"].items() if k != "RISCO_CRED_ALIQ_ZERO"})
+    local = tmp_path / "regras.json"
+    local.write_text(json.dumps(antiga), encoding="utf-8")
+    monkeypatch.setattr(config, "RULES_LOCAL", local)
+    emb_nova = dict(emb, versao="2026.11.17.11")
+    arq = tmp_path / "emb.json"
+    arq.write_text(json.dumps(emb_nova), encoding="utf-8")
+    monkeypatch.setattr(config, "RULES_BUNDLED", arq)
+    b = loader.carregar()
+    assert b.versao == "2026.11.17.11"  # .11 é mais nova que .9 (antes a comparação era de texto)
+    nova_local = dict(emb, versao="2026.11.17.12", teses={k: v for k, v in emb["teses"].items()
+                                                        if k != "RISCO_CRED_ALIQ_ZERO"})
+    local.write_text(json.dumps(nova_local), encoding="utf-8")
+    b = loader.carregar()
+    assert b.versao == "2026.11.17.12" and "RISCO_CRED_ALIQ_ZERO" in b.teses

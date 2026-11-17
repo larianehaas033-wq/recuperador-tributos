@@ -84,7 +84,7 @@ def atualizar_regras(con, url: str) -> str:
     atual = None
     if config.RULES_LOCAL.exists():
         atual = json.loads(config.RULES_LOCAL.read_text(encoding="utf-8")).get("versao")
-    if atual and data["versao"] <= atual:
+    if atual and config.versao_tupla(data["versao"]) <= config.versao_tupla(atual):
         _log(con, "Pacote de regras", "SEM_MUDANCA", f"Versão {atual} já é a mais recente.")
         return atual
     config.RULES_LOCAL.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
