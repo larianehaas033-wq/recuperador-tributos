@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.10",
+  "versao": "1.4.11",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.10.zip",
-  "sha256": "60d78a4adbc191d439fac2d385aec7eacdb34ab442273ecc0ede09ec54479f99",
+  "pacote": "atualizacoes/sistema-1.4.11.zip",
+  "sha256": "5860a1214b0ed8cbf08adccddb32dcca84d1ad74e1712bf8f6c864d1cb29912e",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.12",
   "notas": [
-    "Aviso quando o regime informado não bate com o SPED Fiscal (CST x CSOSN nas vendas)"
+    "A janela sempre carrega a tela nova depois de atualizar (sem cache)"
   ]
 }

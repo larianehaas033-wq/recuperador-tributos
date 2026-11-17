@@ -484,5 +484,15 @@ async def erro(_, exc: Exception):
     return JSONResponse(status_code=500, content={"detail": str(exc)})
 
 
+@app.middleware("http")
+async def sem_cache_da_tela(request, call_next):
+    """A página principal nunca fica em cache: depois de atualizar o programa, a janela mostra a tela nova."""
+    resp = await call_next(request)
+    caminho = request.url.path
+    if not caminho.startswith("/api") and not caminho.startswith("/assets/"):
+        resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return resp
+
+
 if config.FRONTEND_DIR.exists():
     app.mount("/", StaticFiles(directory=str(config.FRONTEND_DIR), html=True), name="frontend")
