@@ -89,9 +89,7 @@ export default function App() {
       <aside className="flex w-60 flex-none flex-col bg-navy text-white">
         <div className="px-5 pb-6 pt-6">
           <div className="flex items-center gap-2.5">
-            <div className="grid h-8 w-8 place-items-center rounded-md bg-white/10">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#C9A24B" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 17l5-5 4 3 7-9" /></svg>
-            </div>
+            <img src="./icone.png" alt="" className="h-9 w-9 rounded-md ring-1 ring-white/10" />
             <div className="leading-tight">
               <div className="text-[15px] font-bold">Recuperador</div>
               <div className="text-[11px] text-white/60">de Tributos</div>

@@ -101,6 +101,41 @@ def abrir_janela(url: str) -> subprocess.Popen | None:
                              "--no-default-browser-check", "--disable-features=Translate", "--window-size=1440,920"])
 
 
+def aplicar_icone_atalho() -> None:
+    """Coloca o ícone do programa no atalho da Área de Trabalho (uma vez por versão do ícone)."""
+    if not sys.platform.startswith("win"):
+        return
+    icone = AQUI / "app" / "recuperador.ico"
+    marca = config.DATA_DIR / "icone_aplicado.txt"
+    if not icone.exists() or (marca.exists() and marca.read_text(encoding="utf-8") == str(icone)):
+        return
+    raiz = AQUI.parent
+
+    def q(v) -> str:  # texto entre aspas simples do PowerShell
+        return "'" + str(v).replace("'", "''") + "'"
+
+    ps = (
+        "$ws = New-Object -ComObject WScript.Shell; "
+        "$l = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Recuperador de Tributos.lnk'; "
+        f"$s = $ws.CreateShortcut($l); $s.TargetPath = {q(raiz / 'python' / 'pythonw.exe')}; "
+        f"$s.Arguments = '\"' + {q(AQUI / 'launcher.py')} + '\"'; $s.WorkingDirectory = {q(raiz)}; "
+        f"$s.IconLocation = {q(str(icone) + ',0')}; $s.Description = 'Recuperador de Tributos'; $s.Save()"
+    )
+    import base64
+    codificado = base64.b64encode(ps.encode("utf-16-le")).decode()
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", codificado],
+                           capture_output=True, text=True, creationflags=0x08000000, timeout=30)
+        if r.returncode == 0:
+            marca.write_text(str(icone), encoding="utf-8")
+            # avisa o Windows para redesenhar os ícones
+            subprocess.run(["ie4uinit.exe", "-show"], capture_output=True, creationflags=0x08000000, timeout=15)
+        else:
+            print("Ícone do atalho:", r.stderr)
+    except Exception as e:
+        print("Ícone do atalho:", e)
+
+
 def main() -> None:
     if LOCK.exists():
         try:
@@ -137,6 +172,7 @@ def main() -> None:
             print("Atualização automática falhou:", e)
 
     threading.Thread(target=auto_atualizar, daemon=True).start()
+    threading.Thread(target=aplicar_icone_atalho, daemon=True).start()
 
     janela = abrir_janela(f"http://127.0.0.1:{porta}/")
     try:

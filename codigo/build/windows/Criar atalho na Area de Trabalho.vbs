@@ -7,7 +7,7 @@ Set lnk = sh.CreateShortcut(desktop & "\Recuperador de Tributos.lnk")
 lnk.TargetPath = pasta & "\python\pythonw.exe"
 lnk.Arguments = """" & pasta & "\sistema\launcher.py"""
 lnk.WorkingDirectory = pasta
-lnk.IconLocation = "%SystemRoot%\System32\imageres.dll,109"
+lnk.IconLocation = pasta & "\sistema\app\recuperador.ico,0"
 lnk.Description = "Recuperador de Tributos"
 lnk.Save
 MsgBox "Atalho criado na Área de Trabalho.", 64, "Recuperador de Tributos"
