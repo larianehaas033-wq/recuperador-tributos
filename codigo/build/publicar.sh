@@ -28,7 +28,7 @@ import json, sys, datetime
 ver, pkg, sha, *notas = sys.argv[1:]
 repo = "/home/claude/recuperador-tributos"
 regras = json.load(open("backend/app/rules/regras_base.json", encoding="utf-8"))
-regras["programa_minimo"] = "1.4.0"
+regras["programa_minimo"] = "1.4.2"
 json.dump(regras, open(f"{repo}/regras/regras.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 json.dump({"versao": ver, "publicado_em": datetime.date.today().isoformat(), "pacote": pkg, "sha256": sha,
            "exige_pacote_completo": False, "versao_regras": regras["versao"], "notas": notas},

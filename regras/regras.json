@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.10",
+ "versao": "2026.11.17.11",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -2713,6 +2713,25 @@
      "MOVEIS"
     ],
     "óleo diesel (2710.19.21)"
+   ],
+   [
+    [
+     "02",
+     "0302",
+     "0303",
+     "0304"
+    ],
+    [
+     " TEMPERAD",
+     " TEMP ",
+     "MARINAD",
+     "EMPANAD",
+     " TEMPERO",
+     "ACEBOLAD",
+     "AO ALHO"
+    ],
+    "carne ou peixe in natura (capítulos 2 e 3)",
+    "Carne ou peixe temperado é preparação de carne (posição 16.02 ou 16.04), não produto in natura do capítulo 2 ou 3: pelo entendimento da Receita Federal (Notas dos Capítulos 2 e 16), sai da alíquota zero da Lei 10.925 e da Cesta Básica do IBS/CBS. Confirme se leva só sal (fica no capítulo 2) ou outros temperos (capítulo 16) e corrija o NCM."
    ]
   ],
   "controle_interno": [
@@ -2724,5 +2743,5 @@
    "RECLASSIFIC"
   ]
  },
- "programa_minimo": "1.4.0"
+ "programa_minimo": "1.4.2"
 }

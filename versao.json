@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.1",
+  "versao": "1.4.2",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.1.zip",
-  "sha256": "317be1b53eff4f5fa5fb65e0c68857bfa9d364626f5144febdfd751b8fd039dc",
+  "pacote": "atualizacoes/sistema-1.4.2.zip",
+  "sha256": "c79de69240236983de76016b2289e24f353073fe628d25fc9f145a208e98c6c9",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.10",
+  "versao_regras": "2026.11.17.11",
   "notas": [
-    "Nomes dos enquadramentos de PIS/COFINS com o inciso da lei (sem 'cesta básica', que é termo do IBS/CBS)"
+    "Carne e peixe temperados com NCM do capítulo 2/3: Revisar NCM (preparação de carne, 16.02); venda com CST 06 vira risco a conferir"
   ]
 }

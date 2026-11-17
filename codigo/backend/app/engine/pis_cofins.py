@@ -442,10 +442,11 @@ class MotorPisCofins:
         out = []
         for row in agg:
             ncm, data = row["ncm"], row["data"]
-            ncm_ef = self._ncm(row).ncm
-            if (self._regra(ncm_ef, data, "MONOFASICO", row["descricao"])
-                    or self._regra(ncm_ef, data, "ALIQ_ZERO", row["descricao"])):
-                continue
+            cn = self._ncm(row)
+            ncm_ef = cn.ncm
+            if not cn.grave and (self._regra(ncm_ef, data, "MONOFASICO", row["descricao"])
+                                 or self._regra(ncm_ef, data, "ALIQ_ZERO", row["descricao"])):
+                continue  # NCM a revisar: o CST 04/06 dado pelo código não se sustenta, vira risco a conferir
             if self._revisao(ncm, "RISCO_SAIDA_ZERO_SEM_REGRA") == "DESCARTADO":
                 continue
             a_pis, a_cof = self.aliq_em(row["periodo"])
@@ -458,6 +459,7 @@ class MotorPisCofins:
                     cst_escriturado=row["cst"], cst_correto="01?", base_original=0.0, base_correta=r2(base_v),
                     valor_recuperar=r2(base_v * aliq / 100), natureza="RISCO",
                     fundamento=self.base.teses["RISCO_SAIDA_ZERO_SEM_REGRA"]["fundamento"], confianca="BAIXA",
-                    observacao="Valor agrupado por NCM no mês. Pode haver outro fundamento para o CST usado.",
+                    observacao=(cn.alerta if cn.grave else
+                                "Valor agrupado por NCM no mês. Pode haver outro fundamento para o CST usado."),
                 ))
         return out

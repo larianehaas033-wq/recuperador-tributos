@@ -76,11 +76,12 @@ def conferir(ncm: str | None, descricao: str | None, base=None) -> Conferencia:
             return Conferencia(ncm, f"A descrição indica {oque}, mas o NCM informado é {_fmt(ncm)}. Corrija o NCM "
                                     "antes de aplicar o enquadramento.", True)
     d = f" {desc} "
-    for prefixos, termos, oque in tab.get("ncm_x_descricao", []):
-        prefixos = tuple(prefixos)
+    for regra in tab.get("ncm_x_descricao", []):
+        prefixos, termos, oque = tuple(regra[0]), regra[1], regra[2]
         if ncm.startswith(prefixos) and any(t in d for t in termos):
-            return Conferencia(ncm, f"O NCM {_fmt(ncm)} é de {oque}, mas a descrição não corresponde. Corrija o NCM "
-                                    "antes de aplicar o enquadramento.", True)
+            msg = regra[3] if len(regra) > 3 else (f"O NCM {_fmt(ncm)} é de {oque}, mas a descrição não corresponde. "
+                                                    "Corrija o NCM antes de aplicar o enquadramento.")
+            return Conferencia(ncm, msg, True)
     return Conferencia(ncm, alerta, False)
 
 
