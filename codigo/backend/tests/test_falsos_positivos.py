@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 os.environ.setdefault("RECUPERADOR_DATA", str(Path(tempfile.mkdtemp()) / "dados"))
@@ -65,7 +66,7 @@ def test_devolucao_de_venda_abate_a_restituicao():
                item(**SHAMPOO, periodo="2024-04", data="2024-04-05", ind_oper="0", cfop="1202", cst_pis="50",
                     cst_cofins="50", vl_item=40.0, vl_bc_pis=40.0, vl_pis=0.66, vl_bc_cofins=40.0, vl_cofins=3.04)])
     r = {x.tributo: x.valor_recuperar for x in c if x.tese == "PISCOF_MONO_SAIDA"}
-    assert r == {"PIS": 0.99, "COFINS": 4.56}  # 1,65 − 0,66 e 7,60 − 3,04
+    assert r == {"PIS": Decimal("0.99"), "COFINS": Decimal("4.56")}  # 1,65 − 0,66 e 7,60 − 3,04
 
 
 def test_regra_fora_da_vigencia_nao_se_aplica():
@@ -78,3 +79,13 @@ def test_regra_fora_da_vigencia_nao_se_aplica():
     depois = rodar([item(**sem, periodo="2023-06", data="2023-06-10")])
     base = lambda c: {x.base_correta for x in c if x.tese == "PISCOF_CREDITO_ENTRADA"}  # noqa: E731
     assert base(antes) == {100.0} and base(depois) == {83.0}
+
+
+def test_dinheiro_em_decimal_com_arredondamento_meio_para_cima():
+    from app.engine.comum import Credito, r2
+    assert r2(2.675) == Decimal("2.68")  # round() do Python daria 2.67 (float binário + arredondamento bancário)
+    assert r2(Decimal("0.125")) == Decimal("0.13")
+    c = Credito(modulo="X", tese="T", tributo="PIS", periodo="2024-01", data=None, valor_recuperar=0.1 + 0.2)
+    assert c.valor_recuperar == Decimal("0.30") and isinstance(c.valor_recuperar, Decimal)
+    c.valor_restituivel = 1.005
+    assert c.valor_restituivel == Decimal("1.01")

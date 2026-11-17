@@ -284,7 +284,7 @@ def analise(aid: int):
         a = dict(a)
         e = dict(con.execute("SELECT * FROM empresas WHERE id=?", (a["empresa_id"],)).fetchone())
         ncms = db.rows(con, """
-            SELECT c.ncm, c.tese, min(c.descricao) descricao, count(*) itens, sum(c.valor_recuperar) valor,
+            SELECT c.ncm, c.tese, min(c.descricao) descricao, count(*) itens, round(sum(c.valor_recuperar), 2) valor,
                    min(c.regra_codigo) regra,
                    CASE WHEN sum(c.confianca <> 'ALTA') > 0 THEN 'BAIXA' ELSE 'ALTA' END confianca, r.decisao
             FROM creditos_identificados c

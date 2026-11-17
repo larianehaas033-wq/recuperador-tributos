@@ -15,7 +15,7 @@ from datetime import date
 import polars as pl
 
 from ..rules.loader import BaseRegras
-from .comum import Credito, r2
+from .comum import CENTAVO, ZERO, Credito, D, linhas, r2
 
 ST_CST = {"10", "30", "60", "70"}
 ST_CSOSN = {"201", "202", "203", "500"}
@@ -58,7 +58,7 @@ class MotorIcms:
         itens = self.sped_entradas.filter(pl.col("chave") == chave)
         if not itens.height:
             return "BAIXA", "Não comprovado automaticamente: a nota não tem itens escriturados (C170)."
-        for row in itens.iter_rows(named=True):
+        for row in linhas(itens):
             tipo = (self.produtos.get(row["cod_item"], {}).get("tipo_item") or "").zfill(2)
             if row["cfop"] not in self.cfop_entrada or tipo in ("07", "08", "09"):
                 return "BAIXA", f"Item {row['cod_item']} escriturado com CFOP {row['cfop']}: pode ser uso e consumo."
@@ -87,12 +87,12 @@ class MotorIcms:
     def _itens_st(self) -> tuple[dict, dict]:
         """Produtos que entraram com ST: pelo código próprio (EFD ICMS/IPI) e pelo NCM (XMLs de compra)."""
         por_cod, por_ncm = {}, {}
-        for row in self.sped_entradas.iter_rows(named=True):
+        for row in linhas(self.sped_entradas):
             if _eh_st(row["cst_icms"]):
                 d = por_cod.get(row["cod_item"])
                 por_cod[row["cod_item"]] = min(d, row["data"]) if d else row["data"]
         ent_xml = self.xml_itens.filter(pl.col("ind_oper") == "0")
-        for row in ent_xml.iter_rows(named=True):
+        for row in linhas(ent_xml):
             if _eh_st(row["cst_icms"]) and row["ncm"]:
                 d = por_ncm.get(row["ncm"])
                 por_ncm[row["ncm"]] = min(d, row["data"]) if d else row["data"]
@@ -104,7 +104,7 @@ class MotorIcms:
             return []
         out = []
         df = saidas.filter(pl.col("vl_icms") > 0)
-        for row in df.iter_rows(named=True):
+        for row in linhas(df):
             if not _tributado(row["cst_icms"]):
                 continue
             if row["cfop"] and row["cfop"] not in self.cfop_revenda:
@@ -135,29 +135,34 @@ class MotorIcms:
                                         & (pl.col("data") >= INICIO_TEMA_201))
         if not ent.height:
             return []
-        base_unit = ent.group_by(["cod_item"]).agg(
-            (pl.col("vl_bc_icms_st").sum() / pl.col("qtd").sum()).alias("bc_unit"),
-            pl.col("unidade").first().str.to_uppercase().alias("un_ent"),
-        )
+        # base presumida média por unidade, somada em Decimal
+        acum: dict[str, list] = {}
+        for r in linhas(ent):
+            a = acum.setdefault(r["cod_item"], [ZERO, ZERO, (r["unidade"] or "").upper()])
+            a[0] += r["vl_bc_icms_st"]
+            a[1] += r["qtd"]
         vendas = saidas.filter((pl.col("modelo") == "65") & (pl.col("qtd") > 0)
                                & (pl.col("data") >= INICIO_TEMA_201))
         vendas = vendas.filter(pl.col("cst_icms").map_elements(_eh_st, return_dtype=pl.Boolean))
         if not vendas.height:
             return []
-        j = vendas.join(base_unit, on="cod_item", how="inner").filter(
-            pl.col("unidade").str.to_uppercase() == pl.col("un_ent")
-        )
-        if not j.height:
-            return []
-        aliq = self.modal["aliquota"]
-        agg = j.group_by(["cod_item", "periodo"]).agg(
-            pl.col("qtd").sum(), (pl.col("vl_item") - pl.col("vl_desc")).sum().alias("vl_venda"),
-            pl.col("bc_unit").first(), pl.col("ncm").first(), pl.col("descricao").first(), pl.col("data").min(),
-        ).with_columns((pl.col("bc_unit") * pl.col("qtd")).alias("bc_presumida"))
+        aliq = D(self.modal["aliquota"])
+        grupos: dict[tuple, dict] = {}
+        for r in linhas(vendas):
+            a = acum.get(r["cod_item"])
+            if not a or a[1] <= 0 or (r["unidade"] or "").upper() != a[2]:
+                continue
+            g = grupos.setdefault((r["cod_item"], r["periodo"]), dict(
+                cod_item=r["cod_item"], periodo=r["periodo"], qtd=ZERO, vl_venda=ZERO, bc_unit=a[0] / a[1],
+                ncm=r["ncm"], descricao=r["descricao"], data=r["data"]))
+            g["qtd"] += r["qtd"]
+            g["vl_venda"] += r["vl_item"] - r["vl_desc"]
+            g["data"] = min(g["data"] or r["data"], r["data"] or g["data"])
         out = []
-        for row in agg.iter_rows(named=True):
+        for row in grupos.values():
+            row["bc_presumida"] = row["bc_unit"] * row["qtd"]
             dif = row["bc_presumida"] - row["vl_venda"]
-            if dif <= 0.01 * row["bc_presumida"]:
+            if dif <= CENTAVO * row["bc_presumida"]:
                 continue
             valor = dif * aliq / 100
             out.append(Credito(
@@ -174,24 +179,24 @@ class MotorIcms:
         return out
 
     # -------------------------------------------------------------- alíquota
-    def _aliq_esperada(self, ncm: str | None) -> tuple[float, str, str]:
+    def _aliq_esperada(self, ncm: str | None):
         melhor = None
         for r in self.base.icms_ncm:
             if r.get("uf") == self.uf and ncm and any(ncm.startswith(p) for p in r["ncm_prefixos"]):
                 if not melhor or max(map(len, r["ncm_prefixos"])) > max(map(len, melhor["ncm_prefixos"])):
                     melhor = r
         if melhor:
-            return melhor["aliquota"], melhor["fundamento"], melhor.get("confianca", "MEDIA")
-        return self.modal["aliquota"], self.modal["fundamento"], "BAIXA"
+            return D(melhor["aliquota"]), melhor["fundamento"], melhor.get("confianca", "MEDIA")
+        return D(self.modal["aliquota"]), self.modal["fundamento"], "BAIXA"
 
     def _aliquota(self, saidas: pl.DataFrame) -> list[Credito]:
         df = saidas.filter(pl.col("cfop").str.starts_with("5") & (pl.col("aliq_icms") > 0) & (pl.col("vl_bc_icms") > 0))
         out = []
-        for row in df.iter_rows(named=True):
+        for row in linhas(df):
             if not _tributado(row["cst_icms"]):
                 continue
             esperada, fund, conf = self._aliq_esperada(row["ncm"])
-            if row["aliq_icms"] <= esperada + 0.01:
+            if row["aliq_icms"] <= esperada + CENTAVO:
                 continue
             if self.revisoes.get((row["ncm"] or "", "ICMS_ALIQ_ACIMA")) == "DESCARTADO":
                 continue
@@ -214,10 +219,10 @@ class MotorIcms:
 
     # -------------------------------------------------------------- cruzamento XML x SPED
     def _cruzamento(self) -> list[Credito]:
-        sped = {r["chave"]: r for r in self.sped_notas.iter_rows(named=True) if r["chave"]}
+        sped = {r["chave"]: r for r in linhas(self.sped_notas) if r["chave"]}
         out = []
         xml = self.xml_notas.filter(pl.col("periodo").is_in(list(self.periodos)) & (pl.col("cancelada") == 0))
-        for n in xml.iter_rows(named=True):
+        for n in linhas(xml):
             s = sped.get(n["chave"])
             if n["ind_oper"] == "0" and n["ind_emit"] == "1":
                 if s is None:
@@ -229,7 +234,7 @@ class MotorIcms:
                         confianca="BAIXA", regra_codigo="XML_X_SPED",
                         observacao=f"Emitente {n['cnpj_emit']}. Confirmar entrada e destinação da mercadoria.",
                     ))
-                elif n["vl_icms"] > (s["vl_icms"] or 0) + 0.01:
+                elif n["vl_icms"] > (s["vl_icms"] or 0) + CENTAVO:
                     conf, motivo = self._destino_nota(n["chave"])
                     out.append(Credito(
                         modulo="CRUZAMENTO", tese="ICMS_CREDITO_MENOR_DESTAQUE", tributo="ICMS", periodo=n["periodo"],

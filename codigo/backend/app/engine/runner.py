@@ -4,12 +4,13 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from datetime import date, datetime
+from decimal import Decimal
 
 import polars as pl
 
 from .. import db
 from ..rules.loader import carregar
-from .comum import (NUM_COLS, Credito, data_corte, data_pagamento, fator_selic, prescrito_credito,
+from .comum import (NUM_COLS, ZERO, Credito, D, data_corte, data_pagamento, fator_selic, prescrito_credito,
                     prescrito_restituicao, r2, to_frame)
 from .icms import MotorIcms
 from .pis_cofins import MotorPisCofins
@@ -90,7 +91,7 @@ def _aplicar_limites(creditos: list[Credito], apuracoes: dict, selic: dict, hoje
         if c.natureza == "RISCO":
             continue
         if c.prescrito or c.excluido:
-            c.valor_restituivel = c.valor_saldo_credor = c.valor_corrigido = 0.0
+            c.valor_restituivel = c.valor_saldo_credor = c.valor_corrigido = ZERO
             continue
         if c.tributo in ("PIS", "COFINS"):
             grupos[(c.tributo, c.periodo)].append(c)
@@ -111,9 +112,9 @@ def _aplicar_limites(creditos: list[Credito], apuracoes: dict, selic: dict, hoje
                     c.valor_saldo_credor = c.valor_recuperar
                 c.observacao = (c.observacao + " Limite do valor recolhido não verificado (sem M200/M600).").strip()
             continue
-        disponivel = recolhido
+        disponivel = D(recolhido)
         for c in lista:
-            parte = min(c.valor_recuperar, max(disponivel, 0.0))
+            parte = min(c.valor_recuperar, max(disponivel, ZERO))
             c.valor_restituivel = r2(parte)
             c.valor_saldo_credor = r2(c.valor_recuperar - parte)
             disponivel -= parte
@@ -124,10 +125,17 @@ def _aplicar_limites(creditos: list[Credito], apuracoes: dict, selic: dict, hoje
             f = fator_selic(pag, hoje, selic)
             c.valor_corrigido = r2(c.valor_restituivel * (1 + f / 100)) if f is not None else c.valor_restituivel
         elif c.natureza != "RISCO":
-            c.valor_corrigido = 0.0
+            c.valor_corrigido = ZERO
     if sem_apuracao:
         avisos.append("Competências sem apuração (M200/M600) importada: " + ", ".join(sorted(sem_apuracao))
                       + ". O limite do valor recolhido não foi aplicado nelas.")
+
+
+def _json_num(o):
+    """Decimal no JSON do resumo: o texto do número é o mesmo (centavos exatos)."""
+    if isinstance(o, Decimal):
+        return float(o)
+    raise TypeError(type(o))
 
 
 def _resumo(creditos: list[Credito], base) -> dict:
@@ -139,8 +147,8 @@ def _resumo(creditos: list[Credito], base) -> dict:
     # Totais principais: só o que foi comprovado automaticamente (ou confirmado). O resto fica "a verificar".
     ok = lambda c: c.natureza != "RISCO" and c.confianca == "ALTA"  # noqa: E731
     ver = lambda c: c.natureza != "RISCO" and c.confianca != "ALTA"  # noqa: E731
-    por_tese = defaultdict(lambda: {"qtd": 0, "restituivel": 0.0, "corrigido": 0.0, "saldo_credor": 0.0,
-                                    "risco": 0.0, "baixa": 0.0})
+    por_tese = defaultdict(lambda: {"qtd": 0, "restituivel": ZERO, "corrigido": ZERO, "saldo_credor": ZERO,
+                                    "risco": ZERO, "baixa": ZERO})
     for c in validos:
         t = por_tese[c.tese]
         t["qtd"] += 1
@@ -159,10 +167,10 @@ def _resumo(creditos: list[Credito], base) -> dict:
     for k, v in por_tese.items():
         info = base.teses.get(k, {})
         teses.append({"tese": k, "nome": info.get("nome", k), "via": info.get("via"), "natureza": info.get("natureza"),
-                      **{kk: (r2(vv) if isinstance(vv, float) else vv) for kk, vv in v.items()}})
+                      **{kk: (r2(vv) if isinstance(vv, Decimal) else vv) for kk, vv in v.items()}})
     teses.sort(key=lambda t: -(t["corrigido"] + t["saldo_credor"] + t["risco"] + t["baixa"]))
 
-    por_periodo = defaultdict(lambda: {"PIS": 0.0, "COFINS": 0.0, "ICMS": 0.0})
+    por_periodo = defaultdict(lambda: {"PIS": ZERO, "COFINS": ZERO, "ICMS": ZERO})
     for c in validos:
         if ok(c) and c.periodo:
             por_periodo[c.periodo][c.tributo] += c.valor_corrigido + c.valor_saldo_credor
@@ -278,7 +286,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             "WHERE id=?",
             (periodos[0] if periodos else None, periodos[-1] if periodos else None,
              f"{base.versao} ({base.origem})", ultima_atual, max(selic) if selic else None,
-             data_corte(hoje).isoformat(), json.dumps(resumo, ensure_ascii=False),
+             data_corte(hoje).isoformat(), json.dumps(resumo, ensure_ascii=False, default=_json_num),
              json.dumps(avisos, ensure_ascii=False), datetime.now().isoformat(timespec="seconds"), analise_id),
         )
     return analise_id

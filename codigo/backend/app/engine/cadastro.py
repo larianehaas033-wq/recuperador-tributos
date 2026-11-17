@@ -88,7 +88,7 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
         obs, conf, div = [], "ALTA", []
         if tipo == "09" and not servico:
             div.append("Tipo do item 09 (serviço) no 0200, mas o produto tem NCM de mercadoria: corrija para 00")
-        cn = conferir(ncm_inf, desc) if not servico else None
+        cn = conferir(ncm_inf, desc, base) if not servico else None
         ncm = cn.ncm if cn else ncm_inf
         ncm_grave = bool(cn and cn.grave)
         if cn and cn.alerta:

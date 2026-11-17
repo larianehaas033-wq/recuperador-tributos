@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import sqlite3
+from decimal import Decimal
 import threading
 from contextlib import contextmanager
 from pathlib import Path
 
 from . import config
+
+# valores monetários são gravados pelo texto do Decimal (centavos exatos)
+sqlite3.register_adapter(Decimal, str)
 
 _lock = threading.RLock()
 _SCHEMA = (Path(__file__).parent / "schema.sql").read_text(encoding="utf-8")

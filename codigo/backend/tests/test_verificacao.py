@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 os.environ.setdefault("RECUPERADOR_DATA", str(Path(tempfile.mkdtemp()) / "dados"))
@@ -131,4 +132,5 @@ def test_sabonete_em_barra_e_aliquota_zero_nao_monofasico():
     c = rodar([item(cod_item="P1", ncm="34011190", descricao="SABONETE PROTEX 85G CREAM", **compra)],
               produtos={"P1": {"tipo_item": "00", "descricao": "SABONETE PROTEX 85G CREAM"}})
     r = {(x.tese, x.tributo): (x.valor_recuperar, x.confianca) for x in c}
-    assert r == {("RISCO_CRED_ALIQ_ZERO", "PIS"): (2.83, "ALTA"), ("RISCO_CRED_ALIQ_ZERO", "COFINS"): (13.02, "ALTA")}
+    assert r == {("RISCO_CRED_ALIQ_ZERO", "PIS"): (Decimal("2.83"), "ALTA"),
+                 ("RISCO_CRED_ALIQ_ZERO", "COFINS"): (Decimal("13.02"), "ALTA")}

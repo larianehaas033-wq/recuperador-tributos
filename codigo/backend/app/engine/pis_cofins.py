@@ -15,18 +15,17 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import date
+from decimal import Decimal
 
 import polars as pl
 
 from ..rules.loader import BaseRegras
 from .coerencia import Conferencia, conferir, controle_interno
-from .comum import Credito, contem, norm, r2
+from .comum import ZERO, Credito, D, contem, linhas, norm, r2
 
 CST_TRIBUTADO = {"01", "02", "03"}
 CST_SEM_CREDITO = {"70", "98", "99"}
 CST_CREDITO = {"50", "51", "52", "53", "54", "55", "56"}
-CFOP_ENTRADA_REVENDA = {"1102", "2102", "1403", "2403", "1652", "2652", "1117", "2117", "1113", "2113", "1121",
-                        "2121", "3102"}
 TIPO_REVENDA = {"00"}
 TIPO_INSUMO = {"01", "02", "06", "10"}
 TIPO_SEM_CREDITO = {"07", "08", "09"}  # uso e consumo, ativo imobilizado (crédito próprio), serviços
@@ -34,8 +33,8 @@ INICIO_TEMA_69 = "2017-03-16"
 INICIO_LEI_14592 = "2023-05-01"
 
 
-def _tol(v: float) -> float:
-    return max(0.05, abs(v) * 0.002)
+def _tol(v: Decimal) -> Decimal:
+    return max(Decimal("0.05"), abs(v) * Decimal("0.002"))
 
 
 class MotorPisCofins:
@@ -58,9 +57,10 @@ class MotorPisCofins:
         # só venda efetiva entra nas teses de saída: remessa, bonificação, transferência e devolução de compra não
         self.cfop_venda = self.cfop_revenda | self.cfop_producao
         self.cfop_devolucao = base.cfops("devolucao_venda")
+        self.cfop_entrada_revenda = base.cfops("entrada_revenda")
         self.simples = (empresa.get("regime") or "") == "SIMPLES_NACIONAL"
         self.cfop_entrada = base.cfops("entrada_credito")
-        self.aliq = (1.65, 7.6) if self.nao_cumulativo else (0.65, 3.0)
+        self.aliq = (Decimal("1.65"), Decimal("7.6")) if self.nao_cumulativo else (Decimal("0.65"), Decimal("3"))
         self.produtos = produtos or {}
         self.evid = evidencias or {"MONOFASICO": set(), "ALIQ_ZERO": set()}
         self._conf_cache: dict = {}
@@ -92,11 +92,11 @@ class MotorPisCofins:
         revendido = row.get("cod_item") in self.revendidos
         if tipo in TIPO_SEM_CREDITO:
             return None, ""
-        if tipo in TIPO_REVENDA and (revendido or row.get("cfop") in CFOP_ENTRADA_REVENDA):
+        if tipo in TIPO_REVENDA and (revendido or row.get("cfop") in self.cfop_entrada_revenda):
             return "ALTA", "Cadastrado como mercadoria para revenda" + (" e revendido no período." if revendido else ".")
         if tipo in TIPO_INSUMO and self.industrial:
             return "ALTA", "Cadastrado como insumo de empresa industrial."
-        if revendido and row.get("cfop") in CFOP_ENTRADA_REVENDA:
+        if revendido and row.get("cfop") in self.cfop_entrada_revenda:
             return "ALTA", "Comprado para revenda e revendido no período."
         return "BAIXA", "Não comprovado automaticamente: o cadastro do produto não mostra revenda nem insumo."
 
@@ -106,7 +106,7 @@ class MotorPisCofins:
         desc = row.get("descricao") or self.produtos.get(row.get("cod_item"), {}).get("descricao")
         k = (row.get("ncm"), desc)
         if k not in self._conf_cache:
-            self._conf_cache[k] = conferir(row.get("ncm"), desc)
+            self._conf_cache[k] = conferir(row.get("ncm"), desc, self.base)
         return self._conf_cache[k]
 
     def _revisao(self, ncm: str | None, tese: str) -> str | None:
@@ -158,7 +158,7 @@ class MotorPisCofins:
 
     def _monofasico_aliq_zero(self, saidas: pl.DataFrame, marcados: set) -> list[Credito]:
         out = []
-        for row in saidas.iter_rows(named=True):
+        for row in linhas(saidas):
             cn = self._ncm(row)
             ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
@@ -198,7 +198,7 @@ class MotorPisCofins:
         out = []
         c170 = saidas.filter((pl.col("origem") == "C170") & (pl.col("vl_icms") > 0)
                              & (pl.col("data") >= INICIO_TEMA_69))
-        for row in c170.iter_rows(named=True):
+        for row in linhas(c170):
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
                 if cst not in CST_TRIBUTADO or vl <= 0 or (row["rid"], trib) in marcados or aliq <= 0:
@@ -237,7 +237,7 @@ class MotorPisCofins:
         por_item: dict[tuple, list[Credito]] = defaultdict(list)
         for c in creditos:
             por_item[(c.cod_item, c.tributo)].append(c)
-        for row in devolucoes.iter_rows(named=True):
+        for row in linhas(devolucoes):
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
                 if cst not in CST_CREDITO or vl <= 0:
                     continue
@@ -254,7 +254,7 @@ class MotorPisCofins:
                 cand = sorted((c for c in lista if c.periodo <= row["periodo"] and c.valor_recuperar > 0),
                               key=lambda c: (c.periodo != row["periodo"], [-ord(x) for x in c.periodo]))
                 for c in cand:
-                    if abater < 0.005:
+                    if abater < Decimal("0.005"):
                         break
                     parte = min(c.valor_recuperar, abater)
                     c.valor_recuperar = r2(c.valor_recuperar - parte)
@@ -269,7 +269,7 @@ class MotorPisCofins:
         df = self.xml_saidas.filter(pl.col("periodo").is_in(list(periodos)) & (pl.col("vl_icms") > 0)
                                     & pl.col("cfop").is_in(list(self.cfop_venda))
                                     & (pl.col("data") >= INICIO_TEMA_69))
-        for row in df.iter_rows(named=True):
+        for row in linhas(df):
             ncm_ef = self._ncm(row).ncm
             if (self._regra(ncm_ef, row["data"], "MONOFASICO", row["descricao"])
                     or self._regra(ncm_ef, row["data"], "ALIQ_ZERO", row["descricao"])):
@@ -298,15 +298,15 @@ class MotorPisCofins:
         df = entradas.filter(pl.col("cfop").is_in(list(self.cfop_entrada)))
         tese = "PISCOF_CREDITO_ENTRADA"
         fund = self.base.teses[tese]["fundamento"]
-        for row in df.iter_rows(named=True):
+        for row in linhas(df):
             cn = self._ncm(row)
             ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             if len(row["cnpj_part"] or "") != 14:
                 continue  # compra de pessoa física não dá crédito básico
-            if controle_interno(row["descricao"]):
+            if controle_interno(row["descricao"], self.base):
                 continue  # perda/descarte da desossa: sai da carcaça comprada a alíquota zero, não gera crédito
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
-            if mono and cfop in CFOP_ENTRADA_REVENDA:
+            if mono and cfop in self.cfop_entrada_revenda:
                 continue  # Tema 1.093: revenda de monofásico não gera crédito
             zero = self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             if self._revisao(ncm, tese) == "DESCARTADO":
@@ -320,9 +320,9 @@ class MotorPisCofins:
                 motivo = f"{motivo} {cn.alerta}"
             if self._revisao(ncm, tese) == "CONFIRMADO":
                 conf, motivo = "ALTA", "Confirmado manualmente."
-            bruto = row["vl_item"] - row["vl_desc"] + (0.0 if self.industrial else row["vl_ipi"])
-            icms_fora = row["vl_icms"] if (data or "") >= INICIO_LEI_14592 else 0.0
-            base_cred = max(0.0, bruto - icms_fora)
+            bruto = row["vl_item"] - row["vl_desc"] + (ZERO if self.industrial else row["vl_ipi"])
+            icms_fora = row["vl_icms"] if (data or "") >= INICIO_LEI_14592 else ZERO
+            base_cred = max(ZERO, bruto - icms_fora)
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
                 if cst == "73":
                     if zero:
@@ -354,11 +354,11 @@ class MotorPisCofins:
     def _riscos_entradas(self, entradas: pl.DataFrame) -> list[Credito]:
         out = []
         df = entradas.filter(pl.col("cst_pis").is_in(list(CST_CREDITO)) | pl.col("cst_cofins").is_in(list(CST_CREDITO)))
-        for row in df.iter_rows(named=True):
+        for row in linhas(df):
             cn = self._ncm(row)
             ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
-            risco_mono = bool(mono) and cfop in CFOP_ENTRADA_REVENDA and not self.industrial
+            risco_mono = bool(mono) and cfop in self.cfop_entrada_revenda and not self.industrial
             zero = None if mono else self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
@@ -404,21 +404,23 @@ class MotorPisCofins:
 
     def _risco_saida_sem_regra(self, saidas: pl.DataFrame) -> list[Credito]:
         """Agrupa por NCM e competência para não poluir o relatório."""
-        df = saidas.with_columns(
-            pl.when(pl.col("cst_pis").is_in(["04", "06"])).then(pl.col("vl_item") - pl.col("vl_desc"))
-            .otherwise(0.0).alias("_bp"),
-            pl.when(pl.col("cst_cofins").is_in(["04", "06"])).then(pl.col("vl_item") - pl.col("vl_desc"))
-            .otherwise(0.0).alias("_bc"),
-        ).filter((pl.col("_bp") > 0) | (pl.col("_bc") > 0))
+        df = saidas.filter(pl.col("cst_pis").is_in(["04", "06"]) | pl.col("cst_cofins").is_in(["04", "06"]))
         if not df.height:
             return []
-        agg = df.group_by(["ncm", "periodo"]).agg(
-            pl.col("_bp").sum(), pl.col("_bc").sum(), pl.col("descricao").first(), pl.col("data").min(),
-            pl.col("cfop").first(), pl.col("cod_item").first(),
-            pl.when(pl.col("cst_pis").is_not_null()).then(pl.col("cst_pis")).otherwise(pl.col("cst_cofins")).first().alias("cst"),
-        )
+        grupos: dict[tuple, dict] = {}
+        for r in linhas(df):  # soma em Decimal, não no float do Polars
+            g = grupos.setdefault((r["ncm"], r["periodo"]), dict(
+                ncm=r["ncm"], periodo=r["periodo"], descricao=r["descricao"], data=r["data"], cfop=r["cfop"],
+                cod_item=r["cod_item"], cst=r["cst_pis"] or r["cst_cofins"], _bp=ZERO, _bc=ZERO))
+            liq = r["vl_item"] - r["vl_desc"]
+            g["data"] = min(g["data"] or r["data"], r["data"] or g["data"])
+            if r["cst_pis"] in ("04", "06"):
+                g["_bp"] += liq
+            if r["cst_cofins"] in ("04", "06"):
+                g["_bc"] += liq
+        agg = list(grupos.values())
         out = []
-        for row in agg.iter_rows(named=True):
+        for row in agg:
             ncm, data = row["ncm"], row["data"]
             ncm_ef = self._ncm(row).ncm
             if (self._regra(ncm_ef, data, "MONOFASICO", row["descricao"])

@@ -49,6 +49,7 @@ class BaseRegras:
     cfop: dict
     teses: dict
     ibs: dict = field(default_factory=dict)
+    coerencia: dict = field(default_factory=dict)
     origem: str = "embutida"
     _cache: dict = field(default_factory=dict)
 
@@ -113,7 +114,7 @@ def _parse(data: dict, origem: str) -> BaseRegras:
         versao=data["versao"], publicado_em=data.get("publicado_em", ""), regras=regras,
         icms_modal={x["uf"]: x for x in data.get("icms_aliquota_modal", [])},
         icms_ncm=data.get("icms_aliquota_ncm", []), cfop=data.get("cfop", {}), teses=data.get("teses", {}),
-        ibs=ibs, origem=origem,
+        ibs=ibs, coerencia=data.get("coerencia_ncm", {}), origem=origem,
     )
 
 

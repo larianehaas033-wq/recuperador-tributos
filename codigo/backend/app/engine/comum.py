@@ -1,8 +1,9 @@
 """Tipos e regras comuns aos motores: crédito identificado, prazo de 5 anos e correção pela Selic."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 
 import polars as pl
 
@@ -12,6 +13,32 @@ TEXT_COLS = ["cst_ibscbs", "cclasstrib", "origem", "periodo", "data", "chave", "
              "descricao", "ncm", "cfop", "unidade", "cst_icms", "cst_pis", "cst_cofins", "modelo", "tipo_arquivo"]
 NUM_COLS = ["qtd", "vl_item", "vl_desc", "vl_bc_icms", "aliq_icms", "vl_icms", "vl_bc_icms_st", "vl_icms_st",
             "vl_ipi", "vl_bc_pis", "aliq_pis", "vl_pis", "vl_bc_cofins", "aliq_cofins", "vl_cofins"]
+
+
+ZERO = Decimal("0")
+CENTAVO = Decimal("0.01")
+
+
+def D(v) -> Decimal:
+    """Valor monetário ou alíquota em Decimal. Floats vindos do arquivo passam pelo texto (repr), que devolve
+    exatamente o número escrito no SPED/XML (até 15 dígitos significativos): 13.02 → Decimal('13.02')."""
+    if v is None or v == "":
+        return ZERO
+    if isinstance(v, Decimal):
+        return v
+    if isinstance(v, float):
+        return Decimal(repr(v))
+    return Decimal(str(v))
+
+
+def linhas(df):
+    """iter_rows com todos os números convertidos para Decimal: nenhuma conta de dinheiro é feita em float."""
+    for row in df.iter_rows(named=True):
+        yield {k: (D(v) if isinstance(v, float) else v) for k, v in row.items()}
+
+
+MONEY_FIELDS = ("base_original", "base_correta", "valor_pago", "valor_recuperar", "valor_restituivel",
+                "valor_saldo_credor", "valor_corrigido")
 
 
 @dataclass
@@ -29,13 +56,13 @@ class Credito:
     cfop: str | None = None
     cst_escriturado: str | None = None
     cst_correto: str | None = None
-    base_original: float = 0.0
-    base_correta: float = 0.0
-    valor_pago: float = 0.0
-    valor_recuperar: float = 0.0
-    valor_restituivel: float = 0.0
-    valor_saldo_credor: float = 0.0
-    valor_corrigido: float = 0.0
+    base_original: Decimal = ZERO
+    base_correta: Decimal = ZERO
+    valor_pago: Decimal = ZERO
+    valor_recuperar: Decimal = ZERO
+    valor_restituivel: Decimal = ZERO
+    valor_saldo_credor: Decimal = ZERO
+    valor_corrigido: Decimal = ZERO
     natureza: str = "RESTITUICAO"
     via: str = "ADMINISTRATIVO_FEDERAL"
     fundamento: str = ""
@@ -44,6 +71,15 @@ class Credito:
     prescrito: int = 0
     excluido: int = 0
     observacao: str = ""
+
+    def __post_init__(self):
+        for f in MONEY_FIELDS:
+            setattr(self, f, r2(getattr(self, f)))
+
+    def __setattr__(self, nome, valor):
+        if nome in MONEY_FIELDS:
+            valor = r2(valor)
+        object.__setattr__(self, nome, valor)
 
     def dict(self) -> dict:
         return asdict(self)
@@ -72,8 +108,9 @@ def contem(desc_norm: str, termos) -> bool:
     return any(t and t in d for t in termos)
 
 
-def r2(v: float) -> float:
-    return round(float(v or 0.0) + 0.0, 2)
+def r2(v) -> Decimal:
+    """Arredonda em centavos, meio para cima (regra de arredondamento dos tributos), sempre em Decimal."""
+    return D(v).quantize(CENTAVO, rounding=ROUND_HALF_UP) + ZERO
 
 
 def to_frame(rows: list, cols: list[str]) -> pl.DataFrame:
@@ -120,17 +157,17 @@ def _add_mes(a: int, m: int, n: int = 1) -> tuple[int, int]:
     return t // 12, t % 12 + 1
 
 
-def fator_selic(pagamento: date, hoje: date, selic: dict[str, float]) -> float | None:
+def fator_selic(pagamento: date, hoje: date, selic: dict) -> Decimal | None:
     """Percentual de correção: Selic acumulada do mês seguinte ao pagamento até o mês anterior ao da
     restituição, mais 1% no mês da restituição (Lei 9.250/1995, art. 39, § 4º).
     Devolve None se faltar alguma taxa mensal na tabela."""
     a, m = _add_mes(pagamento.year, pagamento.month, 1)
     fim = (hoje.year, hoje.month)
-    total = 0.0
+    total = ZERO
     while (a, m) < fim:
         k = f"{a:04d}-{m:02d}"
         if k not in selic:
             return None
-        total += selic[k]
+        total += D(selic[k])
         a, m = _add_mes(a, m, 1)
-    return total + 1.0 if (pagamento.year, pagamento.month) < fim else 0.0
+    return total + 1 if (pagamento.year, pagamento.month) < fim else ZERO
