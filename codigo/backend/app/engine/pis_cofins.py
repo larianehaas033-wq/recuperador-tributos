@@ -99,8 +99,8 @@ class MotorPisCofins:
     def _confianca(self, base_conf: str, ncm: str | None, tese: str) -> str:
         return "ALTA" if self._revisao(ncm, tese) == "CONFIRMADO" else base_conf
 
-    def _regra(self, ncm, data, tipo):
-        return self.base.classificar(ncm, data, tipo)
+    def _regra(self, ncm, data, tipo, descricao=None):
+        return self.base.classificar(ncm, data, tipo, descricao)
 
     def _eh_revenda(self, cfop: str | None) -> bool:
         if cfop in self.cfop_producao:
@@ -140,8 +140,8 @@ class MotorPisCofins:
         out = []
         for row in saidas.iter_rows(named=True):
             ncm, data, cfop = row["ncm"], row["data"], row["cfop"]
-            mono = self._regra(ncm, data, "MONOFASICO")
-            zero = None if mono else self._regra(ncm, data, "ALIQ_ZERO")
+            mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
+            zero = None if mono else self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             regra = mono or zero
             if not regra:
                 continue

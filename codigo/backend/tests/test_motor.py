@@ -7,12 +7,13 @@ from datetime import date
 from pathlib import Path
 
 TMP = Path(tempfile.mkdtemp())
-os.environ["RECUPERADOR_DATA"] = str(TMP / "dados")
+os.environ.setdefault("RECUPERADOR_DATA", str(TMP / "dados"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import pytest  # noqa: E402
 
 from app import db  # noqa: E402
+from app.config import DB_PATH  # noqa: E402
 from app.engine.comum import fator_selic  # noqa: E402
 from app.engine.runner import executar_analise  # noqa: E402
 from app.importador import importar  # noqa: E402
@@ -32,7 +33,7 @@ def analise():
     res = importar([fixtures.efd_contribuicoes(TMP / "contrib.txt"), fixtures.efd_icms(TMP / "icms.txt"),
                     fixtures.xmls(TMP / "xml")])
     assert all(r["status"] == "IMPORTADO" for r in res), res
-    con = sqlite3.connect(os.environ["RECUPERADOR_DATA"] + "/recuperador.db")
+    con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
     emp = con.execute("SELECT id FROM empresas").fetchone()["id"]
     aid = executar_analise(emp, hoje=HOJE)
@@ -128,7 +129,7 @@ def test_reimportar_nao_duplica():
 
 def test_cadastro_tributario(analise):
     from app.engine.runner import gerar_cadastro
-    con = sqlite3.connect(os.environ["RECUPERADOR_DATA"] + "/recuperador.db")
+    con = sqlite3.connect(DB_PATH)
     emp = con.execute("SELECT id FROM empresas").fetchone()[0]
     cad = {x["cod_item"]: x for x in gerar_cadastro(emp, hoje=HOJE)}
     p1, p3, p4, p5 = cad["P1"], cad["P3"], cad["P4"], cad["P5"]

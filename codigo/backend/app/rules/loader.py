@@ -51,18 +51,32 @@ class BaseRegras:
     origem: str = "embutida"
     _cache: dict = field(default_factory=dict)
 
-    def classificar(self, ncm: str | None, data: str | None, tipo: str) -> Regra | None:
-        """Devolve a regra mais específica (prefixo mais longo) do tipo pedido."""
-        key = (ncm, (data or "")[:7], tipo)
+    def classificar(self, ncm: str | None, data: str | None, tipo: str, descricao: str | None = None) -> Regra | None:
+        """Devolve a regra do tipo pedido que melhor se aplica ao produto.
+
+        Ordem: regra condicional cuja descrição confere com o texto legal > regra que vale só pelo NCM > regra
+        condicional que não confere. Empate: prefixo de NCM mais longo. Regra cuja descrição bate num termo de
+        exclusão é descartada."""
+        from ..engine.comum import norm
+        desc = norm(descricao) if descricao else ""
+        key = (ncm, (data or "")[:7], tipo, desc)
         if key in self._cache:
             return self._cache[key]
-        melhor, tam = None, -1
+        melhor, nota = None, (-1, -1)
         for r in self.regras:
             if r.tipo != tipo or not r.cobre(ncm, data):
                 continue
-            t = max(len(p) for p in r.prefixos if ncm.startswith(p))
-            if t > tam:
-                melhor, tam = r, t
+            if desc and r.palavras_excluir and any(x in desc for x in r.palavras_excluir):
+                continue
+            if not r.condicional:
+                peso = 1
+            elif desc and r.palavras and any(p in desc for p in r.palavras):
+                peso = 2
+            else:
+                peso = 0
+            n = (peso, max(len(p) for p in r.prefixos if ncm.startswith(p)))
+            if n > nota:
+                melhor, nota = r, n
         self._cache[key] = melhor
         return melhor
 

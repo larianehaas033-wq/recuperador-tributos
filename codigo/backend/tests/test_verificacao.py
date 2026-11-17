@@ -44,7 +44,7 @@ def test_leite_confirmado_pela_descricao_creme_nao():
     c = rodar([item(cod_item="L1", ncm="04012010", descricao="LEITE UHT INTEGRAL 1L"),
                item(cod_item="C1", ncm="04015010", descricao="CREME DE LEITE 200G")])
     conf = {x.cod_item: x.confianca for x in c if x.tributo == "PIS"}
-    assert conf == {"L1": "ALTA", "C1": "BAIXA"}
+    assert conf == {"L1": "ALTA"}  # creme de leite não está na lei: nem entra como oportunidade
 
 
 def test_autopeca_anexo_ii_comprovada_pelo_fornecedor():

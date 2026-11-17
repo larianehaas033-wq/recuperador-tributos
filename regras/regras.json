@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.3",
+ "versao": "2026.11.17.5",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -341,9 +341,9 @@
    ]
   },
   {
-   "codigo": "MONO_BEBIDAS_FRIAS",
-   "tipo": "MONOFASICO",
-   "grupo": "Bebidas frias (água, refrigerante, chá, isotônico, energético, cerveja)",
+   "codigo": "ZERO_BEBIDAS_FRIAS",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Bebidas frias vendidas pelo varejista (água, refrigerante, chá, isotônico, energético, cerveja)",
    "ncm_prefixos": [
     "2201",
     "2202",
@@ -352,24 +352,32 @@
    "excecoes": [],
    "vigencia_ini": "2015-05-01",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 13.097/2015, art. 14 (incidência concentrada no industrial/importador); revenda por varejista a alíquota zero (Tabela 4.3.13, código 918).",
+   "fundamento": "Lei 13.097/2015, arts. 14 e 28: desde 05/2015 a receita de venda de bebidas frias por pessoa jurídica varejista tem alíquota zero (Tabela 4.3.13, código 918). CST correto: 06.",
    "confianca": "ALTA",
-   "observacao": "",
-   "somente_revenda": true
+   "observacao": "Não alcança bebidas lácteas e bebidas à base de soja, excluídas do art. 14. Atacadista e indústria seguem regras próprias.",
+   "somente_revenda": true,
+   "palavras_excluir": [
+    "LACTE",
+    "LEITE",
+    "IOGURT",
+    "YOGURT",
+    "SOJA",
+    "FERMENTAD"
+   ]
   },
   {
-   "codigo": "MONO_BEBIDAS_CONCENTRADO",
-   "tipo": "MONOFASICO",
-   "grupo": "Concentrados para refrigerante (2106.90.10 Ex 02)",
+   "codigo": "ZERO_BEBIDAS_CONCENTRADO",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Concentrados para bebidas (2106.90.10 Ex 02)",
    "ncm_prefixos": [
     "21069010"
    ],
    "excecoes": [],
    "vigencia_ini": "2015-05-01",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 13.097/2015, art. 14; Tabela 4.3.10, códigos 411 a 414.",
+   "fundamento": "Lei 13.097/2015, arts. 14 e 28 (2106.90.10 Ex 02, revenda pelo varejista a alíquota zero). CST correto: 06.",
    "confianca": "CONDICIONAL",
-   "observacao": "",
+   "observacao": "Só o Ex 02 (concentrado com diluição acima de 10 partes). Pó para refresco depende do enquadramento no Ex: comprovado só pela descrição de concentrado/xarope ou pelo CST do fornecedor.",
    "somente_revenda": true,
    "palavras": [
     "CONCENTRADO",
@@ -489,13 +497,85 @@
    ]
   },
   {
+   "codigo": "ZERO_LACTEOS",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Leite fermentado, bebidas lácteas e compostos lácteos",
+   "ncm_prefixos": [
+    "0403",
+    "22029900",
+    "22029100",
+    "19019090",
+    "19019020"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2007-06-15",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 10.925/2004, art. 1º, XI (leite fermentado, bebidas e compostos lácteos). Bebida láctea e composto lácteo: base láctea de pelo menos 51% (SC Interna Cosit 3/2020). CST correto: 06.",
+   "confianca": "CONDICIONAL",
+   "observacao": "Só leite bovino (leite de cabra fica fora). Iogurte é leite fermentado.",
+   "somente_revenda": false,
+   "palavras": [
+    "LEITE FERMENT",
+    "FERMENTADO",
+    "BEBIDA LACTEA",
+    "BEB LACTEA",
+    "BEB. LACTEA",
+    "LACTEA",
+    "COMPOSTO LACTEO",
+    "IOGURTE",
+    "YOGURTE",
+    "IOGURT",
+    "YOGURT",
+    "COALHADA",
+    "KEFIR"
+   ],
+   "palavras_excluir": [
+    "CABRA",
+    "SORVETE",
+    "PICOLE",
+    "CREME DE LEITE",
+    "SOJA"
+   ]
+  },
+  {
+   "codigo": "ZERO_FORMULAS_INFANTIS",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Fórmulas infantis",
+   "ncm_prefixos": [
+    "190110",
+    "21069090"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2007-06-15",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 10.925/2004, art. 1º, XI (fórmulas infantis, conforme legislação específica). CST correto: 06.",
+   "confianca": "CONDICIONAL",
+   "observacao": "Só fórmulas infantis; cereais infantis e outras preparações do código ficam fora.",
+   "somente_revenda": false,
+   "palavras": [
+    "FORMULA INFANTIL",
+    "FORMULA INF",
+    "FORMULA LACTEA",
+    "FORMULA",
+    "LEITE INFANTIL"
+   ],
+   "palavras_excluir": [
+    "CEREAL",
+    "MUCILON",
+    "NESTON",
+    "FARINHA"
+   ]
+  },
+  {
    "codigo": "ZERO_QUEIJOS",
    "tipo": "ALIQ_ZERO",
    "grupo": "Queijos listados na lei",
    "ncm_prefixos": [
     "0406"
    ],
-   "excecoes": [],
+   "excecoes": [
+    "040640"
+   ],
    "vigencia_ini": "2004-08-01",
    "vigencia_fim": "2026-12-31",
    "fundamento": "Lei 10.925/2004, art. 1º. Tabela 4.3.13, códigos 111 e 120. CST correto: 06.",
@@ -517,6 +597,25 @@
     "PARMESAO",
     "FRESCO",
     "DO REINO"
+   ],
+   "palavras_excluir": [
+    "GORGONZOLA",
+    "ROQUEFORT",
+    "BRIE",
+    "CAMEMBERT",
+    "CHEDDAR",
+    "EMMENTAL",
+    "GOUDA",
+    "GRUYERE",
+    "PECORINO",
+    "ESTEPE",
+    "EDAM",
+    "GRANA PADANO",
+    "TILSIT",
+    "FONDUE",
+    "AZUL",
+    "CABRA",
+    "BURRATA"
    ]
   },
   {
@@ -613,14 +712,15 @@
    "palavras": [
     "HERBICIDA",
     "FUNGICIDA",
-    "INSETICIDA",
     "ACARICIDA",
     "NEMATICIDA",
-    "FORMICIDA",
     "AGRICOLA",
     "AGROTOXICO",
-    "DEFENSIVO",
-    "SEMENTE"
+    "DEFENSIVO AGR",
+    "SEMENTE",
+    "GLIFOSATO",
+    "2,4-D",
+    "ATRAZINA"
    ],
    "palavras_excluir": [
     "DOMESTIC",
@@ -628,7 +728,16 @@
     "REPELENTE",
     "RATICIDA",
     "MOSQUIT",
-    "BARATA"
+    "BARATA",
+    "DESINFET",
+    "SANITARI",
+    "PINHO",
+    "LIMPA",
+    "LIMPEZA",
+    "CLORO",
+    "MULTIUSO",
+    "BACTERICIDA",
+    "LAVANDA"
    ]
   },
   {
@@ -1229,7 +1338,6 @@
      "33061000",
      "96032100",
      "48181000",
-     "38089419",
      "34011900",
      "96190000"
     ],
@@ -1237,6 +1345,29 @@
     "fundamento": "LC 214/2025, art. 136 e Anexo VIII (redução de 60%).",
     "confianca": "ALTA",
     "observacao": ""
+   },
+   {
+    "codigo": "IBS_AGUA_SANITARIA",
+    "cclasstrib": "200035",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Água sanitária (Anexo VIII)",
+    "ncm_prefixos": [
+     "38089419"
+    ],
+    "excecoes": [],
+    "confianca": "ALTA",
+    "fundamento": "LC 214/2025, art. 136 e Anexo VIII (água sanitária do código 3808.94.19).",
+    "observacao": "O código 3808.94.19 também abrange outros desinfetantes, que pagam alíquota cheia.",
+    "palavras": [
+     "AGUA SANITARIA",
+     "SANITARIA",
+     "ALVEJANTE",
+     "HIPOCLORITO",
+     "CANDIDA",
+     "QBOA",
+     "Q-BOA"
+    ]
    },
    {
     "codigo": "IBS_PAO_FRANCES",
@@ -1365,7 +1496,14 @@
     ],
     "fundamento": "LC 214/2025, art. 125 e Anexo I (Cesta Básica Nacional, alíquota zero).",
     "confianca": "ALTA",
-    "observacao": "Pão (1905.90.90) só o pão francês; fórmulas infantis (2106.90.90) conforme legislação específica."
+    "observacao": "Pão (1905.90.90) só o pão francês; fórmulas infantis (2106.90.90) conforme legislação específica.",
+    "palavras_excluir": [
+     "CR LEITE",
+     "CR. LEITE",
+     "CREME DE LEITE",
+     "CREME LEITE",
+     "NATA"
+    ]
    },
    {
     "codigo": "IBS_HORTIFRUTI",
@@ -1416,7 +1554,156 @@
     ],
     "fundamento": "LC 214/2025, art. 148 e Anexo XV (alíquota zero).",
     "confianca": "ALTA",
-    "observacao": ""
+    "observacao": "",
+    "palavras_excluir": [
+     "COM ACUCAR",
+     "C/ACUCAR",
+     "C/ ACUCAR",
+     "ADOCAD",
+     "EM CALDA",
+     "CRISTALIZ",
+     "CARAMELIZ",
+     "COZID"
+    ]
+   },
+   {
+    "codigo": "IBS_SUCOS_POLPAS",
+    "cclasstrib": "200034",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Sucos naturais e polpas sem açúcar (Anexo VII)",
+    "ncm_prefixos": [
+     "2009",
+     "2008"
+    ],
+    "excecoes": [
+     "20081"
+    ],
+    "confianca": "ALTA",
+    "fundamento": "LC 214/2025, art. 135 e Anexo VII, itens 10 e 11 (sucos e polpas sem adição de açúcar, edulcorantes ou conservantes).",
+    "observacao": "Só sem açúcar, edulcorante ou conservante.",
+    "palavras": [
+     "INTEGRAL",
+     "100%",
+     "100 %",
+     "NATURAL",
+     "POLPA",
+     "SEM ACUCAR",
+     "S/ACUCAR",
+     "S/ ACUCAR"
+    ],
+    "palavras_excluir": [
+     "NECTAR",
+     "ADOCAD",
+     "COM ACUCAR",
+     "C/ACUCAR",
+     "REFRESCO",
+     "EM CALDA",
+     "CALDA",
+     "LIGHT",
+     "DIET",
+     "ZERO"
+    ]
+   },
+   {
+    "codigo": "IBS_CASTANHAS_TORRADAS",
+    "cclasstrib": "200034",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Frutas de casca rija regionais e amendoins torrados (Anexo VII)",
+    "ncm_prefixos": [
+     "20081"
+    ],
+    "excecoes": [],
+    "confianca": "ALTA",
+    "fundamento": "LC 214/2025, art. 135 e Anexo VII, item 17 (apenas torrados ou cozidos, sem sal ou outras substâncias).",
+    "observacao": "",
+    "palavras": [
+     "TORRAD",
+     "COZID"
+    ],
+    "palavras_excluir": [
+     "SAL",
+     "SALGAD",
+     "DOCE",
+     "CROC",
+     "JAPON",
+     "CARAMEL",
+     "CHOCOL",
+     "MEL",
+     "PACOCA",
+     "PE DE MOLEQUE"
+    ]
+   },
+   {
+    "codigo": "IBS_LACTEOS_BEBIDA",
+    "cclasstrib": "200034",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Bebidas e compostos lácteos (Anexo VII, item 2)",
+    "ncm_prefixos": [
+     "22029900"
+    ],
+    "excecoes": [],
+    "confianca": "ALTA",
+    "fundamento": "LC 214/2025, art. 135 e Anexo VII, item 2 (leite fermentado, bebidas e compostos lácteos que atendam à legislação específica).",
+    "observacao": "O código 2202.99.00 também abrange energéticos, chás prontos, isotônicos e néctares, que pagam alíquota cheia.",
+    "palavras": [
+     "LACTEA",
+     "LACTEO",
+     "IOGURT",
+     "YOGURT",
+     "LEITE FERMENT",
+     "COMPOSTO LACT",
+     "BEB LAC",
+     "BEB. LAC",
+     "ACHOCOLATADO PRONTO",
+     "BEBIDA DE LEITE"
+    ],
+    "palavras_excluir": [
+     "SOJA",
+     "AMENDOA",
+     "AVEIA",
+     "COCO",
+     "VEGETAL",
+     "ENERG",
+     "ISOTON",
+     "CHA "
+    ]
+   },
+   {
+    "codigo": "IBS_HORTICOLAS_COZIDOS",
+    "cclasstrib": "200034",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Hortícolas apenas pré-cozidos ou cozidos em água ou vapor (Anexo VII, item 16)",
+    "ncm_prefixos": [
+     "2004",
+     "2005",
+     "20021000"
+    ],
+    "excecoes": [],
+    "confianca": "ALTA",
+    "fundamento": "LC 214/2025, art. 135 e Anexo VII, item 16 (apenas pré-cozidos ou cozidos em água ou vapor, sem sal nem outros produtos).",
+    "observacao": "Conservas em salmoura, pré-fritos e temperados não entram: alíquota cheia.",
+    "palavras": [
+     "PRE-COZID",
+     "PRE COZID",
+     "PRECOZID",
+     "COZID",
+     "VAPOR"
+    ],
+    "palavras_excluir": [
+     "FRIT",
+     "SALMOURA",
+     "CONSERVA",
+     "TEMPER",
+     "C/SAL",
+     "COM SAL",
+     "SALGAD",
+     "MOLHO",
+     "AZEITONA"
+    ]
    },
    {
     "codigo": "IBS_ALIMENTOS_60",
@@ -1437,7 +1724,6 @@
      "03079200",
      "04032000",
      "04039000",
-     "22029900",
      "04090000",
      "110100",
      "1102",
@@ -1458,17 +1744,12 @@
      "1515",
      "19022000",
      "19023000",
-     "2009",
-     "2008",
      "19059010",
      "20029000",
      "07",
      "08",
      "10",
-     "12",
-     "2004",
-     "2005",
-     "20021000"
+     "12"
     ],
     "excecoes": [
      "030611",
@@ -1482,7 +1763,17 @@
     ],
     "fundamento": "LC 214/2025, art. 135 e Anexo VII (redução de 60%).",
     "confianca": "ALTA",
-    "observacao": "Sucos e polpas (20.08/20.09) só sem açúcar, edulcorantes ou conservantes; leite fermentado e bebidas lácteas conforme legislação."
+    "observacao": "Sucos e polpas (20.08/20.09) só sem açúcar, edulcorantes ou conservantes; leite fermentado e bebidas lácteas conforme legislação.",
+    "palavras_excluir": [
+     "ADOCAD",
+     "C/ ACUCAR",
+     "C/ACUCAR",
+     "CARAMELIZ",
+     "CHOCOLAT",
+     "COM ACUCAR",
+     "CRISTALIZ",
+     "EM CALDA"
+    ]
    },
    {
     "codigo": "IBS_LIVROS",

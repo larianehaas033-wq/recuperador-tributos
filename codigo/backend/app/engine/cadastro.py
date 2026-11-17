@@ -87,21 +87,27 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
         obs, conf = [], "ALTA"
 
         # PIS/COFINS
-        mono = base.classificar(ncm, row["data"], "MONOFASICO")
-        zero = None if mono else base.classificar(ncm, row["data"], "ALIQ_ZERO")
+        mono = base.classificar(ncm, row["data"], "MONOFASICO", desc)
+        zero = None if mono else base.classificar(ncm, row["data"], "ALIQ_ZERO", desc)
         regra = mono or zero
+        pc_comprovado = True
         if servico:
             cst_pc = "01"
         elif regra:
             c, motivo = motor.verificar(regra, row, "PISCOF_MONO_SAIDA" if mono else "PISCOF_ALIQ_ZERO_SAIDA")
-            cst_pc = ("04" if not motor.industrial else "02") if mono else "06"
-            if c != "ALTA":
+            cst_regra = ("04" if not motor.industrial else "02") if mono else "06"
+            if c == "ALTA":
+                cst_pc = cst_regra
+            else:
+                # não sugere o que não comprovou: mantém o atual e explica a possibilidade
+                pc_comprovado = False
+                cst_pc = _moda(u["cst_pis"]) or "01"
                 conf = "BAIXA"
-                obs.append(f"PIS/COFINS: {motivo}")
+                obs.append(f"PIS/COFINS: pode ser CST {cst_regra} ({regra.grupo}), mas {motivo[0].lower() + motivo[1:]}")
         else:
             cst_pc = "01"
-        regra_pc = regra.grupo if regra else "Tributação normal"
-        fund_pc = regra.fundamento if regra else ""
+        regra_pc = (regra.grupo if pc_comprovado else "Não comprovado") if regra else "Tributação normal"
+        fund_pc = regra.fundamento if (regra and pc_comprovado) else ""
 
         # ICMS / CSOSN
         orig = _moda(origem_cod.get(cod, [])) or "0"
@@ -128,7 +134,7 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
         atual_icms = _moda(u["cst_icms"])
         atual_cc = _moda(u["cclasstrib"])
         div = []
-        if atual_pc and atual_pc != cst_pc and not servico:
+        if atual_pc and atual_pc != cst_pc and not servico and pc_comprovado:
             div.append(f"CST PIS/COFINS {atual_pc} → {cst_pc}")
         if atual_icms and cst_icms != "—":
             if len(atual_icms) == 3 and atual_icms.isdigit() and atual_icms[-2:] != cst_icms[-2:] and not simples:
