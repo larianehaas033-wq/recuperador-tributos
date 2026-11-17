@@ -1,11 +1,11 @@
 {
-  "versao": "1.3.6",
+  "versao": "1.3.7",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.3.6.zip",
-  "sha256": "5be4e614458538371189b0896b59ec0b1132abdca42b77012b418817ae5790af",
+  "pacote": "atualizacoes/sistema-1.3.7.zip",
+  "sha256": "742926ce9c37edbb0129890d083833e3d97bc0d66181a6ea1bd74fa85baec539",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.6",
+  "versao_regras": "2026.11.17.7",
   "notas": [
-    "Perdas e descartes da desossa no açougue não geram crédito de PIS/COFINS"
+    "Sabonete em barra e higiene bucal: alíquota zero (Lei 10.925, art. 1º, XXVI e XXVII), não monofásico; novo risco de crédito na compra de produto com alíquota zero"
   ]
 }

@@ -7,6 +7,7 @@ Teses implementadas:
   PISCOF_CREDITO_ENTRADA   compra para revenda/insumo sem crédito (CST 70/73/98/99) - Lucro Real
 Riscos (valores que a empresa pode ter de devolver):
   RISCO_CRED_MONOFASICO    crédito na compra de monofásico para revenda (STJ, Tema 1.093)
+  RISCO_CRED_ALIQ_ZERO     crédito na compra de produto com alíquota zero (Leis 10.637 e 10.833, art. 3º, § 2º, II)
   RISCO_CRED_ICMS_BASE     ICMS na base do crédito a partir de 05/2023 (Lei 14.592/2023)
   RISCO_SAIDA_ZERO_SEM_REGRA  saída com CST 04/06 sem regra que justifique
 """
@@ -310,6 +311,7 @@ class MotorPisCofins:
             ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
             risco_mono = bool(mono) and cfop in CFOP_ENTRADA_REVENDA and not self.industrial
+            zero = None if mono else self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
                 if cst not in CST_CREDITO or vl <= 0:
@@ -324,6 +326,18 @@ class MotorPisCofins:
                         confianca=("BAIXA" if cn.grave else self.verificar(mono, dict(row, ncm=ncm),
                                                                            "RISCO_CRED_MONOFASICO")[0]),
                         regra_codigo=mono.codigo, observacao=cn.alerta,
+                    ))
+                    continue
+                if zero:
+                    out.append(Credito(
+                        modulo="PIS_COFINS", tese="RISCO_CRED_ALIQ_ZERO", tributo=trib, periodo=row["periodo"],
+                        data=data, chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                        descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="73",
+                        base_original=r2(bc), base_correta=0.0, valor_pago=0.0, valor_recuperar=r2(vl),
+                        natureza="RISCO", fundamento=self.base.teses["RISCO_CRED_ALIQ_ZERO"]["fundamento"],
+                        confianca=("BAIXA" if cn.grave else self.verificar(zero, dict(row, ncm=ncm),
+                                                                           "RISCO_CRED_ALIQ_ZERO")[0]),
+                        regra_codigo=zero.codigo, observacao=cn.alerta,
                     ))
                     continue
                 if (data or "") >= INICIO_LEI_14592 and row["vl_icms"] > 0 and bc >= bruto - _tol(bruto) and aliq > 0:

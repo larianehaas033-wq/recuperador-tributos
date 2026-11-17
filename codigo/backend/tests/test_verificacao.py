@@ -122,3 +122,13 @@ def test_descarte_da_desossa_nao_gera_credito():
     c = rodar([item(cod_item="D1", ncm="05061000", descricao="OSSOS/OUTRAS PERDAS - DESCARTE", **compra)],
               produtos={"D1": {"tipo_item": "00", "descricao": "OSSOS/OUTRAS PERDAS - DESCARTE"}})
     assert not [x for x in c if x.tese == "PISCOF_CREDITO_ENTRADA"]
+
+
+def test_sabonete_em_barra_e_aliquota_zero_nao_monofasico():
+    """3401.11.90 Ex 01 (sabão): Lei 10.925, art. 1º, XXVI. Crédito na compra é vedado por ser alíquota zero."""
+    compra = dict(ind_oper="0", cfop="1102", cnpj_part="12345678000199", cst_pis="50", cst_cofins="50",
+                  vl_bc_pis=171.32, vl_pis=2.83, vl_bc_cofins=171.32, vl_cofins=13.02)
+    c = rodar([item(cod_item="P1", ncm="34011190", descricao="SABONETE PROTEX 85G CREAM", **compra)],
+              produtos={"P1": {"tipo_item": "00", "descricao": "SABONETE PROTEX 85G CREAM"}})
+    r = {(x.tese, x.tributo): (x.valor_recuperar, x.confianca) for x in c}
+    assert r == {("RISCO_CRED_ALIQ_ZERO", "PIS"): (2.83, "ALTA"), ("RISCO_CRED_ALIQ_ZERO", "COFINS"): (13.02, "ALTA")}

@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.6",
+ "versao": "2026.11.17.7",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -48,19 +48,83 @@
     "3303",
     "3304",
     "3305",
-    "3306",
     "3307",
-    "34011190",
     "34012010",
     "96032100"
    ],
    "excecoes": [],
    "vigencia_ini": "2001-01-01",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 10.147/2000, art. 1º, I, 'b'; revenda a alíquota zero (art. 2º). Tabela 4.3.10, código 202. CST correto na revenda: 04.",
+   "fundamento": "Lei 10.147/2000, art. 1º, I, 'b' (redação da Lei 12.839/2013: posições 33.03 a 33.07, exceto 33.06; 3401.11.90, exceto o Ex 01; 3401.20.10; 9603.21.00); revenda a alíquota zero (art. 2º). Tabela 4.3.10. CST correto na revenda: 04.",
    "confianca": "ALTA",
    "observacao": "",
-   "somente_revenda": true
+   "somente_revenda": true,
+   "palavras_excluir": []
+  },
+  {
+   "codigo": "MONO_BARRA_NAO_SABAO",
+   "tipo": "MONOFASICO",
+   "grupo": "Barras de limpeza que não são sabão (3401.11.90 fora do Ex 01)",
+   "ncm_prefixos": [
+    "34011190"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2001-01-01",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 10.147/2000, art. 1º, I, 'b' (redação da Lei 12.839/2013: posições 33.03 a 33.07, exceto 33.06; 3401.11.90, exceto o Ex 01; 3401.20.10; 9603.21.00); revenda a alíquota zero (art. 2º). Tabela 4.3.10. CST correto na revenda: 04.",
+   "confianca": "CONDICIONAL",
+   "observacao": "Sabonete em barra comum é sabão (Ex 01): alíquota zero, não monofásico.",
+   "somente_revenda": true,
+   "palavras_excluir": [],
+   "exige_descricao": true,
+   "palavras": [
+    "BARRA DE LIMPEZA",
+    "SYNDET",
+    "BEAUTY BAR",
+    "BARRA LIMPEZA"
+   ]
+  },
+  {
+   "tipo": "ALIQ_ZERO",
+   "somente_revenda": false,
+   "codigo": "ZERO_SABONETE_BARRA",
+   "grupo": "Sabões de toucador (sabonete em barra)",
+   "ncm_prefixos": [
+    "34011190"
+   ],
+   "excecoes": [],
+   "confianca": "CONDICIONAL",
+   "exige_descricao": true,
+   "palavras": [
+    "SABONETE",
+    "SABAO",
+    " SAB ",
+    "SABON"
+   ],
+   "palavras_excluir": [
+    "LIQ",
+    "INTIMO",
+    "ESPUMA"
+   ],
+   "fundamento": "Lei 10.925/2004, art. 1º, XXVI (sabões de toucador do código 3401.11.90 Ex 01 da TIPI: alíquota zero desde 2013, Lei 12.839/2013). Fora do monofásico (Lei 10.147/2000, art. 1º, I, 'b'). CST correto: 06.",
+   "observacao": "Barras de limpeza que não são sabão (sem o Ex 01) continuam no monofásico.",
+   "vigencia_ini": "2013-03-08"
+  },
+  {
+   "tipo": "ALIQ_ZERO",
+   "somente_revenda": false,
+   "codigo": "ZERO_HIGIENE_BUCAL",
+   "grupo": "Higiene bucal (creme dental, fio dental, enxaguante)",
+   "ncm_prefixos": [
+    "3306"
+   ],
+   "excecoes": [],
+   "confianca": "ALTA",
+   "palavras": [],
+   "palavras_excluir": [],
+   "fundamento": "Lei 10.925/2004, art. 1º, XXVII (produtos para higiene bucal ou dentária da posição 33.06: alíquota zero desde 2013, Lei 12.839/2013). A posição 33.06 saiu do monofásico. CST correto: 06.",
+   "observacao": "",
+   "vigencia_ini": "2013-03-08"
   },
   {
    "codigo": "MONO_COMBUSTIVEIS",
@@ -1223,6 +1287,16 @@
    "roteiro": [
     "Conferir se a nota foi cancelada fora do prazo ou denegada.",
     "Se a venda ocorreu, regularizar antes de qualquer pedido de restituição."
+   ]
+  },
+  "RISCO_CRED_ALIQ_ZERO": {
+   "nome": "Crédito tomado na compra de produto com alíquota zero",
+   "via": "ADMINISTRATIVO_FEDERAL",
+   "natureza": "RISCO",
+   "fundamento": "Lei 10.637/2002, art. 3º, § 2º, II, e Lei 10.833/2003, art. 3º, § 2º, II: não dá direito a crédito a aquisição de bens não sujeitos ao pagamento da contribuição (alíquota zero).",
+   "roteiro": [
+    "Avaliar estorno espontâneo antes de qualquer pedido de restituição, para não ter o PER/DCOMP glosado.",
+    "Corrigir o CST de entrada para 73 nesses produtos."
    ]
   }
  },
