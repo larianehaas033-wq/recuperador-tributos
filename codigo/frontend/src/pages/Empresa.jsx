@@ -17,6 +17,7 @@ export default function Empresa({ id, ir }) {
   const [d, setD] = useState(null)
   const [job, setJob] = useState(null)
   const [erro, setErro] = useState(null)
+  const [excluindo, setExcluindo] = useState(false)
 
   const carregar = () => api.get(`/api/empresas/${id}`).then(setD)
   useEffect(() => { carregar() }, [id])
@@ -43,14 +44,19 @@ export default function Empresa({ id, ir }) {
 
   const excluirArquivo = async (a) => {
     if (!confirm(`Remover ${a.nome}? Os dados desse arquivo saem da base.`)) return
-    await api.del(`/api/arquivos/${a.id}`)
+    try { await api.del(`/api/arquivos/${a.id}`) } catch (err) { alert(err.message) }
     carregar()
   }
 
   const excluirEmpresa = async () => {
     if (!confirm(`Excluir ${e.nome} e todos os arquivos e análises dela?`)) return
-    await api.del(`/api/empresas/${id}`)
-    ir('painel')
+    setExcluindo(true)
+    try {
+      await api.del(`/api/empresas/${id}`)
+      ir('painel')
+    } catch (err) {
+      alert(err.message)
+    } finally { setExcluindo(false) }
   }
 
   const meses = meses60()
@@ -108,7 +114,7 @@ export default function Empresa({ id, ir }) {
             <button key={a.id} onClick={() => ir('analise', a.id)}
               className="flex w-full items-center justify-between border-t border-line px-5 py-3 text-left hover:bg-navy-50/60">
               <div>
-                <div className="text-sm font-semibold">Análise #{a.id}</div>
+                <div className="text-sm font-semibold">Análise #{a.id}{a.desatualizada ? <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">desatualizada</span> : ''}</div>
                 <div className="text-xs text-muted">{dataHora(a.criado_em)} · regras {a.versao_regras?.split(' ')[0]}</div>
               </div>
               <div className="num text-right text-sm font-semibold text-navy">
@@ -120,7 +126,7 @@ export default function Empresa({ id, ir }) {
         <div className="card overflow-hidden lg:col-span-3">
           <div className="flex items-center justify-between px-5 py-4">
             <div className="font-semibold text-navy">Arquivos importados ({d.arquivos.length})</div>
-            <button className="btn-danger !py-1 text-xs" onClick={excluirEmpresa}><Icon name="lixo" className="h-3.5 w-3.5" />Excluir empresa</button>
+            <button className="btn-danger !py-1 text-xs" onClick={excluirEmpresa} disabled={excluindo}><Icon name="lixo" className="h-3.5 w-3.5" />{excluindo ? 'Excluindo...' : 'Excluir empresa'}</button>
           </div>
           <div className="max-h-[420px] overflow-y-auto">
             <table className="w-full">

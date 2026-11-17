@@ -104,6 +104,7 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
             (empresa_id, tipo, path.name, str(path), h, r.dt_ini, r.dt_fin, r.finalidade, regime, r.registros),
         )
         atualizar_regime(con, empresa_id)
+        con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (empresa_id,))
         arquivo_id = cur.lastrowid
         origem_doc = "SPED_CONTRIB" if tipo == "EFD_CONTRIB" else "SPED_ICMS"
 
@@ -229,6 +230,7 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
         resumo["empresas"] = list(arquivos.keys())
         for eid in arquivos:
             atualizar_regime(con, eid)
+            con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (eid,))
     return resumo
 
 

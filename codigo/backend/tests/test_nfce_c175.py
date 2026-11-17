@@ -83,3 +83,20 @@ def test_nfce_resumida_usa_itens_do_xml_e_avisa_o_que_falta():
     sai = cli.get(f"/api/analises/{aid}/creditos?operacao=SAIDA").json()
     ent = cli.get(f"/api/analises/{aid}/creditos?operacao=ENTRADA").json()
     assert sai["total"] == 2 and ent["total"] == 0
+
+
+def test_excluir_arquivo_marca_analise_e_excluir_empresa_apaga_tudo():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    cli = TestClient(app)
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    emp = con.execute("SELECT id FROM empresas WHERE cnpj=?", (CNPJ,)).fetchone()["id"]
+    arq = con.execute("SELECT id FROM arquivos_sped WHERE empresa_id=? AND tipo='EFD_CONTRIB'", (emp,)).fetchone()["id"]
+    assert cli.delete(f"/api/arquivos/{arq}").status_code == 200
+    assert con.execute("SELECT min(desatualizada) d FROM analises WHERE empresa_id=?", (emp,)).fetchone()["d"] == 1
+    assert cli.delete(f"/api/empresas/{emp}").status_code == 200
+    for t in ("empresas WHERE id", "arquivos_sped WHERE empresa_id", "itens_nota WHERE empresa_id",
+              "notas_fiscais WHERE empresa_id", "analises WHERE empresa_id"):
+        assert con.execute(f"SELECT count(*) FROM {t}=?", (emp,)).fetchone()[0] == 0
+    assert emp not in [e["id"] for e in cli.get("/api/empresas").json()]

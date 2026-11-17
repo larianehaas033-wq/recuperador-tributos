@@ -139,6 +139,7 @@ CREATE TABLE IF NOT EXISTS tabela_ncm_regras (
 );
 
 CREATE TABLE IF NOT EXISTS analises (
+    desatualizada INTEGER DEFAULT 0,             -- arquivos da empresa mudaram depois desta análise
     id            INTEGER PRIMARY KEY,
     empresa_id    INTEGER NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
     criado_em     TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -187,6 +188,12 @@ CREATE TABLE IF NOT EXISTS creditos_identificados (
     observacao    TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_cred_analise ON creditos_identificados(analise_id, tese);
+-- chaves estrangeiras indexadas: exclusão de empresa/arquivo e consultas por nota ficam rápidas
+CREATE INDEX IF NOT EXISTS ix_itens_nota ON itens_nota(nota_id);
+CREATE INDEX IF NOT EXISTS ix_itens_arquivo ON itens_nota(arquivo_id);
+CREATE INDEX IF NOT EXISTS ix_nf_arquivo ON notas_fiscais(arquivo_id);
+CREATE INDEX IF NOT EXISTS ix_arq_empresa ON arquivos_sped(empresa_id);
+CREATE INDEX IF NOT EXISTS ix_analises_empresa ON analises(empresa_id);
 
 CREATE TABLE IF NOT EXISTS revisoes_ncm (
     empresa_id    INTEGER NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,

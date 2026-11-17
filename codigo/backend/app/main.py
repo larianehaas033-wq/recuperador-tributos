@@ -249,7 +249,9 @@ def empresas():
             SELECT e.*, (SELECT count(*) FROM arquivos_sped a WHERE a.empresa_id=e.id) arquivos,
                    (SELECT min(periodo_ini) FROM arquivos_sped a WHERE a.empresa_id=e.id AND periodo_ini IS NOT NULL) ini,
                    (SELECT max(periodo_ini) FROM arquivos_sped a WHERE a.empresa_id=e.id AND periodo_ini IS NOT NULL) fim,
-                   (SELECT max(id) FROM analises x WHERE x.empresa_id=e.id AND status='CONCLUIDA') ultima_analise
+                   (SELECT max(id) FROM analises x WHERE x.empresa_id=e.id AND status='CONCLUIDA') ultima_analise,
+                   (SELECT desatualizada FROM analises x WHERE x.empresa_id=e.id AND status='CONCLUIDA'
+                    ORDER BY id DESC LIMIT 1) analise_desatualizada
             FROM empresas e ORDER BY e.nome""")
 
 
@@ -261,7 +263,8 @@ def empresa(eid: int):
             raise HTTPException(404, "Empresa não encontrada")
         arquivos = db.rows(con, "SELECT id, tipo, nome, periodo_ini, finalidade, qtd_registros, importado_em "
                                 "FROM arquivos_sped WHERE empresa_id=? ORDER BY tipo, periodo_ini", (eid,))
-        analises = db.rows(con, "SELECT id, criado_em, periodo_ini, periodo_fim, versao_regras, status, resumo_json "
+        analises = db.rows(con, "SELECT id, criado_em, periodo_ini, periodo_fim, versao_regras, status, resumo_json, "
+                                "desatualizada "
                                 "FROM analises WHERE empresa_id=? ORDER BY id DESC", (eid,))
         cobertura = db.rows(con, "SELECT substr(periodo_ini,1,7) periodo, tipo FROM arquivos_sped "
                                  "WHERE empresa_id=? AND periodo_ini IS NOT NULL", (eid,))
@@ -275,15 +278,37 @@ def empresa(eid: int):
 
 @app.delete("/api/empresas/{eid}")
 def excluir_empresa(eid: int):
-    with db.tx() as con:
-        con.execute("DELETE FROM empresas WHERE id=?", (eid,))
+    """Exclui a empresa e tudo dela, das tabelas filhas para a principal (mais rápido que só a cascata)."""
+    try:
+        with db.tx() as con:
+            for sql in (
+                "DELETE FROM creditos_identificados WHERE analise_id IN (SELECT id FROM analises WHERE empresa_id=?)",
+                "DELETE FROM analises WHERE empresa_id=?", "DELETE FROM itens_nota WHERE empresa_id=?",
+                "DELETE FROM notas_fiscais WHERE empresa_id=?", "DELETE FROM apuracoes WHERE empresa_id=?",
+                "DELETE FROM produtos WHERE empresa_id=?", "DELETE FROM revisoes_ncm WHERE empresa_id=?",
+                "DELETE FROM arquivos_sped WHERE empresa_id=?", "DELETE FROM empresas WHERE id=?",
+            ):
+                con.execute(sql, (eid,))
+            restou = con.execute("SELECT count(*) n FROM empresas WHERE id=?", (eid,)).fetchone()["n"]
+    except Exception as e:
+        raise HTTPException(500, f"Não foi possível excluir a empresa: {e}") from e
+    if restou:
+        raise HTTPException(500, "A empresa não foi excluída. Feche e abra o programa e tente de novo.")
     return {"ok": True}
 
 
 @app.delete("/api/arquivos/{aid}")
 def excluir_arquivo(aid: int):
-    with db.tx() as con:
-        con.execute("DELETE FROM arquivos_sped WHERE id=?", (aid,))
+    try:
+        with db.tx() as con:
+            emp = con.execute("SELECT empresa_id FROM arquivos_sped WHERE id=?", (aid,)).fetchone()
+            for sql in ("DELETE FROM itens_nota WHERE arquivo_id=?", "DELETE FROM notas_fiscais WHERE arquivo_id=?",
+                        "DELETE FROM apuracoes WHERE arquivo_id=?", "DELETE FROM arquivos_sped WHERE id=?"):
+                con.execute(sql, (aid,))
+            if emp:  # a análise anterior deixou de refletir os arquivos
+                con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (emp["empresa_id"],))
+    except Exception as e:
+        raise HTTPException(500, f"Não foi possível remover o arquivo: {e}") from e
     return {"ok": True}
 
 

@@ -71,7 +71,7 @@ export default function Painel({ ir, status }) {
                     <td className="td">{REGIME[e.regime] || <span className="text-muted">não identificado</span>}</td>
                     <td className="td num">{e.arquivos}</td>
                     <td className="td num text-muted">{e.ini ? `${competencia(e.ini.slice(0, 7))} a ${competencia(e.fim.slice(0, 7))}` : '—'}</td>
-                    <td className="td num text-right font-semibold">{r ? brl((r.total_corrigido || 0) + (r.total_saldo_credor || 0)) : <span className="text-muted">sem análise</span>}</td>
+                    <td className="td num text-right font-semibold">{r ? brl((r.total_corrigido || 0) + (r.total_saldo_credor || 0)) : <span className="text-muted">sem análise</span>}{r && e.analise_desatualizada ? <div className="text-[10px] font-semibold text-amber-700">arquivos mudaram: analise de novo</div> : ''}</td>
                     <td className="td num text-right text-bad">{r ? brl(r.riscos) : ''}</td>
                     <td className="td text-right text-muted">›</td>
                   </tr>

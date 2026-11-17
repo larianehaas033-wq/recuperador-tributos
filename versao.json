@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.7",
+  "versao": "1.4.8",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.7.zip",
-  "sha256": "fddd38de2e190a1ca6af53601efc9e7c3a07402565af385c20900f5b68c60c14",
+  "pacote": "atualizacoes/sistema-1.4.8.zip",
+  "sha256": "84cc46dedd68a50bef7ce4affe37490c0e2b93d6e2ffef85908e1019c1a90e68",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Abas 'Saídas auditadas' e 'Entradas auditadas': o que foi examinado, o valor a recuperar e os riscos de cada lado"
+    "Excluir empresa e arquivo: exclusão confirmada, mensagem de erro se falhar e índices que deixam a exclusão rápida; análise marcada como desatualizada quando os arquivos mudam"
   ]
 }
