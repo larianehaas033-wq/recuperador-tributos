@@ -1,0 +1,13 @@
+{
+  "versao": "1.3.0",
+  "publicado_em": "2026-11-17",
+  "pacote": "atualizacoes/sistema-1.3.0.zip",
+  "sha256": "cea8947c18066b1f11409a01322de6e684163cc78e74123a753634ccb4966d48",
+  "exige_pacote_completo": false,
+  "versao_regras": "2026.11.17.3",
+  "notas": [
+    "Atualização automática do programa e das regras pelo próprio sistema",
+    "Cadastro tributário por produto: CST PIS/COFINS, CST ICMS, CSOSN, cClassTrib (tabela v1.71) e NBS",
+    "Conferência automática do enquadramento pela lei, pela descrição e pelos XMLs de compra"
+  ]
+}

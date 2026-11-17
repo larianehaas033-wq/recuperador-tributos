@@ -1,0 +1,16 @@
+{
+  "selic": "https://api.bcb.gov.br/dados/serie/bcdata.sgs.4390/dados?formato=json&dataInicial=01/01/2015",
+  "monitoradas": [
+    {"nome": "Lei 10.637/2002 (PIS não cumulativo)", "url": "https://www.planalto.gov.br/ccivil_03/leis/2002/l10637.htm"},
+    {"nome": "Lei 10.833/2003 (COFINS não cumulativa)", "url": "https://www.planalto.gov.br/ccivil_03/leis/2003/l10.833.htm"},
+    {"nome": "Lei 10.147/2000 (farmacêuticos e perfumaria)", "url": "https://www.planalto.gov.br/ccivil_03/leis/l10147.htm"},
+    {"nome": "Lei 10.485/2002 (veículos, autopeças, pneus)", "url": "https://www.planalto.gov.br/ccivil_03/leis/2002/l10485.htm"},
+    {"nome": "Lei 10.865/2004 (alíquota zero, art. 28)", "url": "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10.865.htm"},
+    {"nome": "Lei 10.925/2004 (alíquota zero, art. 1º)", "url": "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l10.925.htm"},
+    {"nome": "Lei 13.097/2015 (bebidas frias)", "url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13097.htm"},
+    {"nome": "Lei 9.718/1998 (combustíveis)", "url": "https://www.planalto.gov.br/ccivil_03/leis/l9718compilada.htm"},
+    {"nome": "LC 87/1996 (Lei Kandir - ICMS)", "url": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp87.htm"},
+    {"nome": "LC 214/2025 (Reforma Tributária)", "url": "https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp214.htm"},
+    {"nome": "RICMS/SC", "url": "https://legislacao.sef.sc.gov.br/html/regulamentos/icms/ricms_01_00.htm"}
+  ]
+}

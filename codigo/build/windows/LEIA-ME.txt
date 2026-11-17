@@ -1,0 +1,24 @@
+RECUPERADOR DE TRIBUTOS - versão 1.0
+
+COMO INSTALAR
+1. Extraia esta pasta inteira para um lugar fixo, por exemplo C:\RecuperadorTributos
+   (não rode de dentro do .zip).
+2. Dê dois cliques em "Criar atalho na Area de Trabalho.vbs".
+3. Abra pelo atalho "Recuperador de Tributos".
+
+Se o Windows mostrar "O Windows protegeu o computador", clique em "Mais informações" e
+"Executar assim mesmo". Isso acontece com programas que não são comprados em loja.
+
+PRIMEIRO USO
+1. Com internet, clique em "Atualizar agora" (menu à esquerda) para baixar a Selic e registrar
+   as fontes oficiais.
+2. Em Configurações, clique em "Agendar no Windows" para a base se atualizar todo dia às 07:30.
+3. Em "Importar arquivos", escolha a pasta com os SPED e XMLs do cliente.
+4. Abra a empresa e clique em "Analisar agora".
+
+ONDE FICAM OS DADOS
+%LOCALAPPDATA%\RecuperadorTributos (banco, relatórios e registro de erros).
+Para levar para outro computador, copie esta pasta do programa e essa pasta de dados.
+
+ATUALIZAR O PROGRAMA
+Substitua a pasta do programa pela versão nova. Os dados ficam preservados.
