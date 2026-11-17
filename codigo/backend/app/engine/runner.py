@@ -204,13 +204,28 @@ def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
     if manual:  # vale nos meses sem EFD-Contribuições (a escrituração da empresa prevalece)
         meses = {r["p"] for r in con.execute(
             "SELECT DISTINCT substr(periodo_ini,1,7) p FROM arquivos_sped WHERE empresa_id=? AND periodo_ini IS NOT NULL "
-            "UNION SELECT DISTINCT periodo FROM notas_fiscais WHERE empresa_id=? AND periodo IS NOT NULL",
+            "UNION SELECT DISTINCT periodo FROM notas_fiscais WHERE empresa_id=? AND origem='XML' AND periodo IS NOT NULL",
             (empresa_id, empresa_id))}
         divergente = sorted(p for p in meses if p in regimes and regimes[p] != manual)
         for p in meses:
             regimes.setdefault(p, manual)
         avisos.append(f"Regime informado manualmente: {NOME_REGIME.get(manual, manual)} (vale nos meses sem "
                       "EFD-Contribuições).")
+        # as próprias vendas no SPED Fiscal mostram se a empresa usa CSOSN (Simples) ou CST (regime normal)
+        csts = [r["cst_icms"] or "" for r in con.execute(
+            "SELECT a.cst_icms FROM analitico_icms a JOIN notas_fiscais n ON n.id=a.nota_id "
+            "WHERE a.empresa_id=? AND n.ind_oper='1' AND n.ind_emit='0' LIMIT 2000", (empresa_id,))]
+        if csts:
+            # CSOSN vem com 4 dígitos (origem + CSOSN) ou 3 dígitos fora da tabela de CST ("500" é ambíguo: fica de fora)
+            csosn = sum(1 for c in csts if (len(c) == 4 and c[1:] in ("101", "102", "103", "201", "202", "203", "300",
+                                                                      "400", "500", "900"))
+                        or c in ("101", "102", "103", "201", "202", "203", "300", "400", "900"))
+            if manual == "SIMPLES_NACIONAL" and csosn < len(csts) / 2:
+                avisos.append("ATENÇÃO: o regime informado é Simples Nacional, mas as vendas no SPED Fiscal usam CST do "
+                              "regime normal (não CSOSN). Confira o regime da empresa.")
+            elif manual != "SIMPLES_NACIONAL" and csosn > len(csts) / 2:
+                avisos.append("ATENÇÃO: as vendas no SPED Fiscal usam CSOSN, típico do Simples Nacional, mas o regime "
+                              "informado é outro. Confira o regime da empresa.")
         if divergente:
             avisos.append("ATENÇÃO: nas competências " + ", ".join(divergente) + " a EFD-Contribuições informa outro "
                           "regime; prevaleceu o da escrituração.")
