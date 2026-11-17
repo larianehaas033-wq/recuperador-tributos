@@ -164,6 +164,10 @@ def main() -> None:
 
     def auto_atualizar():
         try:
+            updater.verificar_versao()  # procura versão nova toda vez que o programa abre
+        except Exception as e:
+            print("Verificação de versão falhou:", e)
+        try:
             cfg = updater.configuracoes()
             horas = updater.horas_desde_ultima()
             if cfg.get("atualizacao_automatica", True) and (horas is None or horas > 20):

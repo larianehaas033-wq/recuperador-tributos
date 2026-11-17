@@ -5,6 +5,15 @@ import { Aviso, Icon, Titulo } from '../ui'
 export default function Configuracoes({ status }) {
   const [cfg, setCfg] = useState(null)
   const [msg, setMsg] = useState(null)
+  const [procurando, setProcurando] = useState(false)
+  const procurar = async () => {
+    setProcurando(true)
+    try {
+      const v = await api.post('/api/versao/verificar')
+      setMsg(v.nova ? { tipo: 'ok', texto: `Versão ${v.disponivel} disponível. Use o botão "Atualizar programa" no menu à esquerda (pode ser preciso recarregar a tela com F5).` }
+        : { tipo: 'ok', texto: `O programa já está na versão mais recente (${v.atual}).` })
+    } catch (e) { setMsg({ tipo: 'erro', texto: e.message }) } finally { setProcurando(false) }
+  }
 
   useEffect(() => { api.get('/api/configuracoes').then(setCfg) }, [])
   if (!cfg) return null
@@ -56,7 +65,10 @@ export default function Configuracoes({ status }) {
           <p className="mt-1 text-sm text-muted">Tudo fica no seu computador. Nada é enviado para fora, exceto as consultas de atualização (Banco Central e sites oficiais).</p>
           <div className="mt-3 rounded-md bg-navy-50 px-3 py-2 font-mono text-xs">{status?.pasta_dados}</div>
           <button className="btn-ghost mt-3" onClick={() => api.post('/api/abrir-pasta')}><Icon name="pasta" />Abrir pasta de relatórios</button>
-          <div className="mt-4 text-xs text-muted">Versão do programa {status?.versao_programa}</div>
+          <div className="mt-4 flex items-center gap-3">
+            <span className="text-sm">Versão instalada: <b>{status?.versao_programa}</b></span>
+            <button className="btn-ghost !py-1 text-xs" disabled={procurando} onClick={procurar}><Icon name="atualizar" className="h-3.5 w-3.5" />{procurando ? 'Procurando...' : 'Procurar atualização do programa'}</button>
+          </div>
         </div>
       </div>
     </>

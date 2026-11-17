@@ -96,6 +96,14 @@ def versao():
     return updater.estado_versao()
 
 
+@app.post("/api/versao/verificar")
+def verificar_versao_agora():
+    try:
+        return updater.verificar_versao()
+    except Exception as e:
+        raise HTTPException(502, f"Não foi possível consultar o servidor de atualizações: {e}")
+
+
 @app.post("/api/atualizar-programa")
 def atualizar_programa():
     return {"job": _job(lambda progress: updater.baixar_versao(progress))}
