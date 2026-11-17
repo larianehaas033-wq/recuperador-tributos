@@ -13,6 +13,7 @@ Riscos (valores que a empresa pode ter de devolver):
 """
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import date
 
 import polars as pl
@@ -54,6 +55,10 @@ class MotorPisCofins:
         self.nao_cumulativo = (empresa.get("regime") or "") in ("LUCRO_REAL", "MISTO")
         self.cfop_revenda = base.cfops("saida_revenda")
         self.cfop_producao = base.cfops("saida_producao")
+        # só venda efetiva entra nas teses de saída: remessa, bonificação, transferência e devolução de compra não
+        self.cfop_venda = self.cfop_revenda | self.cfop_producao
+        self.cfop_devolucao = base.cfops("devolucao_venda")
+        self.simples = (empresa.get("regime") or "") == "SIMPLES_NACIONAL"
         self.cfop_entrada = base.cfops("entrada_credito")
         self.aliq = (1.65, 7.6) if self.nao_cumulativo else (0.65, 3.0)
         self.produtos = produtos or {}
@@ -132,18 +137,22 @@ class MotorPisCofins:
     def executar(self) -> tuple[list[Credito], set]:
         creditos: list[Credito] = []
         marcados: set = set()  # (id_linha, tributo) já usados por tese de débito indevido
-        saidas = self.itens.filter(pl.col("ind_oper") == "1")
+        saidas = self.itens.filter((pl.col("ind_oper") == "1") & pl.col("cfop").is_in(list(self.cfop_venda)))
         entradas = self.itens.filter(pl.col("ind_oper") == "0")
-        creditos += self._monofasico_aliq_zero(saidas, marcados)
-        creditos += self._icms_na_base(saidas, marcados)
-        if self.nao_cumulativo:
+        devolucoes = entradas.filter(pl.col("cfop").is_in(list(self.cfop_devolucao)))
+        mono_zero = self._monofasico_aliq_zero(saidas, marcados)
+        icms_base = [] if self.simples else self._icms_na_base(saidas, marcados)  # Simples: DAS, sem Tema 69
+        self._deduzir_devolucoes(mono_zero, devolucoes, "mono")
+        self._deduzir_devolucoes(icms_base, devolucoes, "icms")
+        creditos += mono_zero + icms_base
+        if self.nao_cumulativo and not self.simples:
             creditos += self._creditos_entradas(entradas)
             creditos += self._riscos_entradas(entradas)
         creditos += self._risco_saida_sem_regra(saidas)
         periodos_consolidados = set(
             saidas.filter(pl.col("origem").is_in(["C181", "C185"]))["periodo"].unique().to_list()
         ) - set(saidas.filter(pl.col("origem") == "C170")["periodo"].unique().to_list())
-        if periodos_consolidados and self.xml_saidas.height:
+        if periodos_consolidados and self.xml_saidas.height and not self.simples:
             creditos += self._icms_na_base_xml(periodos_consolidados)
         return creditos, periodos_consolidados
 
@@ -216,10 +225,49 @@ class MotorPisCofins:
                 ))
         return out
 
+    def _deduzir_devolucoes(self, creditos: list[Credito], devolucoes: pl.DataFrame, modo: str) -> None:
+        """Devolução de venda: o crédito que a empresa tomou na devolução já devolveu parte do que pagou a mais.
+
+        Para cada item, o valor creditado na devolução (CST 50 a 56) é abatido das restituições do mesmo item e
+        tributo: primeiro na competência da devolução, depois nas anteriores (da mais recente para a mais antiga).
+        modo "mono": abate todo o PIS/COFINS creditado na devolução de produto monofásico/alíquota zero.
+        modo "icms": abate só a parte do crédito calculada sobre o ICMS (Tema 69)."""
+        if not creditos or not devolucoes.height:
+            return
+        por_item: dict[tuple, list[Credito]] = defaultdict(list)
+        for c in creditos:
+            por_item[(c.cod_item, c.tributo)].append(c)
+        for row in devolucoes.iter_rows(named=True):
+            for trib, cst, bc, aliq, vl in self._por_tributo(row):
+                if cst not in CST_CREDITO or vl <= 0:
+                    continue
+                lista = por_item.get((row["cod_item"], trib))
+                if not lista:
+                    continue
+                if modo == "icms":
+                    bruto = row["vl_item"] - row["vl_desc"]
+                    if not (row["vl_icms"] > 0 and bc >= bruto - _tol(bruto)):
+                        continue  # a devolução já creditou sem o ICMS na base
+                    abater = min(vl, row["vl_icms"] * aliq / 100)
+                else:
+                    abater = vl
+                cand = sorted((c for c in lista if c.periodo <= row["periodo"] and c.valor_recuperar > 0),
+                              key=lambda c: (c.periodo != row["periodo"], [-ord(x) for x in c.periodo]))
+                for c in cand:
+                    if abater < 0.005:
+                        break
+                    parte = min(c.valor_recuperar, abater)
+                    c.valor_recuperar = r2(c.valor_recuperar - parte)
+                    abater -= parte
+                    c.observacao = (f"{c.observacao} Abatida devolução de venda de R$ {parte:.2f} "
+                                    f"(CFOP {row['cfop']}, {row['data']}).").strip()
+        creditos[:] = [c for c in creditos if c.valor_recuperar >= 0.01]
+
     def _icms_na_base_xml(self, periodos: set) -> list[Credito]:
         """Estimativa pelos XMLs quando a EFD-Contribuições do período está consolidada (C180/C181)."""
         out = []
         df = self.xml_saidas.filter(pl.col("periodo").is_in(list(periodos)) & (pl.col("vl_icms") > 0)
+                                    & pl.col("cfop").is_in(list(self.cfop_venda))
                                     & (pl.col("data") >= INICIO_TEMA_69))
         for row in df.iter_rows(named=True):
             ncm_ef = self._ncm(row).ncm

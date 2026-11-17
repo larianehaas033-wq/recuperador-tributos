@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.7",
+ "versao": "2026.11.17.8",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -1140,6 +1140,26 @@
    "5104",
    "5929",
    "5656"
+  ],
+  "devolucao_venda": [
+   "1201",
+   "1202",
+   "1203",
+   "1204",
+   "1410",
+   "1411",
+   "1660",
+   "1661",
+   "1662",
+   "2201",
+   "2202",
+   "2203",
+   "2204",
+   "2410",
+   "2411",
+   "2660",
+   "2661",
+   "2662"
   ]
  },
  "teses": {
