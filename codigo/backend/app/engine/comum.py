@@ -50,6 +50,7 @@ class Credito:
     data: str | None
     chave: str | None = None
     num_doc: str | None = None
+    num_item: str | None = None
     cod_item: str | None = None
     descricao: str | None = None
     ncm: str | None = None
@@ -73,6 +74,9 @@ class Credito:
     observacao: str = ""
 
     def __post_init__(self):
+        # número da nota: se o arquivo não trouxer, sai da chave de acesso (posições 26 a 34)
+        if not self.num_doc and self.chave and len(self.chave) == 44 and self.chave.isdigit():
+            self.num_doc = str(int(self.chave[25:34]))
         for f in MONEY_FIELDS:
             setattr(self, f, r2(getattr(self, f)))
 

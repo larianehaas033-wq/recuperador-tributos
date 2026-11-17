@@ -119,7 +119,7 @@ class MotorIcms:
                 continue
             out.append(Credito(
                 modulo="ICMS", tese="ICMS_ST_TRIBUTADO_SAIDA", tributo="ICMS", periodo=row["periodo"], data=data,
-                chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"], descricao=row["descricao"],
+                chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"], descricao=row["descricao"],
                 ncm=row["ncm"], cfop=row["cfop"], cst_escriturado=row["cst_icms"], cst_correto="60",
                 base_original=r2(row["vl_bc_icms"]), base_correta=0.0, valor_pago=r2(row["vl_icms"]),
                 valor_recuperar=r2(row["vl_icms"]), natureza="RESTITUICAO", via="ADMINISTRATIVO_ESTADUAL",
@@ -205,7 +205,7 @@ class MotorIcms:
             valor = row["vl_bc_icms"] * (row["aliq_icms"] - esperada) / 100
             out.append(Credito(
                 modulo="ICMS", tese="ICMS_ALIQ_ACIMA", tributo="ICMS", periodo=row["periodo"], data=row["data"],
-                chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"], descricao=row["descricao"],
+                chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"], descricao=row["descricao"],
                 ncm=row["ncm"], cfop=row["cfop"], cst_escriturado=row["cst_icms"], cst_correto=row["cst_icms"],
                 base_original=r2(row["vl_bc_icms"]), base_correta=r2(row["vl_bc_icms"]), valor_pago=r2(row["vl_icms"]),
                 valor_recuperar=r2(valor), natureza="RESTITUICAO", via="ADMINISTRATIVO_ESTADUAL",

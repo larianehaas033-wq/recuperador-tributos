@@ -202,7 +202,7 @@ class MotorPisCofins:
                 marcados.add((row["rid"], trib))
                 out.append(Credito(
                     modulo="PIS_COFINS", tese=tese, tributo=trib, periodo=row["periodo"], data=data,
-                    chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                    chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                     descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst,
                     cst_correto="04" if mono else "06", base_original=r2(bc), base_correta=0.0,
                     valor_pago=r2(vl), valor_recuperar=r2(vl), natureza="RESTITUICAO",
@@ -214,7 +214,7 @@ class MotorPisCofins:
 
     def _icms_na_base(self, saidas: pl.DataFrame, marcados: set) -> list[Credito]:
         out = []
-        c170 = saidas.filter((pl.col("origem") == "C170") & (pl.col("vl_icms") > 0)
+        c170 = saidas.filter(pl.col("origem").is_in(["C170", "XML"]) & (pl.col("vl_icms") > 0)
                              & (pl.col("data") >= INICIO_TEMA_69))
         for row in linhas(c170):
             if self.simples_em(row["periodo"]):
@@ -236,7 +236,7 @@ class MotorPisCofins:
                     continue
                 out.append(Credito(
                     modulo="PIS_COFINS", tese="PISCOF_ICMS_BASE", tributo=trib, periodo=row["periodo"],
-                    data=row["data"], chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                    data=row["data"], chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                     descricao=row["descricao"], ncm=row["ncm"], cfop=row["cfop"], cst_escriturado=cst,
                     cst_correto=cst, base_original=r2(bc), base_correta=r2(bc - min(icms, excesso)),
                     valor_pago=r2(vl), valor_recuperar=r2(valor), natureza="RESTITUICAO",
@@ -286,7 +286,9 @@ class MotorPisCofins:
     def _icms_na_base_xml(self, periodos: set) -> list[Credito]:
         """Estimativa pelos XMLs quando a EFD-Contribuições do período está consolidada (C180/C181)."""
         out = []
+        ja = set(self.itens["chave"].drop_nulls().unique().to_list()) if self.itens.height else set()
         df = self.xml_saidas.filter(pl.col("periodo").is_in(list(periodos)) & (pl.col("vl_icms") > 0)
+                                    & ~pl.col("chave").is_in(list(ja))
                                     & pl.col("cfop").is_in(list(self.cfop_venda))
                                     & (pl.col("data") >= INICIO_TEMA_69))
         for row in linhas(df):
@@ -303,7 +305,7 @@ class MotorPisCofins:
                 valor = min(vl, row["vl_icms"] * aliq / 100)
                 out.append(Credito(
                     modulo="PIS_COFINS", tese="PISCOF_ICMS_BASE", tributo=trib, periodo=row["periodo"],
-                    data=row["data"], chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                    data=row["data"], chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                     descricao=row["descricao"], ncm=row["ncm"], cfop=row["cfop"], cst_escriturado=cst,
                     cst_correto=cst, base_original=r2(bc), base_correta=r2(bc - row["vl_icms"]),
                     valor_pago=r2(vl), valor_recuperar=r2(valor), natureza="RESTITUICAO",
@@ -362,7 +364,7 @@ class MotorPisCofins:
                     obs += " CST 73 informado, mas o NCM não está na lista de alíquota zero."
                 out.append(Credito(
                     modulo="PIS_COFINS", tese=tese, tributo=trib, periodo=row["periodo"], data=data,
-                    chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                    chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                     descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="50",
                     base_original=r2(bc), base_correta=r2(base_cred), valor_pago=0.0, valor_recuperar=r2(valor),
                     natureza="CREDITO_EXTEMPORANEO", via="ADMINISTRATIVO_FEDERAL", fundamento=fund,
@@ -387,7 +389,7 @@ class MotorPisCofins:
                 if risco_mono:
                     out.append(Credito(
                         modulo="PIS_COFINS", tese="RISCO_CRED_MONOFASICO", tributo=trib, periodo=row["periodo"],
-                        data=data, chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                        data=data, chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                         descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="70",
                         base_original=r2(bc), base_correta=0.0, valor_pago=0.0, valor_recuperar=r2(vl),
                         natureza="RISCO", fundamento=self.base.teses["RISCO_CRED_MONOFASICO"]["fundamento"],
@@ -399,7 +401,7 @@ class MotorPisCofins:
                 if zero:
                     out.append(Credito(
                         modulo="PIS_COFINS", tese="RISCO_CRED_ALIQ_ZERO", tributo=trib, periodo=row["periodo"],
-                        data=data, chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                        data=data, chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                         descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="73",
                         base_original=r2(bc), base_correta=0.0, valor_pago=0.0, valor_recuperar=r2(vl),
                         natureza="RISCO", fundamento=self.base.teses["RISCO_CRED_ALIQ_ZERO"]["fundamento"],
@@ -413,7 +415,7 @@ class MotorPisCofins:
                     if excesso >= 0.01:
                         out.append(Credito(
                             modulo="PIS_COFINS", tese="RISCO_CRED_ICMS_BASE", tributo=trib, periodo=row["periodo"],
-                            data=data, chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
+                            data=data, chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"],
                             descricao=row["descricao"], ncm=ncm, cfop=cfop, cst_escriturado=cst, cst_correto=cst,
                             base_original=r2(bc), base_correta=r2(bc - row["vl_icms"]), valor_pago=0.0,
                             valor_recuperar=r2(excesso), natureza="RISCO",

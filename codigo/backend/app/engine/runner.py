@@ -21,7 +21,7 @@ ITEM_SELECT = ["origem", "periodo", "data", "chave", "num_doc", "ind_oper", "cnp
                "aliq_icms", "vl_icms", "vl_bc_icms_st", "vl_icms_st", "vl_ipi", "cst_pis", "vl_bc_pis", "aliq_pis",
                "vl_pis", "cst_cofins", "vl_bc_cofins", "aliq_cofins", "vl_cofins"]
 
-CRED_COLS = ["analise_id", "modulo", "tese", "tributo", "periodo", "data", "chave", "num_doc", "cod_item",
+CRED_COLS = ["analise_id", "modulo", "tese", "tributo", "periodo", "data", "chave", "num_doc", "num_item", "cod_item",
              "descricao", "ncm", "cfop", "cst_escriturado", "cst_correto", "base_original", "base_correta",
              "valor_pago", "valor_recuperar", "valor_restituivel", "valor_saldo_credor", "valor_corrigido",
              "natureza", "via", "fundamento", "confianca", "regra_codigo", "prescrito", "excluido", "observacao"]
@@ -292,6 +292,12 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             "SELECT periodo, tributo, valor_recolher FROM apuracoes WHERE empresa_id=?", (empresa_id,))}
         selic = {r["competencia"]: r["taxa"] for r in con.execute("SELECT competencia, taxa FROM selic")}
         produtos = _produtos(con, empresa_id)
+        # notas de venda que a EFD-Contribuições traz só resumidas (NFC-e: C100 + C175, sem os produtos)
+        sem_itens = db.rows(con, """
+            SELECT n.chave, n.periodo, n.modelo, n.vl_doc FROM notas_fiscais n
+            JOIN arquivos_sped a ON a.id = n.arquivo_id
+            WHERE n.empresa_id=? AND a.tipo='EFD_CONTRIB' AND n.ind_oper='1' AND COALESCE(n.cancelada,0)=0
+              AND NOT EXISTS (SELECT 1 FROM itens_nota i WHERE i.nota_id = n.id)""", (empresa_id,))
         regimes, avisos_regime = regimes_por_periodo(con, empresa_id)
         empresa["regimes"] = regimes
         ultima_atual = con.execute(
@@ -313,6 +319,26 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
                       + ". Confira se a mudança afeta as regras antes de entregar o relatório.")
 
     xml_saidas = xml_itens.filter(pl.col("ind_oper") == "1")
+    if sem_itens:
+        chaves = {r["chave"] for r in sem_itens if r["chave"]}
+        do_xml = xml_saidas.filter(pl.col("chave").is_in(list(chaves)))
+        cobertas = set(do_xml["chave"].unique().to_list()) if do_xml.height else set()
+        if do_xml.height:  # os produtos dessas vendas vêm do XML da própria nota
+            itens_contrib = pl.concat([itens_contrib.drop("rid"), do_xml.drop("rid")], how="vertical_relaxed")
+            itens_contrib = itens_contrib.with_row_index("rid")
+        faltam = [r for r in sem_itens if r["chave"] not in cobertas]
+        if cobertas:
+            avisos.append(f"{len(cobertas)} notas de venda estão só resumidas na EFD-Contribuições (C175, sem os "
+                          "produtos): os itens foram lidos dos XMLs dessas notas.")
+        if faltam:
+            total = r2(sum(D(r["vl_doc"]) for r in faltam))
+            meses = sorted({r["periodo"] for r in faltam if r["periodo"]})
+            brl = f"{total:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            periodo_txt = f" de {meses[0]} a {meses[-1]}" if meses else ""
+            avisos.append(f"ATENÇÃO: {len(faltam)} notas de venda (R$ {brl}) estão só resumidas na "
+                          "EFD-Contribuições, sem os produtos (NFC-e com registro C175). Sem os produtos, essas vendas "
+                          "não entram nas teses de monofásico, alíquota zero e ICMS na base. Importe os XMLs das "
+                          f"NFC-e{periodo_txt} e analise de novo.")
     xml_entradas = xml_itens.filter(pl.col("ind_oper") == "0")
     evidencias = {
         "MONOFASICO": set(xml_entradas.filter(pl.col("cst_pis").is_in(["02", "04"]))["ncm"].drop_nulls().to_list()),
@@ -388,6 +414,12 @@ def gerar_cadastro(empresa_id: int, hoje: date | None = None) -> list[dict]:
         entradas_icms = _itens(con, empresa_id, "EFD_ICMS_IPI", "AND i.ind_oper='0'")
         xml_itens = _itens(con, empresa_id, "XML_NFE")
         produtos = _produtos(con, empresa_id)
+        # notas de venda que a EFD-Contribuições traz só resumidas (NFC-e: C100 + C175, sem os produtos)
+        sem_itens = db.rows(con, """
+            SELECT n.chave, n.periodo, n.modelo, n.vl_doc FROM notas_fiscais n
+            JOIN arquivos_sped a ON a.id = n.arquivo_id
+            WHERE n.empresa_id=? AND a.tipo='EFD_CONTRIB' AND n.ind_oper='1' AND COALESCE(n.cancelada,0)=0
+              AND NOT EXISTS (SELECT 1 FROM itens_nota i WHERE i.nota_id = n.id)""", (empresa_id,))
         regimes, avisos_regime = regimes_por_periodo(con, empresa_id)
         empresa["regimes"] = regimes
     xml_entradas = xml_itens.filter(pl.col("ind_oper") == "0")

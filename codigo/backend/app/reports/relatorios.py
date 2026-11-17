@@ -67,6 +67,14 @@ def _nome_arquivo(e: dict, analise_id: int, ext: str) -> Path:
 
 
 # ------------------------------------------------------------------------------------------ Excel
+def _nota(c: dict) -> str:
+    num = c.get("num_doc") or ""
+    if not num and (c.get("chave") or "").isdigit() and len(c["chave"]) == 44:
+        num = str(int(c["chave"][25:34]))
+    item = c.get("num_item")
+    return f"{num} (item {int(item) if str(item).isdigit() else item})" if num and item else num
+
+
 def gerar_excel(analise_id: int) -> Path:
     a, e, creds = _carregar(analise_id)
     base = carregar()
@@ -139,7 +147,7 @@ def gerar_excel(analise_id: int) -> Path:
 
     # Analítico
     ws = wb.create_sheet("Créditos")
-    cols = ["Tributo", "Tese", "Natureza", "Via", "Competência", "Data", "Chave da NF-e", "Nº doc", "Cód. item",
+    cols = ["Tributo", "Tese", "Natureza", "Via", "Competência", "Data", "Chave da NF-e", "Nota nº (item)", "Cód. item",
             "Descrição", "NCM", "CFOP", "CST escriturado", "CST correto", "Base original", "Base correta",
             "Valor pago", "Valor a recuperar", "Restituível", "Saldo credor", "Corrigido (Selic)", "Confiança",
             "Prazo de 5 anos", "Fundamento", "Observação"]
@@ -149,7 +157,7 @@ def gerar_excel(analise_id: int) -> Path:
         if c["natureza"] == "RISCO":
             continue
         ws.append([c["tributo"], base.teses.get(c["tese"], {}).get("nome", c["tese"]), NAT.get(c["natureza"]),
-                   VIA.get(c["via"]), c["periodo"], c["data"], c["chave"], c["num_doc"], c["cod_item"],
+                   VIA.get(c["via"]), c["periodo"], c["data"], c["chave"], _nota(c), c["cod_item"],
                    c["descricao"], c["ncm"], c["cfop"], c["cst_escriturado"], c["cst_correto"], c["base_original"],
                    c["base_correta"], c["valor_pago"], c["valor_recuperar"], c["valor_restituivel"],
                    c["valor_saldo_credor"], c["valor_corrigido"], c["confianca"],
@@ -162,16 +170,16 @@ def gerar_excel(analise_id: int) -> Path:
 
     # Riscos
     ws = wb.create_sheet("Riscos")
-    cabecalho(ws, ["Tributo", "Risco", "Competência", "Data", "Chave", "Cód. item", "Descrição", "NCM", "CFOP",
-                   "CST", "Valor em risco", "Confiança", "Fundamento", "Observação"],
-              [9, 40, 11, 11, 46, 12, 30, 11, 7, 7, 14, 10, 60, 50])
+    cabecalho(ws, ["Tributo", "Risco", "Competência", "Data", "Chave", "Nota nº (item)", "Cód. item", "Descrição",
+                   "NCM", "CFOP", "CST", "Valor em risco", "Confiança", "Fundamento", "Observação"],
+              [9, 40, 11, 11, 46, 14, 12, 30, 11, 7, 7, 14, 10, 60, 50])
     for c in creds:
         if c["natureza"] != "RISCO":
             continue
         ws.append([c["tributo"], base.teses.get(c["tese"], {}).get("nome", c["tese"]), c["periodo"], c["data"],
-                   c["chave"], c["cod_item"], c["descricao"], c["ncm"], c["cfop"], c["cst_escriturado"],
+                   c["chave"], _nota(c), c["cod_item"], c["descricao"], c["ncm"], c["cfop"], c["cst_escriturado"],
                    c["valor_recuperar"], c["confianca"], c["fundamento"], c["observacao"]])
-        ws.cell(row=ws.max_row, column=11).number_format = money
+        ws.cell(row=ws.max_row, column=12).number_format = money
     ws.auto_filter.ref = ws.dimensions
 
     # Por competência

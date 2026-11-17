@@ -42,14 +42,14 @@ function Itens({ id, filtroInicial, teses }) {
       <div className="overflow-x-auto">
         <table className="w-full whitespace-nowrap">
           <thead className="bg-navy-50"><tr>
-            <th className="th">Chave da NF-e / Data</th><th className="th">Produto</th><th className="th">NCM</th><th className="th">CFOP</th>
+            <th className="th">Nota (chave, número e item) / Data</th><th className="th">Produto</th><th className="th">NCM</th><th className="th">CFOP</th>
             <th className="th">CST</th><th className="th text-right">Base original</th><th className="th text-right">Valor pago</th>
             <th className="th text-right">A recuperar</th><th className="th text-right">Corrigido</th><th className="th">Tese</th><th className="th">Situação</th>
           </tr></thead>
           <tbody>
             {d.itens.map((c) => (
               <tr key={c.id} className={c.prescrito || c.excluido ? 'opacity-50' : ''} title={c.observacao || ''}>
-                <td className="td"><div className="font-mono text-[11px]">{c.chave || '(consolidado)'}</div><div className="text-xs text-muted">{c.data} · {c.tributo}</div></td>
+                <td className="td"><div className="font-mono text-[11px]">{c.chave || '(consolidado)'}</div><div className="text-xs text-muted">{c.num_doc ? `Nota ${c.num_doc}${c.num_item ? ` · item ${Number(c.num_item) || c.num_item}` : ''} · ` : ''}{c.data} · {c.tributo}</div></td>
                 <td className="td max-w-[220px] truncate">{c.descricao || '—'}<div className="text-xs text-muted">{c.cod_item}</div></td>
                 <td className="td num">{c.ncm || '—'}</td>
                 <td className="td num">{c.cfop || '—'}</td>

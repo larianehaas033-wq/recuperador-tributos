@@ -163,6 +163,7 @@ CREATE TABLE IF NOT EXISTS creditos_identificados (
     data          TEXT,
     chave         TEXT,
     num_doc       TEXT,
+    num_item      TEXT,                      -- número do item na nota (C170 / det nItem)
     cod_item      TEXT,
     descricao     TEXT,
     ncm           TEXT,

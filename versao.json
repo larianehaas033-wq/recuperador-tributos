@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.5",
+  "versao": "1.4.6",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.5.zip",
-  "sha256": "94c92e2159e3c855c37a02e18ef32754fac858fc4c583cadc74bdadbb970d997",
+  "pacote": "atualizacoes/sistema-1.4.6.zip",
+  "sha256": "a917d7f03620d62a0f8205de912e424fde26967338c1d74e505f8e9e885e21e2",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Corrige atualização presa em 'Reiniciando': ao abrir, o programa fecha o processo de uma versão anterior que ficou rodando em segundo plano"
+    "Número da nota e do item em cada crédito e risco; vendas em NFC-e resumidas na EFD-Contribuições (C175) analisadas pelos XMLs, com aviso do que faltar"
   ]
 }
