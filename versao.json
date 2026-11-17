@@ -2,10 +2,10 @@
   "versao": "1.4.1",
   "publicado_em": "2026-11-17",
   "pacote": "atualizacoes/sistema-1.4.1.zip",
-  "sha256": "fc731a8e5ae36e5a06edc98792a6d4936aa12122ce7ee696c24e42ca27214b80",
+  "sha256": "317be1b53eff4f5fa5fb65e0c68857bfa9d364626f5144febdfd751b8fd039dc",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.9",
+  "versao_regras": "2026.11.17.10",
   "notas": [
-    "Regime identificado por competência (EFD-Contribuições 0110 e CRT dos XMLs); Simples Nacional reconhecido; sem regime, PIS/COFINS não é calculado"
+    "Nomes dos enquadramentos de PIS/COFINS com o inciso da lei (sem 'cesta básica', que é termo do IBS/CBS)"
   ]
 }

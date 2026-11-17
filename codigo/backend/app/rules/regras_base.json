@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.9",
+ "versao": "2026.11.17.10",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -797,7 +797,7 @@
   {
    "codigo": "ZERO_QUEIJOS",
    "tipo": "ALIQ_ZERO",
-   "grupo": "Queijos listados na lei",
+   "grupo": "Queijos listados na Lei 10.925, art. 1º, XII",
    "ncm_prefixos": [
     "0406"
    ],
@@ -867,7 +867,7 @@
   {
    "codigo": "ZERO_CARNES_PEIXES",
    "tipo": "ALIQ_ZERO",
-   "grupo": "Carnes e peixes (cesta básica)",
+   "grupo": "Carnes, miudezas e peixes (Lei 10.925, art. 1º, XIX e XX)",
    "ncm_prefixos": [
     "0201",
     "0202",
@@ -891,7 +891,7 @@
    "excecoes": [],
    "vigencia_ini": "2013-03-08",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 10.925/2004, art. 1º (incluído pela Lei 12.839/2013). Tabela 4.3.13, códigos 121 e 122. CST correto: 06.",
+   "fundamento": "Lei 10.925/2004, art. 1º, XIX (carnes bovina, suína, ovina, caprina e de aves e miudezas: 02.01, 02.02, 0206.10.00, 0206.2, 0206.30.00, 0206.4, 02.07, 02.09, 0210.1 etc.) e XX (peixes: 03.02, exceto 0302.90.00, 03.03 e 03.04), incluídos pela Lei 12.839/2013. Tabela 4.3.13, códigos 121 e 122. CST correto: 06.",
    "confianca": "ALTA",
    "observacao": "",
    "somente_revenda": false
@@ -899,7 +899,7 @@
   {
    "codigo": "ZERO_CESTA_OUTROS",
    "tipo": "ALIQ_ZERO",
-   "grupo": "Café, açúcar, óleos vegetais, manteiga, margarina, papel higiênico",
+   "grupo": "Café, açúcar, óleos vegetais, manteiga, margarina e papel higiênico (Lei 10.925, art. 1º, XXI a XXVIII)",
    "ncm_prefixos": [
     "0901",
     "21011",
@@ -920,7 +920,7 @@
    "excecoes": [],
    "vigencia_ini": "2013-03-08",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 10.925/2004, art. 1º (incluído pela Lei 12.839/2013). Tabela 4.3.13, códigos 123 a 130. CST correto: 06.",
+   "fundamento": "Lei 10.925/2004, art. 1º: XXI (café, 09.01 e 2101.1), XXII (açúcar, 1701.14.00 e 1701.99.00), XXIII (óleos vegetais), XXIV (manteiga, 0405.10.00), XXV (margarina, 1517.10.00) e XXVIII (papel higiênico, 4818.10.00), incluídos pela Lei 12.839/2013. Tabela 4.3.13, códigos 123 a 130. CST correto: 06.",
    "confianca": "ALTA",
    "observacao": "",
    "somente_revenda": false
