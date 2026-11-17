@@ -17,7 +17,7 @@ from datetime import date
 import polars as pl
 
 from ..rules.loader import BaseRegras
-from .coerencia import Conferencia, conferir
+from .coerencia import Conferencia, conferir, controle_interno
 from .comum import Credito, contem, norm, r2
 
 CST_TRIBUTADO = {"01", "02", "03"}
@@ -254,6 +254,8 @@ class MotorPisCofins:
             ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             if len(row["cnpj_part"] or "") != 14:
                 continue  # compra de pessoa física não dá crédito básico
+            if controle_interno(row["descricao"]):
+                continue  # perda/descarte da desossa: sai da carcaça comprada a alíquota zero, não gera crédito
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
             if mono and cfop in CFOP_ENTRADA_REVENDA:
                 continue  # Tema 1.093: revenda de monofásico não gera crédito

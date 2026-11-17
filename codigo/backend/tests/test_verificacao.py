@@ -114,3 +114,11 @@ def test_nectar_e_ice_nao_viram_restituicao():
                item(cod_item="I1", ncm="22089000", descricao="BEB.ICE 51 275ML LIMAO"),
                item(cod_item="E1", ncm="22029900", descricao="ENERG.MONSTER GREEN 473ML")])
     assert {x.cod_item for x in c if x.tese in ("PISCOF_MONO_SAIDA", "PISCOF_ALIQ_ZERO_SAIDA")} == {"E1"}
+
+
+def test_descarte_da_desossa_nao_gera_credito():
+    compra = dict(ind_oper="0", cfop="1102", cnpj_part="12345678000199", cst_pis="73", cst_cofins="73",
+                  vl_pis=0.0, vl_cofins=0.0)
+    c = rodar([item(cod_item="D1", ncm="05061000", descricao="OSSOS/OUTRAS PERDAS - DESCARTE", **compra)],
+              produtos={"D1": {"tipo_item": "00", "descricao": "OSSOS/OUTRAS PERDAS - DESCARTE"}})
+    assert not [x for x in c if x.tese == "PISCOF_CREDITO_ENTRADA"]

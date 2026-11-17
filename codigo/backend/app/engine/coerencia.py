@@ -126,3 +126,13 @@ def conferir(ncm: str | None, descricao: str | None) -> Conferencia:
 
 def _fmt(ncm: str) -> str:
     return f"{ncm[:4]}.{ncm[4:6]}.{ncm[6:]}" if len(ncm) == 8 else ncm
+
+
+# Itens de controle interno (perda, descarte, quebra): não são mercadoria comprada para revenda nem insumo.
+# Ex.: açougue que compra a carcaça inteira (alíquota zero/suspensão), desossa e lança "OSSOS/PERDAS - DESCARTE".
+TERMOS_CONTROLE_INTERNO = (" PERDA", "DESCARTE", " QUEBRA", " AVARIA", "DESOSSA", "RECLASSIFIC")
+
+
+def controle_interno(descricao: str | None) -> bool:
+    d = f" {norm(descricao)} "
+    return any(t in d for t in TERMOS_CONTROLE_INTERNO)

@@ -1,11 +1,11 @@
 {
-  "versao": "1.3.5",
+  "versao": "1.3.6",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.3.5.zip",
-  "sha256": "c8e5f685c3dc67ceb72a604dc7d6a1528de0ee5ab9b1a3db1f9887875eddb857",
+  "pacote": "atualizacoes/sistema-1.3.6.zip",
+  "sha256": "5be4e614458538371189b0896b59ec0b1132abdca42b77012b418817ae5790af",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.6",
   "notas": [
-    "Revisão minuciosa com o cadastro real de um supermercado: NCM conferido com a descrição, néctares e bebidas de soja fora das bebidas frias, creme e leite condensado fora do leite, queijos e lácteos pela descrição, IBS/CBS de absorventes, peixes, sementes, aveia, sabão em barra e dispositivos médicos"
+    "Perdas e descartes da desossa no açougue não geram crédito de PIS/COFINS"
   ]
 }
