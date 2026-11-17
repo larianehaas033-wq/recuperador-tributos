@@ -72,3 +72,14 @@ def test_nfce_resumida_usa_itens_do_xml_e_avisa_o_que_falta():
     avisos = json.loads(con.execute("SELECT avisos_json FROM analises WHERE id=?", (aid,)).fetchone()[0])
     assert any("1 notas de venda" in a and "lidos dos XMLs" in a for a in avisos)
     assert any("ATENÇÃO: 1 notas de venda (R$ 100,00)" in a and "C175" in a for a in avisos)
+    res = json.loads(con.execute("SELECT resumo_json FROM analises WHERE id=?", (aid,)).fetchone()[0])
+    s = res["operacoes"]["SAIDA"]
+    assert (s["notas"], s["itens"], s["valor_operacoes"], s["notas_sem_produtos"], s["valor_sem_produtos"]) == \
+        (1, 1, 100.0, 1, 100.0)
+    assert s["recuperar_corrigido"] > 9.25  # 1,65 + 7,60 corrigidos pela Selic
+    from fastapi.testclient import TestClient
+    from app.main import app
+    cli = TestClient(app)
+    sai = cli.get(f"/api/analises/{aid}/creditos?operacao=SAIDA").json()
+    ent = cli.get(f"/api/analises/{aid}/creditos?operacao=ENTRADA").json()
+    assert sai["total"] == 2 and ent["total"] == 0

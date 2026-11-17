@@ -10,7 +10,7 @@ import polars as pl
 
 from .. import db
 from ..rules.loader import carregar
-from .comum import (NUM_COLS, ZERO, Credito, D, data_corte, data_pagamento, fator_selic, prescrito_credito,
+from .comum import (NUM_COLS, ZERO, Credito, D, operacao, data_corte, data_pagamento, fator_selic, prescrito_credito,
                     prescrito_restituicao, r2, to_frame)
 from .icms import MotorIcms
 from .pis_cofins import MotorPisCofins
@@ -207,6 +207,31 @@ def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
     return regimes, avisos
 
 
+def _por_operacao(creditos: list[Credito], itens, base, sem_itens: list) -> dict:
+    """Painel separado de saídas e entradas auditadas: o que foi examinado e o que se achou em cada lado."""
+    vendas = base.cfops("saida_revenda") | base.cfops("saida_producao")
+    out = {}
+    for op, filtro in (("SAIDA", (pl.col("ind_oper") == "1") & pl.col("cfop").is_in(list(vendas))),
+                       ("ENTRADA", pl.col("ind_oper") == "0")):
+        df = itens.filter(filtro) if itens.height else itens
+        notas = df["chave"].drop_nulls().n_unique() if df.height else 0
+        valor = r2(sum((D(a) - D(b) for a, b in zip(df["vl_item"].to_list(), df["vl_desc"].to_list())), ZERO)
+                   ) if df.height else ZERO
+        meus = [c for c in creditos if operacao(c.cfop, c.tese) == op and not c.prescrito and not c.excluido]
+        ok = [c for c in meus if c.natureza != "RISCO" and c.confianca == "ALTA"]
+        out[op] = {
+            "notas": notas, "itens": df.height, "valor_operacoes": valor,
+            "achados": len(meus),
+            "recuperar_corrigido": r2(sum((c.valor_corrigido + c.valor_saldo_credor for c in ok), ZERO)),
+            "nao_comprovado": r2(sum((c.valor_corrigido + c.valor_saldo_credor for c in meus
+                                      if c.natureza != "RISCO" and c.confianca != "ALTA"), ZERO)),
+            "riscos": r2(sum((c.valor_recuperar for c in meus if c.natureza == "RISCO" and c.confianca == "ALTA"), ZERO)),
+        }
+    out["SAIDA"]["notas_sem_produtos"] = len(sem_itens)
+    out["SAIDA"]["valor_sem_produtos"] = r2(sum((D(r["vl_doc"]) for r in sem_itens), ZERO))
+    return out
+
+
 def _json_num(o):
     """Decimal no JSON do resumo: o texto do número é o mesmo (centavos exatos)."""
     if isinstance(o, Decimal):
@@ -319,6 +344,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
                       + ". Confira se a mudança afeta as regras antes de entregar o relatório.")
 
     xml_saidas = xml_itens.filter(pl.col("ind_oper") == "1")
+    sem_itens_faltando: list = []
     if sem_itens:
         chaves = {r["chave"] for r in sem_itens if r["chave"]}
         do_xml = xml_saidas.filter(pl.col("chave").is_in(list(chaves)))
@@ -327,6 +353,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             itens_contrib = pl.concat([itens_contrib.drop("rid"), do_xml.drop("rid")], how="vertical_relaxed")
             itens_contrib = itens_contrib.with_row_index("rid")
         faltam = [r for r in sem_itens if r["chave"] not in cobertas]
+        sem_itens_faltando = faltam
         if cobertas:
             avisos.append(f"{len(cobertas)} notas de venda estão só resumidas na EFD-Contribuições (C175, sem os "
                           "produtos): os itens foram lidos dos XMLs dessas notas.")
@@ -375,6 +402,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
 
     _aplicar_limites(creditos, apuracoes, selic, hoje, avisos)
     resumo = _resumo(creditos, base)
+    resumo["operacoes"] = _por_operacao(creditos, itens_contrib, base, sem_itens_faltando)
     periodos = sorted({c.periodo for c in creditos if c.periodo})
 
     if progress:

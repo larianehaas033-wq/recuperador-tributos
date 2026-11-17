@@ -89,6 +89,19 @@ class Credito:
         return asdict(self)
 
 
+TESES_SAIDA = ("PISCOF_MONO_SAIDA", "PISCOF_ALIQ_ZERO_SAIDA", "PISCOF_ICMS_BASE", "RISCO_SAIDA_ZERO_SEM_REGRA",
+               "ICMS_ST_TRIBUTADO_SAIDA", "ICMS_ST_RESSARCIMENTO", "ICMS_ALIQ_ACIMA", "RISCO_SAIDA_NAO_ESCRITURADA")
+
+
+def operacao(cfop: str | None, tese: str) -> str:
+    """SAIDA ou ENTRADA: pelo CFOP (5, 6, 7 = saída); sem CFOP, pela tese."""
+    if cfop and cfop[:1] in "567":
+        return "SAIDA"
+    if cfop and cfop[:1] in "123":
+        return "ENTRADA"
+    return "SAIDA" if tese in TESES_SAIDA else "ENTRADA"
+
+
 def norm(texto: str | None) -> str:
     """Maiúsculas, sem acento e sem pontuação repetida: para comparar descrição de produto com o texto da lei."""
     import re

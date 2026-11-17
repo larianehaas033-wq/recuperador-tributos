@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.6",
+  "versao": "1.4.7",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.6.zip",
-  "sha256": "a917d7f03620d62a0f8205de912e424fde26967338c1d74e505f8e9e885e21e2",
+  "pacote": "atualizacoes/sistema-1.4.7.zip",
+  "sha256": "fddd38de2e190a1ca6af53601efc9e7c3a07402565af385c20900f5b68c60c14",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Número da nota e do item em cada crédito e risco; vendas em NFC-e resumidas na EFD-Contribuições (C175) analisadas pelos XMLs, com aviso do que faltar"
+    "Abas 'Saídas auditadas' e 'Entradas auditadas': o que foi examinado, o valor a recuperar e os riscos de cada lado"
   ]
 }

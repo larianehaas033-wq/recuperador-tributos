@@ -5,7 +5,7 @@ import { Aviso, Confianca, Icon, Kpi, Progresso, Titulo } from '../ui'
 
 const CORES = { PIS: '#0B1F3A', COFINS: '#4E6A93', ICMS: '#C9A24B' }
 
-function Itens({ id, filtroInicial, teses }) {
+function Itens({ id, filtroInicial, teses, operacao }) {
   const [f, setF] = useState({ tese: '', tributo: '', natureza: '', confianca: '', busca: '', ...filtroInicial })
   const [pag, setPag] = useState(1)
   const [d, setD] = useState({ total: 0, itens: [] })
@@ -14,8 +14,9 @@ function Itens({ id, filtroInicial, teses }) {
   useEffect(() => {
     const q = new URLSearchParams({ pagina: pag, por_pagina: 50 })
     Object.entries(f).forEach(([k, v]) => v && q.set(k, v))
+    if (operacao) q.set('operacao', operacao)
     api.get(`/api/analises/${id}/creditos?${q}`).then(setD)
-  }, [id, f, pag])
+  }, [id, f, pag, operacao])
 
   const set = (k) => (e) => { setPag(1); setF({ ...f, [k]: e.target.value }) }
   const paginas = Math.max(1, Math.ceil(d.total / 50))
@@ -74,6 +75,28 @@ function Itens({ id, filtroInicial, teses }) {
           <button className="btn-ghost !py-1" disabled={pag >= paginas} onClick={() => setPag(pag + 1)}>Próxima</button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function Operacao({ id, op, dados, teses }) {
+  const saida = op === 'SAIDA'
+  if (!dados) return <Aviso tipo="info">Analise de novo para ver este painel.</Aviso>
+  return (
+    <div className="space-y-4">
+      {saida && dados.notas_sem_produtos > 0 && (
+        <Aviso tipo="erro">
+          {dados.notas_sem_produtos} notas de venda ({brl(dados.valor_sem_produtos)}) estão só resumidas na EFD-Contribuições (NFC-e, registro C175), sem os produtos. Importe os XMLs dessas NFC-e e analise de novo: o valor a recuperar vai mudar.
+        </Aviso>
+      )}
+      <div className="grid gap-3 md:grid-cols-4">
+        <Kpi rotulo={saida ? 'Vendas examinadas' : 'Compras examinadas'} valor={brl(dados.valor_operacoes)}
+          detalhe={`${dados.notas} notas · ${dados.itens} itens`} />
+        <Kpi rotulo="A recuperar comprovado" valor={brl(dados.recuperar_corrigido)} detalhe="Corrigido pela Selic" destaque />
+        <Kpi rotulo="Não comprovado" valor={brl(dados.nao_comprovado)} detalhe="Fora dos totais" tom="verificar" />
+        <Kpi rotulo="Riscos comprovados" valor={brl(dados.riscos)} detalhe="Podem ser cobrados" tom="risco" />
+      </div>
+      <Itens id={id} filtroInicial={{}} teses={teses} operacao={op} />
     </div>
   )
 }
@@ -305,7 +328,7 @@ export default function Analise({ id, ir }) {
       </div>
 
       <div className="mb-4 flex gap-1 border-b border-line">
-        {[['teses', 'Por tese'], ['cadastro', 'Cadastro tributário'], ['itens', 'Itens'], ['ncm', `Revisão de NCM (${d.ncms.length})`], ['roteiro', 'Como recuperar']].map(([k, n]) => (
+        {[['teses', 'Por tese'], ['saidas', 'Saídas auditadas'], ['entradas', 'Entradas auditadas'], ['cadastro', 'Cadastro tributário'], ['itens', 'Todos os itens'], ['ncm', `Revisão de NCM (${d.ncms.length})`], ['roteiro', 'Como recuperar']].map(([k, n]) => (
           <button key={k} onClick={() => { setAba(k); if (k === 'itens') setFiltro({}) }}
             className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${aba === k ? 'border-gold text-navy' : 'border-transparent text-muted hover:text-navy'}`}>{n}</button>
         ))}
@@ -337,6 +360,8 @@ export default function Analise({ id, ir }) {
           </table>
         </div>
       )}
+      {aba === 'saidas' && <Operacao id={id} op="SAIDA" dados={r.operacoes?.SAIDA} teses={teses} />}
+      {aba === 'entradas' && <Operacao id={id} op="ENTRADA" dados={r.operacoes?.ENTRADA} teses={teses} />}
       {aba === 'cadastro' && <Cadastro empresaId={e.id} />}
       {aba === 'ncm' && <RevisaoNcm id={id} ncms={d.ncms} teses={teses} onMudou={carregar} />}
       {aba === 'itens' && <Itens id={id} filtroInicial={filtro} teses={teses} />}

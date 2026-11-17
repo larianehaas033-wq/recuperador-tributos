@@ -320,8 +320,15 @@ def analise(aid: int):
 
 @app.get("/api/analises/{aid}/creditos")
 def creditos(aid: int, tese: str | None = None, tributo: str | None = None, natureza: str | None = None,
-             confianca: str | None = None, busca: str | None = None, pagina: int = 1, por_pagina: int = 100):
+             confianca: str | None = None, busca: str | None = None, operacao: str | None = None,
+             pagina: int = 1, por_pagina: int = 100):
+    from .engine.comum import TESES_SAIDA
     where, params = ["analise_id = ?"], [aid]
+    if operacao in ("SAIDA", "ENTRADA"):
+        marcas = ",".join("?" * len(TESES_SAIDA))
+        cond = (f"(substr(cfop,1,1) IN ('5','6','7') OR ((cfop IS NULL OR cfop = '') AND tese IN ({marcas})))")
+        where.append(cond if operacao == "SAIDA" else f"NOT {cond}")
+        params += list(TESES_SAIDA)
     for campo, valor in (("tese", tese), ("tributo", tributo), ("natureza", natureza), ("confianca", confianca)):
         if valor:
             where.append(f"{campo} = ?")

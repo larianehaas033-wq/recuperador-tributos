@@ -21,6 +21,7 @@ Worksheet.append = _append_limpo
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from ..engine.comum import operacao
 from .. import config, db
 from ..rules.loader import carregar
 
@@ -114,6 +115,20 @@ def gerar_excel(analise_id: int) -> Path:
         ("Riscos não comprovados (conferir)", r.get("riscos_a_verificar", 0)),
         ("Valores perdidos pelo prazo de 5 anos", r.get("prescrito", 0)),
     ]
+    ops = r.get("operacoes") or {}
+    for op, nome in (("SAIDA", "Saídas (vendas) auditadas"), ("ENTRADA", "Entradas (compras) auditadas")):
+        o = ops.get(op)
+        if not o:
+            continue
+        linhas += [("", ""), (nome, f"{o['notas']} notas · {o['itens']} itens"),
+                   ("   Valor das operações examinadas", o["valor_operacoes"]),
+                   ("   A recuperar comprovado (corrigido)", o["recuperar_corrigido"]),
+                   ("   Não comprovado (fora dos totais)", o["nao_comprovado"]),
+                   ("   Riscos comprovados", o["riscos"])]
+        if op == "SAIDA" and o.get("notas_sem_produtos"):
+            linhas += [("   Vendas sem os produtos (NFC-e só no resumo C175, sem XML)",
+                        f"{o['notas_sem_produtos']} notas · R$ {o['valor_sem_produtos']:,.2f}"
+                        .replace(",", "X").replace(".", ",").replace("X", "."))]
     for i, (k, v) in enumerate(linhas, start=3):
         ws.cell(row=i, column=1, value=k).font = Font(bold=bool(k))
         c = ws.cell(row=i, column=2, value=v)
@@ -150,7 +165,7 @@ def gerar_excel(analise_id: int) -> Path:
     cols = ["Tributo", "Tese", "Natureza", "Via", "Competência", "Data", "Chave da NF-e", "Nota nº (item)", "Cód. item",
             "Descrição", "NCM", "CFOP", "CST escriturado", "CST correto", "Base original", "Base correta",
             "Valor pago", "Valor a recuperar", "Restituível", "Saldo credor", "Corrigido (Selic)", "Confiança",
-            "Prazo de 5 anos", "Fundamento", "Observação"]
+            "Prazo de 5 anos", "Fundamento", "Observação", "Operação"]
     cabecalho(ws, cols, [9, 34, 18, 22, 11, 11, 46, 10, 12, 30, 11, 7, 9, 9, 13, 13, 13, 13, 13, 13, 14, 10, 12,
                          60, 50])
     for c in creds:
@@ -162,7 +177,7 @@ def gerar_excel(analise_id: int) -> Path:
                    c["base_correta"], c["valor_pago"], c["valor_recuperar"], c["valor_restituivel"],
                    c["valor_saldo_credor"], c["valor_corrigido"], c["confianca"],
                    "Prescrito" if c["prescrito"] else ("Excluído" if c["excluido"] else "No prazo"), c["fundamento"],
-                   c["observacao"]])
+                   c["observacao"], "Saída" if operacao(c["cfop"], c["tese"]) == "SAIDA" else "Entrada"])
     for row in ws.iter_rows(min_row=2, min_col=15, max_col=21):
         for cell in row:
             cell.number_format = money
@@ -171,14 +186,15 @@ def gerar_excel(analise_id: int) -> Path:
     # Riscos
     ws = wb.create_sheet("Riscos")
     cabecalho(ws, ["Tributo", "Risco", "Competência", "Data", "Chave", "Nota nº (item)", "Cód. item", "Descrição",
-                   "NCM", "CFOP", "CST", "Valor em risco", "Confiança", "Fundamento", "Observação"],
-              [9, 40, 11, 11, 46, 14, 12, 30, 11, 7, 7, 14, 10, 60, 50])
+                   "NCM", "CFOP", "CST", "Valor em risco", "Confiança", "Fundamento", "Observação", "Operação"],
+              [9, 40, 11, 11, 46, 14, 12, 30, 11, 7, 7, 14, 10, 60, 50, 10])
     for c in creds:
         if c["natureza"] != "RISCO":
             continue
         ws.append([c["tributo"], base.teses.get(c["tese"], {}).get("nome", c["tese"]), c["periodo"], c["data"],
                    c["chave"], _nota(c), c["cod_item"], c["descricao"], c["ncm"], c["cfop"], c["cst_escriturado"],
-                   c["valor_recuperar"], c["confianca"], c["fundamento"], c["observacao"]])
+                   c["valor_recuperar"], c["confianca"], c["fundamento"], c["observacao"],
+                   "Saída" if operacao(c["cfop"], c["tese"]) == "SAIDA" else "Entrada"])
         ws.cell(row=ws.max_row, column=12).number_format = money
     ws.auto_filter.ref = ws.dimensions
 
