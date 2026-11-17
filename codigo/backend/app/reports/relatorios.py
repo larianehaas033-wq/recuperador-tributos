@@ -102,7 +102,8 @@ def gerar_excel(analise_id: int) -> Path:
         ("Total restituível corrigido pela Selic", r.get("total_corrigido", 0)),
         ("Créditos a aproveitar (saldo credor)", r.get("total_saldo_credor", 0)),
         ("Não comprovado automaticamente (fora dos totais)", r.get("a_verificar", 0)),
-        ("Riscos encontrados (valores que podem ser cobrados)", r.get("riscos", 0)),
+        ("Riscos comprovados (valores que podem ser cobrados)", r.get("riscos", 0)),
+        ("Riscos não comprovados (conferir)", r.get("riscos_a_verificar", 0)),
         ("Valores perdidos pelo prazo de 5 anos", r.get("prescrito", 0)),
     ]
     for i, (k, v) in enumerate(linhas, start=3):
@@ -261,7 +262,7 @@ def _aba_cadastro(wb, empresa_id: int, cabecalho) -> None:
             if k == "divergencias":
                 v = "; ".join(v) if v else ""
             elif k == "comprovacao":
-                v = "Comprovado" if v == "ALTA" else "Não comprovado"
+                v = {"ALTA": "Comprovado", "Revisar NCM": "Revisar NCM"}.get(v, "Não comprovado")
             vals.append(v)
         ws.append(vals)
         ws.cell(row=ws.max_row, column=5).number_format = "#,##0.00"

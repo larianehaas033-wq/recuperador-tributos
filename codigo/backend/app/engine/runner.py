@@ -145,7 +145,10 @@ def _resumo(creditos: list[Credito], base) -> dict:
         t = por_tese[c.tese]
         t["qtd"] += 1
         if c.natureza == "RISCO":
-            t["risco"] += c.valor_recuperar
+            if c.confianca == "ALTA":
+                t["risco"] += c.valor_recuperar
+            else:
+                t["baixa"] += c.valor_recuperar
         elif c.confianca != "ALTA":
             t["baixa"] += c.valor_corrigido + c.valor_saldo_credor
         else:
@@ -172,7 +175,9 @@ def _resumo(creditos: list[Credito], base) -> dict:
         "por_tributo": {t: r2(sum(c.valor_corrigido + c.valor_saldo_credor for c in validos
                                   if ok(c) and c.tributo == t)) for t in ("PIS", "COFINS", "ICMS")},
         "a_verificar": r2(sum(c.valor_corrigido + c.valor_saldo_credor for c in validos if ver(c))),
-        "riscos": r2(sum(c.valor_recuperar for c in validos if c.natureza == "RISCO")),
+        "riscos": r2(sum(c.valor_recuperar for c in validos if c.natureza == "RISCO" and c.confianca == "ALTA")),
+        "riscos_a_verificar": r2(sum(c.valor_recuperar for c in validos
+                                     if c.natureza == "RISCO" and c.confianca != "ALTA")),
         "prescrito": r2(sum(c.valor_recuperar for c in creditos if c.prescrito and c.natureza != "RISCO")),
         "qtd_itens": len(validos),
         "teses": teses,

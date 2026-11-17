@@ -57,6 +57,21 @@ def norm(texto: str | None) -> str:
     return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9/ -]", " ", t)).strip()
 
 
+def termo(t: str) -> str:
+    """Normaliza um termo de busca como a descrição, preservando espaço no início/fim (marca de palavra inteira):
+    " NATA" casa com "NATA AURORA" mas não com "DESNATADO"."""
+    t = t or ""
+    return (" " if t[:1] == " " else "") + norm(t) + (" " if t[-1:] == " " else "")
+
+
+def contem(desc_norm: str, termos) -> bool:
+    """A descrição (já normalizada) contém algum dos termos? Compara com espaço nas bordas da descrição."""
+    if not desc_norm or not termos:
+        return False
+    d = f" {desc_norm} "
+    return any(t and t in d for t in termos)
+
+
 def r2(v: float) -> float:
     return round(float(v or 0.0) + 0.0, 2)
 

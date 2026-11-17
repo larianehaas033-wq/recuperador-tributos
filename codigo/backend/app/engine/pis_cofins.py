@@ -17,7 +17,8 @@ from datetime import date
 import polars as pl
 
 from ..rules.loader import BaseRegras
-from .comum import Credito, norm, r2
+from .coerencia import Conferencia, conferir
+from .comum import Credito, contem, norm, r2
 
 CST_TRIBUTADO = {"01", "02", "03"}
 CST_SEM_CREDITO = {"70", "98", "99"}
@@ -56,6 +57,7 @@ class MotorPisCofins:
         self.aliq = (1.65, 7.6) if self.nao_cumulativo else (0.65, 3.0)
         self.produtos = produtos or {}
         self.evid = evidencias or {"MONOFASICO": set(), "ALIQ_ZERO": set()}
+        self._conf_cache: dict = {}
         self.revendidos = set(itens.filter(pl.col("ind_oper") == "1")["cod_item"].drop_nulls().unique().to_list())
 
     def verificar(self, regra, row: dict, tese: str) -> tuple[str, str]:
@@ -70,7 +72,7 @@ class MotorPisCofins:
         if not regra.condicional:
             return "ALTA", "NCM consta da lista legal."
         desc = norm(row.get("descricao") or self.produtos.get(row.get("cod_item"), {}).get("descricao"))
-        if regra.palavras and any(p in desc for p in regra.palavras) and not any(x in desc for x in regra.palavras_excluir):
+        if regra.palavras and contem(desc, regra.palavras) and not contem(desc, regra.palavras_excluir):
             return "ALTA", "Descrição do produto confere com o texto legal."
         if ncm in self.evid.get(regra.tipo, set()):
             return "ALTA", "O fornecedor tratou o mesmo NCM da mesma forma no XML de compra."
@@ -93,6 +95,14 @@ class MotorPisCofins:
         return "BAIXA", "Não comprovado automaticamente: o cadastro do produto não mostra revenda nem insumo."
 
     # ------------------------------------------------------------------ utilidades
+    def _ncm(self, row: dict) -> Conferencia:
+        """NCM conferido com a descrição (extinto → vigente; incompatível → nada se comprova pelo código)."""
+        desc = row.get("descricao") or self.produtos.get(row.get("cod_item"), {}).get("descricao")
+        k = (row.get("ncm"), desc)
+        if k not in self._conf_cache:
+            self._conf_cache[k] = conferir(row.get("ncm"), desc)
+        return self._conf_cache[k]
+
     def _revisao(self, ncm: str | None, tese: str) -> str | None:
         return self.revisoes.get((ncm or "", tese))
 
@@ -139,7 +149,8 @@ class MotorPisCofins:
     def _monofasico_aliq_zero(self, saidas: pl.DataFrame, marcados: set) -> list[Credito]:
         out = []
         for row in saidas.iter_rows(named=True):
-            ncm, data, cfop = row["ncm"], row["data"], row["cfop"]
+            cn = self._ncm(row)
+            ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
             zero = None if mono else self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             regra = mono or zero
@@ -155,12 +166,16 @@ class MotorPisCofins:
                 if cst not in CST_TRIBUTADO or vl <= 0:
                     continue
                 if conf is None:
-                    conf, motivo = self.verificar(regra, row, tese)
+                    conf, motivo = self.verificar(regra, dict(row, ncm=ncm), tese)
+                    if cn.grave:
+                        conf, motivo = "BAIXA", cn.alerta
+                    elif cn.alerta:
+                        motivo = f"{motivo} {cn.alerta}"
                 marcados.add((row["rid"], trib))
                 out.append(Credito(
                     modulo="PIS_COFINS", tese=tese, tributo=trib, periodo=row["periodo"], data=data,
                     chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
-                    descricao=row["descricao"], ncm=ncm, cfop=cfop, cst_escriturado=cst,
+                    descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst,
                     cst_correto="04" if mono else "06", base_original=r2(bc), base_correta=0.0,
                     valor_pago=r2(vl), valor_recuperar=r2(vl), natureza="RESTITUICAO",
                     via="ADMINISTRATIVO_FEDERAL", fundamento=regra.fundamento,
@@ -206,7 +221,9 @@ class MotorPisCofins:
         df = self.xml_saidas.filter(pl.col("periodo").is_in(list(periodos)) & (pl.col("vl_icms") > 0)
                                     & (pl.col("data") >= INICIO_TEMA_69))
         for row in df.iter_rows(named=True):
-            if self._regra(row["ncm"], row["data"], "MONOFASICO") or self._regra(row["ncm"], row["data"], "ALIQ_ZERO"):
+            ncm_ef = self._ncm(row).ncm
+            if (self._regra(ncm_ef, row["data"], "MONOFASICO", row["descricao"])
+                    or self._regra(ncm_ef, row["data"], "ALIQ_ZERO", row["descricao"])):
                 continue
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
@@ -233,18 +250,23 @@ class MotorPisCofins:
         tese = "PISCOF_CREDITO_ENTRADA"
         fund = self.base.teses[tese]["fundamento"]
         for row in df.iter_rows(named=True):
-            ncm, data, cfop = row["ncm"], row["data"], row["cfop"]
+            cn = self._ncm(row)
+            ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
             if len(row["cnpj_part"] or "") != 14:
                 continue  # compra de pessoa física não dá crédito básico
-            mono = self._regra(ncm, data, "MONOFASICO")
+            mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
             if mono and cfop in CFOP_ENTRADA_REVENDA:
                 continue  # Tema 1.093: revenda de monofásico não gera crédito
-            zero = self._regra(ncm, data, "ALIQ_ZERO")
+            zero = self._regra(ncm, data, "ALIQ_ZERO", row["descricao"])
             if self._revisao(ncm, tese) == "DESCARTADO":
                 continue
             conf, motivo = self.destinacao(row)
             if conf is None:
                 continue  # uso e consumo, ativo ou serviço: fora desta tese
+            if cn.grave:
+                conf, motivo = "BAIXA", cn.alerta
+            elif cn.alerta:
+                motivo = f"{motivo} {cn.alerta}"
             if self._revisao(ncm, tese) == "CONFIRMADO":
                 conf, motivo = "ALTA", "Confirmado manualmente."
             bruto = row["vl_item"] - row["vl_desc"] + (0.0 if self.industrial else row["vl_ipi"])
@@ -270,7 +292,7 @@ class MotorPisCofins:
                 out.append(Credito(
                     modulo="PIS_COFINS", tese=tese, tributo=trib, periodo=row["periodo"], data=data,
                     chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
-                    descricao=row["descricao"], ncm=ncm, cfop=cfop, cst_escriturado=cst, cst_correto="50",
+                    descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="50",
                     base_original=r2(bc), base_correta=r2(base_cred), valor_pago=0.0, valor_recuperar=r2(valor),
                     natureza="CREDITO_EXTEMPORANEO", via="ADMINISTRATIVO_FEDERAL", fundamento=fund,
                     confianca=conf, regra_codigo="ART3_LEIS_10637_10833",
@@ -282,8 +304,9 @@ class MotorPisCofins:
         out = []
         df = entradas.filter(pl.col("cst_pis").is_in(list(CST_CREDITO)) | pl.col("cst_cofins").is_in(list(CST_CREDITO)))
         for row in df.iter_rows(named=True):
-            ncm, data, cfop = row["ncm"], row["data"], row["cfop"]
-            mono = self._regra(ncm, data, "MONOFASICO")
+            cn = self._ncm(row)
+            ncm, data, cfop = cn.ncm, row["data"], row["cfop"]
+            mono = self._regra(ncm, data, "MONOFASICO", row["descricao"])
             risco_mono = bool(mono) and cfop in CFOP_ENTRADA_REVENDA and not self.industrial
             bruto = row["vl_item"] - row["vl_desc"]
             for trib, cst, bc, aliq, vl in self._por_tributo(row):
@@ -293,10 +316,12 @@ class MotorPisCofins:
                     out.append(Credito(
                         modulo="PIS_COFINS", tese="RISCO_CRED_MONOFASICO", tributo=trib, periodo=row["periodo"],
                         data=data, chave=row["chave"], num_doc=row["num_doc"], cod_item=row["cod_item"],
-                        descricao=row["descricao"], ncm=ncm, cfop=cfop, cst_escriturado=cst, cst_correto="70",
+                        descricao=row["descricao"], ncm=row["ncm"], cfop=cfop, cst_escriturado=cst, cst_correto="70",
                         base_original=r2(bc), base_correta=0.0, valor_pago=0.0, valor_recuperar=r2(vl),
                         natureza="RISCO", fundamento=self.base.teses["RISCO_CRED_MONOFASICO"]["fundamento"],
-                        confianca=self.verificar(mono, row, "RISCO_CRED_MONOFASICO")[0], regra_codigo=mono.codigo,
+                        confianca=("BAIXA" if cn.grave else self.verificar(mono, dict(row, ncm=ncm),
+                                                                           "RISCO_CRED_MONOFASICO")[0]),
+                        regra_codigo=mono.codigo, observacao=cn.alerta,
                     ))
                     continue
                 if (data or "") >= INICIO_LEI_14592 and row["vl_icms"] > 0 and bc >= bruto - _tol(bruto) and aliq > 0:
@@ -331,7 +356,9 @@ class MotorPisCofins:
         out = []
         for row in agg.iter_rows(named=True):
             ncm, data = row["ncm"], row["data"]
-            if self._regra(ncm, data, "MONOFASICO") or self._regra(ncm, data, "ALIQ_ZERO"):
+            ncm_ef = self._ncm(row).ncm
+            if (self._regra(ncm_ef, data, "MONOFASICO", row["descricao"])
+                    or self._regra(ncm_ef, data, "ALIQ_ZERO", row["descricao"])):
                 continue
             if self._revisao(ncm, "RISCO_SAIDA_ZERO_SEM_REGRA") == "DESCARTADO":
                 continue

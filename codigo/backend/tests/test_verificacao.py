@@ -91,3 +91,26 @@ def test_cclasstrib_farmacia():
     erros = {k: (v, classificar_ibs(BASE, *k)["cclasstrib"]) for k, v in casos.items()
              if classificar_ibs(BASE, *k)["cclasstrib"] != v}
     assert not erros, erros
+
+
+def test_credito_de_compra_exige_ncm_coerente():
+    """Compra sem NCM, com NCM incompatível ou de produto de alíquota zero não vira crédito comprovado."""
+    prod = {k: {"tipo_item": "00", "descricao": d} for k, d in
+            (("S1", "LEITE PREMIARE 1L"), ("O1", "OVOS EMBALADO"), ("A1", "ACUCAR A.ALEGRE 5KG"),
+             ("B1", "BISCOITO RECHEADO 140G"))}
+    compra = dict(ind_oper="0", cfop="1102", cnpj_part="12345678000199", cst_pis="70", cst_cofins="70",
+                  vl_pis=0.0, vl_cofins=0.0)
+    c = rodar([item(cod_item="S1", ncm=None, descricao="LEITE PREMIARE 1L", **compra),
+               item(cod_item="O1", ncm="04089100", descricao="OVOS EMBALADO", **compra),
+               item(cod_item="A1", ncm="17011100", descricao="ACUCAR A.ALEGRE 5KG", **compra),
+               item(cod_item="B1", ncm="19053100", descricao="BISCOITO RECHEADO 140G", **compra),
+               item(cod_item="B1", ncm="19053100", descricao="BISCOITO RECHEADO 140G")], produtos=prod)
+    conf = {x.cod_item: x.confianca for x in c if x.tese == "PISCOF_CREDITO_ENTRADA" and x.tributo == "PIS"}
+    assert conf == {"S1": "BAIXA", "O1": "BAIXA", "B1": "ALTA"}  # açúcar (1701.11 → 1701.14) é alíquota zero
+
+
+def test_nectar_e_ice_nao_viram_restituicao():
+    c = rodar([item(cod_item="N1", ncm="22029900", descricao="SUCO DEL VALLE 1L TP PESSEGO"),
+               item(cod_item="I1", ncm="22089000", descricao="BEB.ICE 51 275ML LIMAO"),
+               item(cod_item="E1", ncm="22029900", descricao="ENERG.MONSTER GREEN 473ML")])
+    assert {x.cod_item for x in c if x.tese in ("PISCOF_MONO_SAIDA", "PISCOF_ALIQ_ZERO_SAIDA")} == {"E1"}

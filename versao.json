@@ -1,11 +1,11 @@
 {
-  "versao": "1.3.4",
+  "versao": "1.3.5",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.3.4.zip",
-  "sha256": "ba006ed36f6f6084f3efc188c49cbf6107043ee39944b90871f7c8ad2edf9bcc",
+  "pacote": "atualizacoes/sistema-1.3.5.zip",
+  "sha256": "c8e5f685c3dc67ceb72a604dc7d6a1528de0ee5ab9b1a3db1f9887875eddb857",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.5",
+  "versao_regras": "2026.11.17.6",
   "notas": [
-    "Conferência minuciosa do enquadramento: bateria de 100 produtos reais; bebidas frias CST 06; desinfetante fora de defensivos; lácteos e fórmulas infantis; cClassTrib de bebidas lácteas, hortícolas cozidos, frutas com açúcar, creme de leite e queijos não listados"
+    "Revisão minuciosa com o cadastro real de um supermercado: NCM conferido com a descrição, néctares e bebidas de soja fora das bebidas frias, creme e leite condensado fora do leite, queijos e lácteos pela descrição, IBS/CBS de absorventes, peixes, sementes, aveia, sabão em barra e dispositivos médicos"
   ]
 }

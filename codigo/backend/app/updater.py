@@ -92,6 +92,30 @@ def atualizar_regras(con, url: str) -> str:
     return data["versao"]
 
 
+URL_NCM = "https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json?perfil=PUBLICO"
+
+
+def atualizar_ncm(con) -> str:
+    """Baixa a tabela NCM vigente (Portal Único Siscomex) para conferir os códigos do cadastro do cliente."""
+    dados = json.loads(_get(URL_NCM, timeout=120).decode("utf-8-sig"))
+    lista = dados.get("Nomenclaturas") or dados.get("nomenclaturas") or []
+    codigos = set()
+    for n in lista:
+        c = re.sub(r"\D", "", str(n.get("Codigo") or n.get("codigo") or ""))
+        fim = str(n.get("Data_Fim") or n.get("dataFim") or "31/12/9999")
+        if len(c) == 8 and not (len(fim) == 10 and fim[6:] + fim[3:5] + fim[:2] < datetime.now().strftime("%Y%m%d")):
+            codigos.add(c)
+    if len(codigos) < 5000:
+        raise ValueError(f"tabela NCM incompleta ({len(codigos)} códigos)")
+    destino = config.DATA_DIR / "ncm_vigente.json"
+    destino.write_text(json.dumps({"atualizada_em": datetime.now().isoformat(timespec="seconds"),
+                                   "fonte": URL_NCM, "codigos": sorted(codigos)}), encoding="utf-8")
+    from .engine import coerencia
+    coerencia.tabela_vigente.cache_clear()
+    _log(con, "Tabela NCM (Siscomex)", "OK", f"{len(codigos)} códigos vigentes")
+    return f"{len(codigos)} códigos"
+
+
 def _texto_normalizado(html: bytes) -> str:
     t = html.decode("utf-8", errors="ignore") if b"charset=utf-8" in html[:2000].lower() else html.decode("latin-1")
     t = re.sub(r"(?is)<(script|style).*?</\1>", " ", t)
@@ -210,7 +234,7 @@ def marcar_revisada(url: str) -> None:
 
 def atualizar_tudo() -> dict:
     cfg = configuracoes()
-    resultado = {"selic": None, "regras": None, "fontes_alteradas": [], "erros": []}
+    resultado = {"selic": None, "regras": None, "ncm": None, "fontes_alteradas": [], "erros": []}
     with db.tx() as con:
         for nome, fn in (("selic", lambda: atualizar_selic(con)),
                          ("regras", lambda: atualizar_regras(con, cfg.get("url_regras", "")))):
@@ -219,6 +243,10 @@ def atualizar_tudo() -> dict:
             except Exception as e:
                 _log(con, nome, "ERRO", str(e))
                 resultado["erros"].append(f"{nome}: {e}")
+        try:  # tabela NCM: complemento; falha não marca a atualização como erro
+            resultado["ncm"] = atualizar_ncm(con)
+        except Exception as e:
+            _log(con, "Tabela NCM (Siscomex)", "AVISO", str(e)[:200])
         try:
             resultado["versao"] = verificar_versao(con).get("disponivel")
         except Exception as e:

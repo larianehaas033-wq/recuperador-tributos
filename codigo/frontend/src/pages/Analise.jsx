@@ -194,9 +194,9 @@ function Cadastro({ empresaId }) {
                   <td className="td num">{l.csosn}</td>
                   <td className="td num">{l.cst_ibscbs}</td>
                   <td className="td"><Cel atual={l.atual_cclasstrib} novo={l.cclasstrib} /><div className="max-w-[200px] truncate text-[11px] text-muted">{l.grupo_ibscbs}</div></td>
-                  <td className="td num">{l.reducao_ibscbs}%</td>
+                  <td className="td num">{l.reducao_ibscbs == null ? '—' : `${l.reducao_ibscbs}%`}</td>
                   <td className="td text-xs text-muted">{l.nbs}</td>
-                  <td className="td"><Confianca v={l.comprovacao === 'ALTA' ? 'ALTA' : 'BAIXA'} />{l.comprovacao !== 'ALTA' && <div className="mt-1 max-w-[240px] whitespace-normal text-[11px] text-muted">{l.observacao}</div>}</td>
+                  <td className="td">{l.comprovacao === 'Revisar NCM' ? <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">Revisar NCM</span> : <Confianca v={l.comprovacao === 'ALTA' ? 'ALTA' : 'BAIXA'} />}{l.comprovacao !== 'ALTA' && <div className="mt-1 max-w-[240px] whitespace-normal text-[11px] text-muted">{l.observacao}</div>}</td>
                 </tr>
               ))}
               {vis.length === 0 && <tr><td className="td py-8 text-center text-muted" colSpan={10}>{so ? 'Nenhum produto com divergência.' : 'Nenhum produto.'}</td></tr>}

@@ -23,6 +23,7 @@ class Regra:
     somente_revenda: bool
     palavras: tuple[str, ...] = ()
     palavras_excluir: tuple[str, ...] = ()
+    exige_descricao: bool = True  # condicional cuja descrição não confere é descartada (False: fica como possibilidade)
 
     @property
     def condicional(self) -> bool:
@@ -54,10 +55,10 @@ class BaseRegras:
     def classificar(self, ncm: str | None, data: str | None, tipo: str, descricao: str | None = None) -> Regra | None:
         """Devolve a regra do tipo pedido que melhor se aplica ao produto.
 
-        Ordem: regra condicional cuja descrição confere com o texto legal > regra que vale só pelo NCM > regra
-        condicional que não confere. Empate: prefixo de NCM mais longo. Regra cuja descrição bate num termo de
-        exclusão é descartada."""
-        from ..engine.comum import norm
+        Regra condicional (depende de 'Ex', destinação ou do tipo de produto) só vale quando a descrição confere com
+        o texto legal; sem descrição, fica como possibilidade a conferir. Regra cuja descrição bate num termo de
+        exclusão é descartada. Empate: a mais específica (condicional que conferiu > só NCM; prefixo mais longo)."""
+        from ..engine.comum import contem, norm
         desc = norm(descricao) if descricao else ""
         key = (ncm, (data or "")[:7], tipo, desc)
         if key in self._cache:
@@ -66,12 +67,17 @@ class BaseRegras:
         for r in self.regras:
             if r.tipo != tipo or not r.cobre(ncm, data):
                 continue
-            if desc and r.palavras_excluir and any(x in desc for x in r.palavras_excluir):
+            if desc and contem(desc, r.palavras_excluir):
                 continue
             if not r.condicional:
                 peso = 1
-            elif desc and r.palavras and any(p in desc for p in r.palavras):
-                peso = 2
+            elif desc and r.palavras:
+                if contem(desc, r.palavras):
+                    peso = 2
+                elif r.exige_descricao:
+                    continue  # a descrição mostra que não é o produto da lei
+                else:
+                    peso = 0  # depende da destinação: fica como possibilidade (fornecedor pode comprovar)
             else:
                 peso = 0
             n = (peso, max(len(p) for p in r.prefixos if ncm.startswith(p)))
@@ -85,6 +91,11 @@ class BaseRegras:
 
 
 def _parse(data: dict, origem: str) -> BaseRegras:
+    from ..engine.comum import termo
+    ibs = data.get("ibs_cbs", {})
+    for r in ibs.get("regras", []):
+        r["_palavras"] = tuple(termo(x) for x in r.get("palavras", []))
+        r["_excluir"] = tuple(termo(x) for x in r.get("palavras_excluir", []))
     regras = [
         Regra(
             codigo=r["codigo"], tipo=r["tipo"], grupo=r.get("grupo", ""),
@@ -92,7 +103,9 @@ def _parse(data: dict, origem: str) -> BaseRegras:
             vigencia_ini=r.get("vigencia_ini", "1900-01-01"), vigencia_fim=r.get("vigencia_fim", "2999-12-31"),
             fundamento=r["fundamento"], confianca=r.get("confianca", "MEDIA"),
             observacao=r.get("observacao", ""), somente_revenda=bool(r.get("somente_revenda", False)),
-            palavras=tuple(r.get("palavras", [])), palavras_excluir=tuple(r.get("palavras_excluir", [])),
+            palavras=tuple(termo(x) for x in r.get("palavras", [])),
+            palavras_excluir=tuple(termo(x) for x in r.get("palavras_excluir", [])),
+            exige_descricao=bool(r.get("exige_descricao", True)),
         )
         for r in data["regras"]
     ]
@@ -100,7 +113,7 @@ def _parse(data: dict, origem: str) -> BaseRegras:
         versao=data["versao"], publicado_em=data.get("publicado_em", ""), regras=regras,
         icms_modal={x["uf"]: x for x in data.get("icms_aliquota_modal", [])},
         icms_ncm=data.get("icms_aliquota_ncm", []), cfop=data.get("cfop", {}), teses=data.get("teses", {}),
-        ibs=data.get("ibs_cbs", {}), origem=origem,
+        ibs=ibs, origem=origem,
     )
 
 

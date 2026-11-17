@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.17.5",
+ "versao": "2026.11.17.6",
  "publicado_em": "2026-11-17",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -103,6 +103,22 @@
     "ALCOOL COMBUST",
     "ALCOOL HIDRATADO",
     "ALCOOL ANIDRO"
+   ],
+   "palavras_excluir": [
+    "ICE",
+    "RUM ",
+    "VODKA",
+    "GIN ",
+    "WHISK",
+    "LICOR",
+    "CACHACA",
+    "AGUARD",
+    "CONHAQUE",
+    "BEB ",
+    "BEBIDA",
+    "COQUETEL",
+    "SAKE",
+    "TEQUILA"
    ]
   },
   {
@@ -270,7 +286,8 @@
     "P/ VEIC",
     "AUTOPECA",
     "AUTO PECA"
-   ]
+   ],
+   "exige_descricao": false
   },
   {
    "codigo": "MONO_AUTOPECAS_II",
@@ -338,7 +355,8 @@
     "P/ VEIC",
     "AUTOPECA",
     "AUTO PECA"
-   ]
+   ],
+   "exige_descricao": false
   },
   {
    "codigo": "ZERO_BEBIDAS_FRIAS",
@@ -346,13 +364,14 @@
    "grupo": "Bebidas frias vendidas pelo varejista (água, refrigerante, chá, isotônico, energético, cerveja)",
    "ncm_prefixos": [
     "2201",
-    "2202",
+    "22021",
+    "22029100",
     "2203"
    ],
    "excecoes": [],
    "vigencia_ini": "2015-05-01",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 13.097/2015, arts. 14 e 28: desde 05/2015 a receita de venda de bebidas frias por pessoa jurídica varejista tem alíquota zero (Tabela 4.3.13, código 918). CST correto: 06.",
+   "fundamento": "Lei 13.097/2015, arts. 14 e 28 (bebidas frias vendidas pelo varejista: alíquota zero). Água mineral natural: Lei 12.715/2012, art. 76. Tabela 4.3.13. CST correto: 06.",
    "confianca": "ALTA",
    "observacao": "Não alcança bebidas lácteas e bebidas à base de soja, excluídas do art. 14. Atacadista e indústria seguem regras próprias.",
    "somente_revenda": true,
@@ -363,6 +382,45 @@
     "YOGURT",
     "SOJA",
     "FERMENTAD"
+   ]
+  },
+  {
+   "codigo": "ZERO_BEBIDAS_FRIAS_2202_99",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Bebidas frias do código 2202.99.00 (energéticos, isotônicos, chás prontos), vendidas pelo varejista",
+   "ncm_prefixos": [
+    "22029900",
+    "22029000"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2015-05-01",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 13.097/2015, arts. 14, III, e 28: o regime alcança a posição 22.02, exceto os Ex 01 (bebidas à base de soja ou de leite e cacau) e Ex 02 (néctares de frutas) do código 2202.99.00 (TIPI). CST correto: 06.",
+   "confianca": "ALTA",
+   "observacao": "Néctares e bebidas de soja ou de leite com cacau ficam fora do regime de bebidas frias.",
+   "somente_revenda": true,
+   "palavras_excluir": [
+    "ACHOC",
+    "ADES ",
+    "AMENDOA",
+    "AVEIA",
+    "CHOCOLEITE",
+    "D V ",
+    "DEL VALLE",
+    "FERMENTAD",
+    "IOGURT",
+    "LACTE",
+    "LEITE",
+    "MAGUARY",
+    "NECTAR",
+    "NESCAU",
+    "SOJA",
+    "SOY",
+    "SU FRESH",
+    "SUCO",
+    "SUFRESH",
+    "TODDYNHO",
+    "YOGURT"
    ]
   },
   {
@@ -431,12 +489,41 @@
    "somente_revenda": false
   },
   {
+   "codigo": "ZERO_MILHO_FLOCOS",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Milho em grãos esmagados ou em flocos",
+   "ncm_prefixos": [
+    "110419"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2004-08-01",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 10.925/2004, art. 1º, IX (farinha, grumos e sêmolas, grãos esmagados ou em flocos, de milho: 1102.20, 1103.13 e 1104.19). CST correto: 06.",
+   "confianca": "CONDICIONAL",
+   "observacao": "O código 1104.19 também abrange flocos de outros cereais, que não entram.",
+   "somente_revenda": false,
+   "palavras": [
+    "MILHO",
+    "FLOCAO",
+    "POLENTA",
+    "CUSCUZ"
+   ],
+   "palavras_excluir": [
+    "AVEIA",
+    "ARROZ",
+    "CEVADA",
+    "CENTEIO"
+   ]
+  },
+  {
    "codigo": "ZERO_PAO_PREMISTURA",
    "tipo": "ALIQ_ZERO",
    "grupo": "Pão comum e pré-misturas (1905.90.90 Ex 01, 1901.20.00 Ex 01)",
    "ncm_prefixos": [
     "19059090",
-    "19012000"
+    "19012000",
+    "19012010",
+    "19012090"
    ],
    "excecoes": [],
    "vigencia_ini": "2004-08-01",
@@ -461,14 +548,22 @@
     "MISTURA PARA PAO"
    ],
    "palavras_excluir": [
-    "DOCE",
-    "QUEIJO",
+    "BISC",
     "BISNAGUINHA",
-    "FORMA",
+    "BOLO",
     "BRIOCHE",
-    "INTEGRAL",
+    "CANUDO",
+    "DOCE",
+    "FORMA",
     "HAMBURGUER",
-    "HOT DOG"
+    "HOT DOG",
+    "INTEGRAL",
+    "PASTEL",
+    "PIZZA",
+    "QUEIJO",
+    "ROSCA",
+    "SALG",
+    "TORRADA"
    ]
   },
   {
@@ -479,10 +574,17 @@
     "0401",
     "0402"
    ],
-   "excecoes": [],
+   "excecoes": [
+    "040291",
+    "040299",
+    "0401402",
+    "0401502",
+    "04022130",
+    "04022930"
+   ],
    "vigencia_ini": "2004-08-01",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 10.925/2004, art. 1º. Tabela 4.3.13, código 110. CST correto: 06.",
+   "fundamento": "Lei 10.925/2004, art. 1º, XI (leite fluido pasteurizado ou UHT e leite em pó: 04.01 e 0402.10/0402.21/0402.29; creme de leite e leite condensado não entram). Tabela 4.3.13, código 110. CST correto: 06.",
    "confianca": "CONDICIONAL",
    "observacao": "",
    "somente_revenda": false,
@@ -492,8 +594,12 @@
    "palavras_excluir": [
     "CREME",
     "CONDENSADO",
+    "LEITE COND",
+    "COND ",
+    " NATA",
     "CHANTILLY",
-    "NATA"
+    "DOCE DE LEITE",
+    "DOCE LEITE"
    ]
   },
   {
@@ -503,9 +609,7 @@
    "ncm_prefixos": [
     "0403",
     "22029900",
-    "22029100",
-    "19019090",
-    "19019020"
+    "22029000"
    ],
    "excecoes": [],
    "vigencia_ini": "2007-06-15",
@@ -515,26 +619,74 @@
    "observacao": "Só leite bovino (leite de cabra fica fora). Iogurte é leite fermentado.",
    "somente_revenda": false,
    "palavras": [
-    "LEITE FERMENT",
-    "FERMENTADO",
-    "BEBIDA LACTEA",
+    "ACHOC",
+    "BEB LACT",
     "BEB LACTEA",
     "BEB. LACTEA",
-    "LACTEA",
-    "COMPOSTO LACTEO",
-    "IOGURTE",
-    "YOGURTE",
-    "IOGURT",
-    "YOGURT",
+    "BEBIDA LACTEA",
+    "CHAMYTO",
     "COALHADA",
-    "KEFIR"
+    "COMPOSTO LACTEO",
+    "FERMENTADO",
+    "IOGURT",
+    "IOGURTE",
+    "KEFIR",
+    "LACTEA",
+    "LEITE FERM",
+    "LEITE FERMENT",
+    "YAKULT",
+    "YOGURT",
+    "YOGURTE"
    ],
    "palavras_excluir": [
+    "ADES ",
+    "BEIJINHO",
+    "BRIGADEIRO",
     "CABRA",
-    "SORVETE",
-    "PICOLE",
     "CREME DE LEITE",
-    "SOJA"
+    "DOCE DE LEITE",
+    "DOCE LEITE",
+    "FLAN",
+    "MIST LACT",
+    "MISTURA LACT",
+    "PICOLE",
+    "PUDIM",
+    "SOBR ",
+    "SOBREMESA",
+    "SOJA",
+    "SORVETE",
+    "SOY"
+   ]
+  },
+  {
+   "codigo": "ZERO_COMPOSTO_LACTEO",
+   "tipo": "ALIQ_ZERO",
+   "grupo": "Compostos lácteos",
+   "ncm_prefixos": [
+    "19019090",
+    "19019020",
+    "040229",
+    "190110"
+   ],
+   "excecoes": [],
+   "vigencia_ini": "2007-06-15",
+   "vigencia_fim": "2026-12-31",
+   "fundamento": "Lei 10.925/2004, art. 1º, XI (compostos lácteos, conforme Instrução Normativa MAPA 28/2007). CST correto: 06.",
+   "confianca": "CONDICIONAL",
+   "observacao": "Mistura láctea condensada, sobremesas e doces de leite não são compostos lácteos.",
+   "somente_revenda": false,
+   "palavras": [
+    "COMPOSTO LACT",
+    "COMP LACT",
+    "COMP. LACT"
+   ],
+   "palavras_excluir": [
+    "SOBREMESA",
+    "DOCE",
+    "BRIGADEIRO",
+    "BEIJINHO",
+    "FAROFA",
+    "POLENTA"
    ]
   },
   {
@@ -556,14 +708,26 @@
     "FORMULA INFANTIL",
     "FORMULA INF",
     "FORMULA LACTEA",
-    "FORMULA",
-    "LEITE INFANTIL"
+    " FORMULA",
+    "LEITE INFANTIL",
+    " NAN ",
+    "APTAMIL",
+    "NESTOGENO",
+    "ENFAMIL",
+    "MILNUTRI",
+    "PREMATURO"
    ],
    "palavras_excluir": [
+    "ADOCANTE",
+    "ADOCYL",
+    "ASPARTAME",
     "CEREAL",
+    "ERITRITOL",
+    "FARINHA",
     "MUCILON",
     "NESTON",
-    "FARINHA"
+    "STEVIA",
+    "SUCRALOSE"
    ]
   },
   {
@@ -583,39 +747,57 @@
    "observacao": "",
    "somente_revenda": false,
    "palavras": [
-    "MUSSARELA",
-    "MUCARELA",
+    " MOZ",
+    " MUS ",
+    " MUSS",
+    " PARM",
+    " REQ ",
+    "COALHO",
+    "DO REINO",
+    "FRESCAL",
+    "FRESCO",
+    "MINAS",
     "MOZARELA",
     "MOZZARELLA",
+    "MUC ",
+    "MUCARELA",
+    "MUSSARELA",
     "MUZZARELA",
-    "MINAS",
-    "PRATO",
-    "COALHO",
-    "RICOTA",
-    "REQUEIJAO",
-    "PROVOLONE",
     "PARMESAO",
-    "FRESCO",
-    "DO REINO"
+    "PETIT",
+    "PRATO",
+    "PROVOL",
+    "PROVOLONE",
+    "QJO MUS",
+    "QJO PRATO",
+    "QUEIJO REINO",
+    "REQUEIJ",
+    "REQUEIJAO",
+    "RICOT",
+    "RICOTA"
    ],
    "palavras_excluir": [
-    "GORGONZOLA",
-    "ROQUEFORT",
+    "AZUL",
     "BRIE",
+    "BURRATA",
+    "CABRA",
     "CAMEMBERT",
     "CHEDDAR",
-    "EMMENTAL",
-    "GOUDA",
-    "GRUYERE",
-    "PECORINO",
-    "ESTEPE",
+    "COLONIAL",
     "EDAM",
-    "GRANA PADANO",
-    "TILSIT",
+    "EMMENTAL",
+    "ESTEPE",
     "FONDUE",
-    "AZUL",
-    "CABRA",
-    "BURRATA"
+    "GORGONZOLA",
+    "GOUDA",
+    "GRANA PADANO",
+    "GRUYERE",
+    "MIST ALIM",
+    "MISTURA",
+    "PECORINO",
+    "QUEIJO CREMOSO",
+    "ROQUEFORT",
+    "TILSIT"
    ]
   },
   {
@@ -1070,18 +1252,27 @@
     "confianca": "ALTA",
     "observacao": "",
     "palavras": [
+     "ABS ",
      "ABSORV",
-     "TAMPAO",
-     "TAMPOES",
+     "ALWAYS",
+     "CALCINHA ABSORV",
      "COLETOR MENSTRUAL",
-     "CALCINHA ABSORV"
+     "INTIMUS",
+     "PROT DIARIO",
+     "PROTETOR DIARIO",
+     "SEMPRE LIVRE",
+     "TAMPAO",
+     "TAMPOES"
     ],
     "palavras_excluir": [
+     "AMAMENT",
      "FRALDA",
+     "GERIAT",
      "GERIATR",
      "LENCO",
+     "MAMA",
      "SEIO",
-     "MAMA"
+     "SEIOS"
     ]
    },
    {
@@ -1119,7 +1310,19 @@
     ],
     "fundamento": "LC 214/2025, art. 133 (redução de 60%).",
     "confianca": "ALTA",
-    "observacao": "Se o medicamento for destinado, pelo registro sanitário, a doença rara, negligenciada, oncologia, diabetes, HIV/IST ou doença cardiovascular, ou for vendido pelo Farmácia Popular, o código é 200009 (alíquota zero, art. 146 com redação da LC 227/2026). A lista oficial por destinação é publicada periodicamente."
+    "observacao": "Se o medicamento for destinado, pelo registro sanitário, a doença rara, negligenciada, oncologia, diabetes, HIV/IST ou doença cardiovascular, ou for vendido pelo Farmácia Popular, o código é 200009 (alíquota zero, art. 146 com redação da LC 227/2026). A lista oficial por destinação é publicada periodicamente. Produto de uso veterinário (registro no MAPA, não na Anvisa) não entra.",
+    "palavras_excluir": [
+     "VETERIN",
+     " PET ",
+     "PETBRILL",
+     " CAES",
+     "GATOS",
+     "ANTI PULGA",
+     "ANTIPULGA",
+     "CARRAPAT",
+     "BOVINO",
+     "EQUINO"
+    ]
    },
    {
     "codigo": "IBS_MEDICAMENTOS_OUTROS",
@@ -1133,7 +1336,19 @@
     "excecoes": [],
     "fundamento": "LC 214/2025, art. 133 (redução de 60%).",
     "confianca": "ALTA",
-    "observacao": "3004.90.99 também aparece no Anexo IV (substitutos de enxerto ósseo, soluções para diálise)."
+    "observacao": "3004.90.99 também aparece no Anexo IV (substitutos de enxerto ósseo, soluções para diálise). Produto de uso veterinário (registro no MAPA, não na Anvisa) não entra.",
+    "palavras_excluir": [
+     "VETERIN",
+     " PET ",
+     "PETBRILL",
+     " CAES",
+     "GATOS",
+     "ANTI PULGA",
+     "ANTIPULGA",
+     "CARRAPAT",
+     "BOVINO",
+     "EQUINO"
+    ]
    },
    {
     "codigo": "IBS_DISP_ZERO",
@@ -1212,9 +1427,6 @@
      "39269030",
      "37011010",
      "30064020",
-     "39269040",
-     "3917401",
-     "3917409",
      "90189010",
      "90219091",
      "37021020",
@@ -1244,7 +1456,6 @@
      "30069190",
      "39269050",
      "4015120",
-     "4015190",
      "9018311",
      "9018319",
      "9018321",
@@ -1291,40 +1502,67 @@
     "reducao": 60,
     "grupo": "Dispositivos médicos do Anexo IV em códigos genéricos",
     "ncm_prefixos": [
-     "90189099",
-     "90219099",
-     "90219019",
+     "30059090",
+     "38249989",
+     "3917401",
+     "3917409",
+     "39269040",
+     "4015190",
+     "84198999",
      "84212990",
      "84798999",
-     "38249989",
-     "84198999",
-     "30059090"
+     "90189099",
+     "90219019",
+     "90219099"
     ],
     "excecoes": [],
     "fundamento": "LC 214/2025, art. 131 e Anexo IV (redução de 60%; produto regularizado na Anvisa).",
     "confianca": "ALTA",
     "observacao": "Código genérico da NCM: só entra quando a descrição corresponde a um item do Anexo IV.",
     "palavras": [
-     "DRENAGEM",
-     "OXIGENADOR",
-     "CARDIOTOMIA",
-     "CARDIOPLEGIA",
      "ANESTESIA",
-     "INTRAUTERINO",
-     "DIU ",
      "BALAO INTRA",
-     "HIDROCEFALIA",
-     "SHUNT",
-     "ESPACADOR DE TENDAO",
-     "ENXERTO",
      "BOTAO PARA CRANIO",
+     "CARDIOPLEGIA",
+     "CARDIOTOMIA",
+     "CATETER",
+     "CIRURG",
+     "COLETOR",
+     "COLOSTOMIA",
+     "CONSERVACAO DE ORGAOS",
+     "DIU ",
+     "DRENAGEM",
+     "DRENO",
+     "ENXERTO",
+     "EQUIPO",
+     "ESPACADOR DE TENDAO",
+     "ESTERIL",
+     "EXAME",
      "FILTRO DE LINHA ARTERIAL",
      "FILTRO DE SANGUE",
+     "HIDROCEFALIA",
+     "HOSPITALAR",
+     "INTRAUTERINO",
+     "OSTOMIA",
+     "OXIGENADOR",
+     "PROCEDIMENTO",
      "REPROCESSADOR",
-     "CONSERVACAO DE ORGAOS",
-     "TERMOCICLADOR",
+     "SHUNT",
+     "SONDA",
      "SUBSTITUTO DE PELE",
-     "SUBSTITUTO TEMPORARIO"
+     "SUBSTITUTO TEMPORARIO",
+     "TERMOCICLADOR"
+    ],
+    "palavras_excluir": [
+     "CHUPETA",
+     "MAMADEIRA",
+     "SIFAO",
+     "DOMEST",
+     "LIMPEZA",
+     "MUCAMBO",
+     "MULTIUSO",
+     "JARDINAGEM",
+     "COZINHA"
     ]
    },
    {
@@ -1338,13 +1576,40 @@
      "33061000",
      "96032100",
      "48181000",
-     "34011900",
      "96190000"
     ],
     "excecoes": [],
     "fundamento": "LC 214/2025, art. 136 e Anexo VIII (redução de 60%).",
     "confianca": "ALTA",
     "observacao": ""
+   },
+   {
+    "codigo": "IBS_SABAO_BARRA",
+    "cclasstrib": "200035",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Sabões em barra (Anexo VIII)",
+    "ncm_prefixos": [
+     "34011900"
+    ],
+    "excecoes": [],
+    "fundamento": "LC 214/2025, art. 136 e Anexo VIII (sabões em barra do código 3401.19.00).",
+    "confianca": "ALTA",
+    "observacao": "O código 3401.19.00 também abrange lenços umedecidos e sabão em pasta, que pagam alíquota cheia.",
+    "palavras": [
+     "SABAO",
+     "BARRA",
+     " SAB "
+    ],
+    "palavras_excluir": [
+     "LENC",
+     "TOALHA",
+     "UMEDEC",
+     "UMED ",
+     "PASTA",
+     "LIQ",
+     " PO "
+    ]
    },
    {
     "codigo": "IBS_AGUA_SANITARIA",
@@ -1376,21 +1641,35 @@
     "reducao": 100,
     "grupo": "Pão francês (Anexo I)",
     "ncm_prefixos": [
-     "19059090"
+     "19059090",
+     "19012000",
+     "19012010",
+     "19012090"
     ],
     "excecoes": [],
     "fundamento": "LC 214/2025, art. 125 e Anexo I, item 16 (pão francês e sua pré-mistura).",
     "confianca": "ALTA",
     "observacao": "",
     "palavras": [
-     "PAO FRANCES",
-     "FRANCESINHO",
-     "PAOZINHO",
-     "PAO DE SAL",
-     "PAO SAL",
      "CACETINHO",
+     "FRANCESINHO",
+     "MISTURA PARA PAO FRANCES",
      "PAO CARIOCA",
-     "PAO JACO"
+     "PAO DE SAL",
+     "PAO FRANCES",
+     "PAO JACO",
+     "PAO SAL",
+     "PAOZINHO",
+     "PRE MISTURA PAO FRANCES",
+     "PRE-MISTURA PAO FRANCES"
+    ],
+    "palavras_excluir": [
+     "BOLO",
+     "PIZZA",
+     "QUEIJO",
+     "DOCE",
+     "INTEGRAL",
+     "FORMA"
     ]
    },
    {
@@ -1415,8 +1694,6 @@
      "04022120",
      "04022910",
      "04022920",
-     "19011010",
-     "19011090",
      "04051000",
      "15171000",
      "07133319",
@@ -1436,11 +1713,8 @@
      "17011400",
      "17019900",
      "19021",
-     "19012010",
-     "19012090",
      "11041200",
      "11042200",
-     "11029000",
      "0201",
      "0202",
      "02061000",
@@ -1462,12 +1736,6 @@
      "0302",
      "0303",
      "0304",
-     "04061010",
-     "04061090",
-     "04062000",
-     "04069010",
-     "04069020",
-     "04069030",
      "25010020",
      "25010090",
      "09030010",
@@ -1498,12 +1766,208 @@
     "confianca": "ALTA",
     "observacao": "Pão (1905.90.90) só o pão francês; fórmulas infantis (2106.90.90) conforme legislação específica.",
     "palavras_excluir": [
+     " CAES ",
+     " P/CACHORRO",
+     "ALPISTE",
+     "CACHORRO",
+     "CALOPSITA",
+     "CANARIO",
+     "COLEIRA",
      "CR LEITE",
      "CR. LEITE",
      "CREME DE LEITE",
      "CREME LEITE",
-     "NATA"
+     "GATOS",
+     "NIGER",
+     "PAINCO",
+     "PASSARO",
+     "PERIQUITO",
+     " RACAO",
+     " NATA"
     ]
+   },
+   {
+    "cclasstrib": "200003",
+    "cst": "200",
+    "reducao": 100,
+    "confianca": "ALTA",
+    "codigo": "IBS_QUEIJOS",
+    "grupo": "Queijos da Cesta Básica Nacional (Anexo I)",
+    "ncm_prefixos": [
+     "04061010",
+     "04061090",
+     "04062000",
+     "04069010",
+     "04069020",
+     "04069030"
+    ],
+    "excecoes": [],
+    "palavras": [
+     " MOZ",
+     " MUS ",
+     " MUSS",
+     " PARM",
+     " REQ ",
+     "COALHO",
+     "DO REINO",
+     "FRESCAL",
+     "FRESCO",
+     "MINAS",
+     "MOZARELA",
+     "MOZZARELLA",
+     "MUC ",
+     "MUCARELA",
+     "MUSSARELA",
+     "MUZZARELA",
+     "PARMESAO",
+     "PETIT",
+     "PRATO",
+     "PROVOL",
+     "PROVOLONE",
+     "QJO MUS",
+     "QJO PRATO",
+     "QUEIJO REINO",
+     "REQUEIJ",
+     "REQUEIJAO",
+     "RICOT",
+     "RICOTA"
+    ],
+    "palavras_excluir": [
+     "AZUL",
+     "BRIE",
+     "BURRATA",
+     "CABRA",
+     "CAMEMBERT",
+     "CHEDDAR",
+     "COLONIAL",
+     "EDAM",
+     "EMMENTAL",
+     "ESTEPE",
+     "FONDUE",
+     "GORGONZOLA",
+     "GOUDA",
+     "GRANA PADANO",
+     "GRUYERE",
+     "MIST ALIM",
+     "MISTURA",
+     "PECORINO",
+     "QUEIJO CREMOSO",
+     "ROQUEFORT",
+     "TILSIT"
+    ],
+    "fundamento": "LC 214/2025, art. 125 e Anexo I (queijos tipo mozarela, minas, prato, coalho, ricota, requeijão, provolone, parmesão, fresco não maturado e do reino).",
+    "observacao": "Outros queijos nos mesmos códigos pagam alíquota cheia."
+   },
+   {
+    "cclasstrib": "200003",
+    "cst": "200",
+    "reducao": 100,
+    "confianca": "ALTA",
+    "codigo": "IBS_FORMULAS_INFANTIS",
+    "grupo": "Fórmulas infantis (Anexo I)",
+    "ncm_prefixos": [
+     "19011010",
+     "19011090"
+    ],
+    "excecoes": [],
+    "palavras": [
+     "FORMULA INFANTIL",
+     "FORMULA INF",
+     "FORMULA LACTEA",
+     " FORMULA",
+     "LEITE INFANTIL",
+     " NAN ",
+     "APTAMIL",
+     "NESTOGENO",
+     "ENFAMIL",
+     "MILNUTRI",
+     "PREMATURO"
+    ],
+    "palavras_excluir": [
+     "ADOCANTE",
+     "ADOCYL",
+     "ASPARTAME",
+     "CEREAL",
+     "ERITRITOL",
+     "FARINHA",
+     "MUCILON",
+     "NESTON",
+     "STEVIA",
+     "SUCRALOSE"
+    ],
+    "fundamento": "LC 214/2025, art. 125 e Anexo I (fórmulas infantis definidas por previsão legal específica).",
+    "observacao": ""
+   },
+   {
+    "cclasstrib": "200003",
+    "cst": "200",
+    "reducao": 100,
+    "confianca": "ALTA",
+    "codigo": "IBS_AVEIA",
+    "grupo": "Farinha de aveia (Anexo I)",
+    "ncm_prefixos": [
+     "11029000"
+    ],
+    "excecoes": [],
+    "palavras": [
+     "AVEIA"
+    ],
+    "palavras_excluir": [
+     " RACAO",
+     " P/CACHORRO",
+     "CACHORRO",
+     " CAES ",
+     "GATOS",
+     "CALOPSITA",
+     "PERIQUITO",
+     "CANARIO",
+     "PASSARO",
+     "ALPISTE",
+     "PAINCO",
+     "NIGER",
+     "COLEIRA"
+    ],
+    "fundamento": "LC 214/2025, art. 125 e Anexo I (farinha de aveia, 1102.90.00).",
+    "observacao": "Outras farinhas do código 1102.90.00 (arroz, por exemplo) têm redução de 60% (Anexo VII)."
+   },
+   {
+    "cclasstrib": "200003",
+    "cst": "200",
+    "reducao": 100,
+    "confianca": "ALTA",
+    "codigo": "IBS_PEIXES_FILES",
+    "grupo": "Filés e carnes de peixe (Anexo I)",
+    "ncm_prefixos": [
+     "03044",
+     "03045",
+     "03047",
+     "03048",
+     "03049"
+    ],
+    "excecoes": [
+     "030441",
+     "030442",
+     "030444",
+     "03047",
+     "030481",
+     "030482",
+     "030487",
+     "030452",
+     "030453",
+     "030495"
+    ],
+    "palavras_excluir": [
+     "SALMAO",
+     "TRUTA",
+     "ATUM",
+     "BACALHAU",
+     "HADOQUE",
+     "SAITHE",
+     " OVAS",
+     "SALMON"
+    ],
+    "fundamento": "LC 214/2025, art. 125 e Anexo I (peixes e carnes de peixes, exceto salmonídeos, atuns, bacalhaus, hadoque, saithe e ovas).",
+    "observacao": ""
    },
    {
     "codigo": "IBS_HORTIFRUTI",
@@ -1550,7 +2014,8 @@
     ],
     "excecoes": [
      "07095",
-     "07108000"
+     "07108000",
+     "080620"
     ],
     "fundamento": "LC 214/2025, art. 148 e Anexo XV (alíquota zero).",
     "confianca": "ALTA",
@@ -1584,13 +2049,14 @@
     "observacao": "Só sem açúcar, edulcorante ou conservante.",
     "palavras": [
      "INTEGRAL",
-     "100%",
-     "100 %",
      "NATURAL",
      "POLPA",
      "SEM ACUCAR",
      "S/ACUCAR",
-     "S/ ACUCAR"
+     "S/ ACUCAR",
+     " 100 ",
+     " INT ",
+     "INTEGR"
     ],
     "palavras_excluir": [
      "NECTAR",
@@ -1642,33 +2108,50 @@
     "reducao": 60,
     "grupo": "Bebidas e compostos lácteos (Anexo VII, item 2)",
     "ncm_prefixos": [
-     "22029900"
+     "22029900",
+     "22029000",
+     "04039000"
     ],
     "excecoes": [],
     "confianca": "ALTA",
     "fundamento": "LC 214/2025, art. 135 e Anexo VII, item 2 (leite fermentado, bebidas e compostos lácteos que atendam à legislação específica).",
-    "observacao": "O código 2202.99.00 também abrange energéticos, chás prontos, isotônicos e néctares, que pagam alíquota cheia.",
+    "observacao": "Os códigos 2202.99.00 e 0403.90.00 também abrangem bebidas e sobremesas que não são lácteas (alíquota cheia).",
     "palavras": [
+     "ACHOC",
+     "ACHOCOLATADO PRONTO",
+     "BEB LAC",
+     "BEB LACT",
+     "BEB. LAC",
+     "BEBIDA DE LEITE",
+     "CHAMYTO",
+     "COALHADA",
+     "COMPOSTO LACT",
+     "FERMENTAD",
+     "IOGURT",
+     "KEFIR",
      "LACTEA",
      "LACTEO",
-     "IOGURT",
-     "YOGURT",
+     "LEITE FERM",
      "LEITE FERMENT",
-     "COMPOSTO LACT",
-     "BEB LAC",
-     "BEB. LAC",
-     "ACHOCOLATADO PRONTO",
-     "BEBIDA DE LEITE"
+     "YAKULT",
+     "YOGURT"
     ],
     "palavras_excluir": [
-     "SOJA",
+     "ADES ",
+     "AGUA COCO",
+     "AGUA DE COCO",
      "AMENDOA",
      "AVEIA",
-     "COCO",
-     "VEGETAL",
+     "CHA ",
      "ENERG",
+     "FLAN",
      "ISOTON",
-     "CHA "
+     "LEITE DE COCO",
+     "PUDIM",
+     "SOBR ",
+     "SOBREMESA",
+     "SOJA",
+     "VEGETAL"
     ]
    },
    {
@@ -1723,7 +2206,6 @@
      "03079100",
      "03079200",
      "04032000",
-     "04039000",
      "04090000",
      "110100",
      "1102",
@@ -1749,7 +2231,13 @@
      "07",
      "08",
      "10",
-     "12"
+     "1201",
+     "1202",
+     "1203",
+     "1204",
+     "1205",
+     "1206",
+     "1207"
     ],
     "excecoes": [
      "030611",
@@ -1758,22 +2246,54 @@
      "03063400",
      "03063910",
      "0711",
+     "0802",
      "0812",
      "08140000"
     ],
     "fundamento": "LC 214/2025, art. 135 e Anexo VII (redução de 60%).",
     "confianca": "ALTA",
-    "observacao": "Sucos e polpas (20.08/20.09) só sem açúcar, edulcorantes ou conservantes; leite fermentado e bebidas lácteas conforme legislação.",
+    "observacao": "Frutas de casca rija não regionais (0802: amêndoas, avelãs, nozes, pistaches) ficam fora. Capítulo 12: só sementes e frutos oleaginosos (12.01 a 12.07).",
     "palavras_excluir": [
+     " CAES ",
+     " P/CACHORRO",
      "ADOCAD",
+     "ALPISTE",
      "C/ ACUCAR",
      "C/ACUCAR",
+     "CACHORRO",
+     "CALOPSITA",
+     "CANARIO",
      "CARAMELIZ",
      "CHOCOLAT",
+     "COLEIRA",
      "COM ACUCAR",
      "CRISTALIZ",
-     "EM CALDA"
+     "EM CALDA",
+     "GATOS",
+     "NIGER",
+     "PAINCO",
+     "PASSARO",
+     "PERIQUITO",
+     " RACAO"
     ]
+   },
+   {
+    "codigo": "IBS_SEMENTES_AGRO",
+    "cclasstrib": "200038",
+    "cst": "200",
+    "reducao": 60,
+    "grupo": "Sementes para semeadura (Anexo IX)",
+    "ncm_prefixos": [
+     "1209"
+    ],
+    "excecoes": [],
+    "confianca": "ALTA",
+    "palavras": [
+     "SEMENTE"
+    ],
+    "palavras_excluir": [],
+    "fundamento": "LC 214/2025, art. 138 e Anexo IX (sementes e mudas destinadas à semeadura e plantio, conforme a Lei 10.711/2003).",
+    "observacao": "Exige que as sementes atendam à Lei 10.711/2003 (registro no RENASEM)."
    },
    {
     "codigo": "IBS_LIVROS",
@@ -1792,5 +2312,5 @@
    }
   ]
  },
- "programa_minimo": "1.3.4"
+ "programa_minimo": "1.3.5"
 }
