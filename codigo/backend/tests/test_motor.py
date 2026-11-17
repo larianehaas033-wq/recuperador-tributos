@@ -139,3 +139,14 @@ def test_cadastro_tributario(analise):
     assert p3["cst_icms"] == "000" and p3["csosn"] == "102" and p3["cclasstrib"] == "000001"
     assert "cClassTrib 200034 → 000001" in p3["divergencias"]
     assert cad["P2"]["cclasstrib"] == "000001"  # shampoo não está no Anexo VIII
+
+
+def test_relatorios_com_caracteres_invalidos(analise):
+    from app import db as _db
+    from app.reports.relatorios import gerar_excel, gerar_excel_cadastro, gerar_pdf
+    with _db.tx() as con:
+        con.execute("UPDATE produtos SET descricao = descricao || char(11) || char(31)")
+        con.execute("UPDATE creditos_identificados SET descricao = 'X' || char(11)")
+        aid = con.execute("SELECT max(id) FROM analises").fetchone()[0]
+        emp = con.execute("SELECT empresa_id FROM analises WHERE id=?", (aid,)).fetchone()[0]
+    assert gerar_excel(aid).exists() and gerar_pdf(aid).exists() and gerar_excel_cadastro(emp).exists()

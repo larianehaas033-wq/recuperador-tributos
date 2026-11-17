@@ -6,6 +6,18 @@ from datetime import datetime
 from pathlib import Path
 
 from openpyxl import Workbook
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+from openpyxl.worksheet.worksheet import Worksheet
+
+_append_original = Worksheet.append
+
+
+def _append_limpo(self, linha):
+    """Remove caracteres de controle que alguns sistemas gravam no SPED e que o Excel não aceita."""
+    return _append_original(self, [ILLEGAL_CHARACTERS_RE.sub("", v) if isinstance(v, str) else v for v in linha])
+
+
+Worksheet.append = _append_limpo
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
@@ -39,9 +51,19 @@ def _brl(v: float) -> str:
     return "R$ " + s.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
+def _livre(out: Path) -> Path:
+    """Se o arquivo anterior ainda está aberto no Excel (bloqueado), grava com outro nome."""
+    try:
+        if out.exists():
+            out.rename(out)  # falha no Windows se outro programa estiver com o arquivo aberto
+        return out
+    except OSError:
+        return out.with_name(f"{out.stem}_{datetime.now():%H%M%S}{out.suffix}")
+
+
 def _nome_arquivo(e: dict, analise_id: int, ext: str) -> Path:
     nome = "".join(ch for ch in (e["nome"] or "empresa") if ch.isalnum() or ch in " -_")[:40].strip().replace(" ", "_")
-    return config.DATA_DIR / "relatorios" / f"Recuperacao_{nome}_analise{analise_id}.{ext}"
+    return _livre(config.DATA_DIR / "relatorios" / f"Recuperacao_{nome}_analise{analise_id}.{ext}")
 
 
 # ------------------------------------------------------------------------------------------ Excel
@@ -267,16 +289,25 @@ def gerar_excel_cadastro(empresa_id: int) -> Path:
     _aba_cadastro(wb, empresa_id, cabecalho)
     del wb["Sheet"]
     nome = "".join(ch for ch in (e["nome"] or "empresa") if ch.isalnum() or ch in " -_")[:40].strip().replace(" ", "_")
-    out = config.DATA_DIR / "relatorios" / f"Cadastro_tributario_{nome}.xlsx"
+    out = _livre(config.DATA_DIR / "relatorios" / f"Cadastro_tributario_{nome}.xlsx")
     wb.save(out)
     return out
 
 
 # ------------------------------------------------------------------------------------------ PDF
+def _texto_pdf(v) -> str:
+    """Tira caracteres de controle e símbolos fora da fonte (emoji etc.) para o PDF não falhar."""
+    import unicodedata
+    t = ILLEGAL_CHARACTERS_RE.sub("", str(v or ""))
+    return "".join(ch for ch in t if ord(ch) < 0x2100 or unicodedata.category(ch).startswith("P"))
+
+
 def gerar_pdf(analise_id: int) -> Path:
     from fpdf import FPDF
 
     a, e, creds = _carregar(analise_id)
+    e = {k: (_texto_pdf(v) if isinstance(v, str) else v) for k, v in e.items()}
+    a["avisos"] = [_texto_pdf(x) for x in a["avisos"]]
     base = carregar()
     r = a["resumo"]
     fonts = Path(__file__).parent / "fonts"

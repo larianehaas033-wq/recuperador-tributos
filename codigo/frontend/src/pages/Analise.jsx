@@ -128,12 +128,30 @@ function RevisaoNcm({ id, ncms, teses, onMudou }) {
   )
 }
 
+function ArquivoGerado({ arquivo }) {
+  if (arquivo.erro) return <Aviso tipo="erro">Não foi possível gerar o arquivo: {arquivo.erro}</Aviso>
+  return (
+    <Aviso tipo="ok">
+      <b>{arquivo.nome}</b> {arquivo.aberto ? 'foi aberto.' : 'foi salvo.'} Fica guardado em {arquivo.caminho}.{' '}
+      <button className="font-semibold underline" onClick={() => api.post('/api/abrir-pasta')}>Abrir pasta</button>
+    </Aviso>
+  )
+}
+
 function Cadastro({ empresaId }) {
   const [d, setD] = useState(null)
   const [so, setSo] = useState(true)
   const [busca, setBusca] = useState('')
   const [pag, setPag] = useState(1)
+  const [gerando, setGerando] = useState(false)
+  const [arquivo, setArquivo] = useState(null)
   useEffect(() => { setD(null); api.get(`/api/empresas/${empresaId}/cadastro`).then(setD) }, [empresaId])
+  const baixar = async () => {
+    setGerando(true); setArquivo(null)
+    try { setArquivo(await api.post(`/api/empresas/${empresaId}/cadastro/abrir`)) }
+    catch (err) { setArquivo({ erro: err.message }) }
+    finally { setGerando(false) }
+  }
   if (!d) return <div className="card p-6 text-sm text-muted">Montando o cadastro dos produtos...</div>
   const q = busca.trim().toUpperCase()
   const linhas = d.linhas.filter((l) => (!so || l.divergencias.length) &&
@@ -145,6 +163,7 @@ function Cadastro({ empresaId }) {
   )
   return (
     <div className="space-y-3">
+      {arquivo && <ArquivoGerado arquivo={arquivo} />}
       <div className="grid gap-3 md:grid-cols-4">
         <Kpi rotulo="Produtos" valor={String(d.resumo.produtos)} />
         <Kpi rotulo="Com divergência" valor={String(d.resumo.com_divergencia)} tom="risco" detalhe="Cadastro atual diferente do sugerido" />
@@ -155,7 +174,7 @@ function Cadastro({ empresaId }) {
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-4">
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-navy" checked={so} onChange={(e) => { setSo(e.target.checked); setPag(1) }} />Só produtos com divergência</label>
           <input className="input max-w-xs" placeholder="Buscar código, descrição ou NCM" value={busca} onChange={(e) => { setBusca(e.target.value); setPag(1) }} />
-          <a className="btn-primary ml-auto" href={`/api/empresas/${empresaId}/cadastro/excel`}><Icon name="excel" />Baixar cadastro em Excel</a>
+          <button className="btn-primary ml-auto" disabled={gerando} onClick={baixar}><Icon name="excel" />{gerando ? 'Gerando...' : 'Abrir cadastro em Excel'}</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full whitespace-nowrap">
@@ -203,6 +222,17 @@ export default function Analise({ id, ir }) {
   const [aba, setAba] = useState('teses')
   const [filtro, setFiltro] = useState({})
   const [job, setJob] = useState(null)
+  const [gerando, setGerando] = useState(null)
+  const [arquivo, setArquivo] = useState(null)
+
+  const abrir = async (tipo) => {
+    setGerando(tipo); setArquivo(null)
+    try {
+      setArquivo(await api.post(`/api/analises/${id}/abrir`, { tipo }))
+    } catch (err) {
+      setArquivo({ erro: err.message })
+    } finally { setGerando(null) }
+  }
 
   const carregar = () => api.get(`/api/analises/${id}`).then(setD)
   useEffect(() => { carregar() }, [id])
@@ -227,13 +257,14 @@ export default function Analise({ id, ir }) {
       <Titulo sub={`${cnpj(e.cnpj)} · ${competencia(a.periodo_ini)} a ${competencia(a.periodo_fim)} · análise de ${dataHora(a.criado_em)} · regras ${a.versao_regras}`}
         acoes={<>
           <button className="btn-ghost" disabled={!!job} onClick={reanalisar}><Icon name="atualizar" />Analisar de novo</button>
-          <a className="btn-ghost" href={`/api/analises/${id}/pdf`}><Icon name="pdf" />PDF para o cliente</a>
-          <a className="btn-primary" href={`/api/analises/${id}/excel`}><Icon name="excel" />Excel completo</a>
+          <button className="btn-ghost" disabled={!!gerando} onClick={() => abrir('pdf')}><Icon name="pdf" />{gerando === 'pdf' ? 'Gerando...' : 'PDF para o cliente'}</button>
+          <button className="btn-primary" disabled={!!gerando} onClick={() => abrir('excel')}><Icon name="excel" />{gerando === 'excel' ? 'Gerando...' : 'Excel completo'}</button>
         </>}>
         Análise #{a.id}
       </Titulo>
 
       {job && <div className="mb-4"><Progresso job={job} /></div>}
+      {arquivo && <div className="mb-4"><ArquivoGerado arquivo={arquivo} /></div>}
       {a.avisos?.length > 0 && <div className="mb-5 space-y-2">{a.avisos.map((t, i) => <Aviso key={i}>{t}</Aviso>)}</div>}
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">

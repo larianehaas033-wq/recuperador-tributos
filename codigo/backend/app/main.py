@@ -366,6 +366,33 @@ def pdf(aid: int):
     return FileResponse(p, filename=p.name, media_type="application/pdf")
 
 
+def _abrir(p: Path) -> dict:
+    """Abre o arquivo direto no programa padrão (Excel, leitor de PDF) em vez de depender do download da janela."""
+    aberto = False
+    if sys.platform.startswith("win"):
+        try:
+            import os
+            os.startfile(str(p))  # noqa: S606
+            aberto = True
+        except OSError:
+            subprocess.Popen(["explorer", "/select,", str(p)])
+    return {"caminho": str(p), "nome": p.name, "aberto": aberto}
+
+
+class Tipo(BaseModel):
+    tipo: str  # excel ou pdf
+
+
+@app.post("/api/analises/{aid}/abrir")
+def abrir_relatorio(aid: int, body: Tipo):
+    return _abrir(gerar_pdf(aid) if body.tipo == "pdf" else gerar_excel(aid))
+
+
+@app.post("/api/empresas/{eid}/cadastro/abrir")
+def abrir_cadastro(eid: int):
+    return _abrir(gerar_excel_cadastro(eid))
+
+
 @app.post("/api/abrir-pasta")
 def abrir_pasta():
     pasta = config.DATA_DIR / "relatorios"
