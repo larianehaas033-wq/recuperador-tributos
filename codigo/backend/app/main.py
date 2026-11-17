@@ -276,6 +276,24 @@ def empresa(eid: int):
     return {"empresa": dict(e), "arquivos": arquivos, "analises": analises, "cobertura": cobertura, "xml": xml}
 
 
+class RegimeManual(BaseModel):
+    regime: str | None = None  # LUCRO_REAL, LUCRO_PRESUMIDO, SIMPLES_NACIONAL ou vazio (automático)
+
+
+@app.post("/api/empresas/{eid}/regime")
+def definir_regime(eid: int, body: RegimeManual):
+    """Regime informado pelo usuário: vale nas competências sem EFD-Contribuições (que tem prioridade)."""
+    reg = body.regime or None
+    if reg not in (None, "LUCRO_REAL", "LUCRO_PRESUMIDO", "SIMPLES_NACIONAL"):
+        raise HTTPException(400, "Regime inválido.")
+    with db.tx() as con:
+        con.execute("UPDATE empresas SET regime_manual=? WHERE id=?", (reg, eid))
+        con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (eid,))
+        from .importador import atualizar_regime
+        atualizar_regime(con, eid)
+    return {"ok": True}
+
+
 @app.delete("/api/empresas/{eid}")
 def excluir_empresa(eid: int):
     """Exclui a empresa e tudo dela, das tabelas filhas para a principal (mais rápido que só a cascata)."""
@@ -283,7 +301,8 @@ def excluir_empresa(eid: int):
         with db.tx() as con:
             for sql in (
                 "DELETE FROM creditos_identificados WHERE analise_id IN (SELECT id FROM analises WHERE empresa_id=?)",
-                "DELETE FROM analises WHERE empresa_id=?", "DELETE FROM itens_nota WHERE empresa_id=?",
+                "DELETE FROM analises WHERE empresa_id=?", "DELETE FROM analitico_icms WHERE empresa_id=?",
+                "DELETE FROM itens_nota WHERE empresa_id=?",
                 "DELETE FROM notas_fiscais WHERE empresa_id=?", "DELETE FROM apuracoes WHERE empresa_id=?",
                 "DELETE FROM produtos WHERE empresa_id=?", "DELETE FROM revisoes_ncm WHERE empresa_id=?",
                 "DELETE FROM arquivos_sped WHERE empresa_id=?", "DELETE FROM empresas WHERE id=?",
@@ -302,7 +321,8 @@ def excluir_arquivo(aid: int):
     try:
         with db.tx() as con:
             emp = con.execute("SELECT empresa_id FROM arquivos_sped WHERE id=?", (aid,)).fetchone()
-            for sql in ("DELETE FROM itens_nota WHERE arquivo_id=?", "DELETE FROM notas_fiscais WHERE arquivo_id=?",
+            for sql in ("DELETE FROM analitico_icms WHERE arquivo_id=?", "DELETE FROM itens_nota WHERE arquivo_id=?",
+                        "DELETE FROM notas_fiscais WHERE arquivo_id=?",
                         "DELETE FROM apuracoes WHERE arquivo_id=?", "DELETE FROM arquivos_sped WHERE id=?"):
                 con.execute(sql, (aid,))
             if emp:  # a análise anterior deixou de refletir os arquivos

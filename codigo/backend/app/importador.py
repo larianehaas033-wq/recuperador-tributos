@@ -27,12 +27,25 @@ REGIME = {"1": "LUCRO_REAL", "2": "LUCRO_PRESUMIDO", "3": "MISTO"}
 Progress = Callable[[str, float], None]
 
 
+ANALITICO_COLS = ["cst_icms", "cfop", "aliq_icms", "vl_opr", "vl_bc_icms", "vl_icms", "vl_bc_icms_st", "vl_icms_st"]
+
+
+def gravar_analitico(con, empresa_id: int, arquivo_id: int, nota_id: int, nota: dict) -> None:
+    for a in nota.get("analitico") or []:
+        con.execute(f"INSERT INTO analitico_icms (empresa_id, arquivo_id, nota_id, {','.join(ANALITICO_COLS)}) "
+                    f"VALUES (?,?,?,{','.join('?' * len(ANALITICO_COLS))})",
+                    [empresa_id, arquivo_id, nota_id] + [a.get(c) for c in ANALITICO_COLS])
+
+
 def atualizar_regime(con, empresa_id: int) -> None:
     """Regime atual da empresa = o do período mais recente. Fonte: EFD-Contribuições (0110); sem ela, o CRT
     das notas que a própria empresa emitiu (1, 2 ou 4 = Simples Nacional)."""
     r = con.execute("SELECT regime FROM arquivos_sped WHERE empresa_id=? AND tipo='EFD_CONTRIB' AND regime IS NOT NULL"
                     " ORDER BY periodo_ini DESC LIMIT 1", (empresa_id,)).fetchone()
     regime = r["regime"] if r else None
+    if not regime:
+        m = con.execute("SELECT regime_manual FROM empresas WHERE id=?", (empresa_id,)).fetchone()
+        regime = m["regime_manual"] if m else None
     if not regime:
         c = con.execute("SELECT crt_emit FROM notas_fiscais WHERE empresa_id=? AND origem='XML' AND ind_emit='0'"
                         " AND crt_emit IS NOT NULL ORDER BY data DESC LIMIT 1", (empresa_id,)).fetchone()
@@ -117,6 +130,7 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
                 [vals.get(c) for c in NOTA_COLS],
             )
             nota_ids[n["_idx"]] = cur.lastrowid
+            gravar_analitico(con, empresa_id, arquivo_id, cur.lastrowid, n)
 
         gravar_produtos(con, empresa_id, r.produtos)
         batch = []

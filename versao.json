@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.8",
+  "versao": "1.4.9",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.8.zip",
-  "sha256": "84cc46dedd68a50bef7ce4affe37490c0e2b93d6e2ffef85908e1019c1a90e68",
+  "pacote": "atualizacoes/sistema-1.4.9.zip",
+  "sha256": "d341ad825927ac7f850bb1aa9d0e1be23c8246cbd680e5e3e173f516ef8dfc2e",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.11",
+  "versao_regras": "2026.11.17.12",
   "notas": [
-    "Excluir empresa e arquivo: exclusão confirmada, mensagem de erro se falhar e índices que deixam a exclusão rápida; análise marcada como desatualizada quando os arquivos mudam"
+    "Regime informado na tela da empresa; SPED Fiscal lido por inteiro (resumo C190 das vendas); nova tese: ICMS próprio debitado em venda de produto com ST"
   ]
 }

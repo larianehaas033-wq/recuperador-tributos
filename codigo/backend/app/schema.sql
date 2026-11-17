@@ -5,6 +5,7 @@
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS empresas (
+    regime_manual TEXT,                          -- regime informado pelo usuário (sem EFD-Contribuições)
     id            INTEGER PRIMARY KEY,
     cnpj          TEXT NOT NULL UNIQUE,      -- CNPJ do estabelecimento principal (14 dígitos)
     raiz_cnpj     TEXT NOT NULL,             -- 8 primeiros dígitos (agrupa filiais)
@@ -188,6 +189,25 @@ CREATE TABLE IF NOT EXISTS creditos_identificados (
     observacao    TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_cred_analise ON creditos_identificados(analise_id, tese);
+-- EFD ICMS/IPI: registro analítico do documento (C190), por CST/CFOP/alíquota. É o único detalhe das vendas
+-- em NFC-e e NF-e própria no SPED Fiscal.
+CREATE TABLE IF NOT EXISTS analitico_icms (
+    id            INTEGER PRIMARY KEY,
+    empresa_id    INTEGER NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+    arquivo_id    INTEGER NOT NULL REFERENCES arquivos_sped(id) ON DELETE CASCADE,
+    nota_id       INTEGER REFERENCES notas_fiscais(id) ON DELETE CASCADE,
+    cst_icms      TEXT,
+    cfop          TEXT,
+    aliq_icms     REAL,
+    vl_opr        REAL,
+    vl_bc_icms    REAL,
+    vl_icms       REAL,
+    vl_bc_icms_st REAL,
+    vl_icms_st    REAL
+);
+CREATE INDEX IF NOT EXISTS ix_c190_emp ON analitico_icms(empresa_id);
+CREATE INDEX IF NOT EXISTS ix_c190_nota ON analitico_icms(nota_id);
+CREATE INDEX IF NOT EXISTS ix_c190_arq ON analitico_icms(arquivo_id);
 -- chaves estrangeiras indexadas: exclusão de empresa/arquivo e consultas por nota ficam rápidas
 CREATE INDEX IF NOT EXISTS ix_itens_nota ON itens_nota(nota_id);
 CREATE INDEX IF NOT EXISTS ix_itens_arquivo ON itens_nota(arquivo_id);

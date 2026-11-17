@@ -135,6 +135,29 @@ NOME_REGIME = {"LUCRO_REAL": "Lucro Real (não cumulativo)", "LUCRO_PRESUMIDO": 
                "MISTO": "Lucro Real com receitas cumulativas e não cumulativas", "SIMPLES_NACIONAL": "Simples Nacional"}
 
 
+def _preencher_c190(con, empresa_id: int) -> None:
+    """SPED Fiscal importado antes da 1.4.9 não guardou o resumo das notas (C190): relê do arquivo original."""
+    from pathlib import Path
+
+    from ..importador import gravar_analitico
+    from ..parsers.efd import parse_efd
+    pend = con.execute("""SELECT a.id, a.caminho FROM arquivos_sped a WHERE a.empresa_id=? AND a.tipo='EFD_ICMS_IPI'
+                          AND NOT EXISTS (SELECT 1 FROM analitico_icms x WHERE x.arquivo_id=a.id)""",
+                       (empresa_id,)).fetchall()
+    for arq in pend:
+        if not arq["caminho"] or not Path(arq["caminho"]).exists():
+            continue
+        try:
+            r = parse_efd(Path(arq["caminho"]), "EFD_ICMS_IPI")
+        except Exception:
+            continue
+        ids = [x["id"] for x in con.execute("SELECT id FROM notas_fiscais WHERE arquivo_id=? ORDER BY id", (arq["id"],))]
+        if len(ids) != len(r.notas):
+            continue  # o arquivo mudou desde a importação: não arrisca associar errado
+        for nid, n in zip(ids, r.notas):
+            gravar_analitico(con, empresa_id, arq["id"], nid, n)
+
+
 def _preencher_regime_antigo(con, empresa_id: int) -> None:
     """Arquivos importados antes da 1.4.1 não guardaram o regime do mês: relê o registro 0110 do arquivo original,
     se ele ainda estiver no mesmo lugar."""
@@ -176,6 +199,21 @@ def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
     for r in con.execute("SELECT periodo, crt_emit FROM notas_fiscais WHERE empresa_id=? AND origem='XML' "
                          "AND ind_emit='0' AND crt_emit IS NOT NULL", (empresa_id,)):
         crt[r["periodo"]].add("SIMPLES_NACIONAL" if r["crt_emit"] in ("1", "2", "4") else "NORMAL")
+    manual = con.execute("SELECT regime_manual FROM empresas WHERE id=?", (empresa_id,)).fetchone()
+    manual = manual["regime_manual"] if manual else None
+    if manual:  # vale nos meses sem EFD-Contribuições (a escrituração da empresa prevalece)
+        meses = {r["p"] for r in con.execute(
+            "SELECT DISTINCT substr(periodo_ini,1,7) p FROM arquivos_sped WHERE empresa_id=? AND periodo_ini IS NOT NULL "
+            "UNION SELECT DISTINCT periodo FROM notas_fiscais WHERE empresa_id=? AND periodo IS NOT NULL",
+            (empresa_id, empresa_id))}
+        divergente = sorted(p for p in meses if p in regimes and regimes[p] != manual)
+        for p in meses:
+            regimes.setdefault(p, manual)
+        avisos.append(f"Regime informado manualmente: {NOME_REGIME.get(manual, manual)} (vale nos meses sem "
+                      "EFD-Contribuições).")
+        if divergente:
+            avisos.append("ATENÇÃO: nas competências " + ", ".join(divergente) + " a EFD-Contribuições informa outro "
+                          "regime; prevaleceu o da escrituração.")
     conflito = []
     for per, tipos in crt.items():
         if per in regimes:
@@ -184,8 +222,13 @@ def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
         elif tipos == {"SIMPLES_NACIONAL"}:
             regimes[per] = "SIMPLES_NACIONAL"
     if not regimes:
-        avisos.append("REGIME NÃO IDENTIFICADO: importe a EFD-Contribuições (registro 0110) ou os XMLs emitidos pela "
-                      "empresa. Sem o regime, as teses de PIS/COFINS não são calculadas; só as de ICMS.")
+        tipos = {r["tipo"]: r["n"] for r in con.execute(
+            "SELECT tipo, count(*) n FROM arquivos_sped WHERE empresa_id=? GROUP BY tipo", (empresa_id,))}
+        nomes = {"EFD_CONTRIB": "EFD-Contribuições", "EFD_ICMS_IPI": "EFD ICMS/IPI (SPED Fiscal)", "XML_NFE": "XMLs"}
+        tem = ", ".join(f"{nomes.get(t, t)} ({n})" for t, n in tipos.items()) or "nenhum arquivo"
+        avisos.append(f"REGIME NÃO IDENTIFICADO. Arquivos desta empresa: {tem}. O regime e as teses de PIS/COFINS "
+                      "vêm da EFD-Contribuições (registro 0110); a EFD ICMS/IPI (SPED Fiscal) não informa o regime. "
+                      "Importe a EFD-Contribuições do mesmo período para a análise de PIS/COFINS de entradas e saídas.")
         return regimes, avisos
     faixas, atual = [], None
     for per in sorted(regimes):
@@ -317,6 +360,10 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             "SELECT periodo, tributo, valor_recolher FROM apuracoes WHERE empresa_id=?", (empresa_id,))}
         selic = {r["competencia"]: r["taxa"] for r in con.execute("SELECT competencia, taxa FROM selic")}
         produtos = _produtos(con, empresa_id)
+        _preencher_c190(con, empresa_id)
+        analitico = db.rows(con, """
+            SELECT a.*, n.chave, n.numero, n.data, n.periodo, n.ind_oper, n.ind_emit, n.cancelada, n.modelo
+            FROM analitico_icms a JOIN notas_fiscais n ON n.id = a.nota_id WHERE a.empresa_id=?""", (empresa_id,))
         # notas de venda que a EFD-Contribuições traz só resumidas (NFC-e: C100 + C175, sem os produtos)
         sem_itens = db.rows(con, """
             SELECT n.chave, n.periodo, n.modelo, n.vl_doc FROM notas_fiscais n
@@ -387,7 +434,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
     if progress:
         progress("Analisando ICMS e cruzamentos", 0.6)
     cred_icms, av_icms = MotorIcms(base, empresa, entradas_icms, xml_itens, sped_notas, xml_notas, periodos_icms,
-                                   revisoes, hoje, produtos).executar()
+                                   revisoes, hoje, produtos, analitico).executar()
     creditos += cred_icms
     avisos += av_icms
 
@@ -442,6 +489,10 @@ def gerar_cadastro(empresa_id: int, hoje: date | None = None) -> list[dict]:
         entradas_icms = _itens(con, empresa_id, "EFD_ICMS_IPI", "AND i.ind_oper='0'")
         xml_itens = _itens(con, empresa_id, "XML_NFE")
         produtos = _produtos(con, empresa_id)
+        _preencher_c190(con, empresa_id)
+        analitico = db.rows(con, """
+            SELECT a.*, n.chave, n.numero, n.data, n.periodo, n.ind_oper, n.ind_emit, n.cancelada, n.modelo
+            FROM analitico_icms a JOIN notas_fiscais n ON n.id = a.nota_id WHERE a.empresa_id=?""", (empresa_id,))
         # notas de venda que a EFD-Contribuições traz só resumidas (NFC-e: C100 + C175, sem os produtos)
         sem_itens = db.rows(con, """
             SELECT n.chave, n.periodo, n.modelo, n.vl_doc FROM notas_fiscais n

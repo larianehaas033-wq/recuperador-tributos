@@ -59,6 +59,11 @@ export default function Empresa({ id, ir }) {
     } finally { setExcluindo(false) }
   }
 
+  const mudarRegime = async (ev) => {
+    try { await api.post(`/api/empresas/${id}/regime`, { regime: ev.target.value || null }) } catch (err) { alert(err.message) }
+    carregar()
+  }
+
   const meses = meses60()
   const linhas = [['EFD_CONTRIB', 'EFD-Contribuições'], ['EFD_ICMS_IPI', 'EFD ICMS/IPI'], ['XML_NFE', 'XMLs']]
 
@@ -67,6 +72,15 @@ export default function Empresa({ id, ir }) {
       <button className="mb-3 flex items-center gap-1 text-sm text-muted hover:text-navy" onClick={() => ir('painel')}><Icon name="voltar" />Painel</button>
       <Titulo sub={`${cnpj(e.cnpj)} · ${e.uf || ''} · ${REGIME[e.regime] || 'regime não identificado'}${e.ind_ativ === '0' ? ' · industrial' : ''}`}
         acoes={<>
+          <label className="flex items-center gap-2 text-sm text-muted" title="Usado nos meses sem EFD-Contribuições. Quando a EFD-Contribuições existe, vale o regime informado nela.">
+            Regime
+            <select className="input !w-auto !py-1.5" value={e.regime_manual || ''} onChange={mudarRegime}>
+              <option value="">Automático (pelos arquivos)</option>
+              <option value="LUCRO_REAL">Lucro Real</option>
+              <option value="LUCRO_PRESUMIDO">Lucro Presumido</option>
+              <option value="SIMPLES_NACIONAL">Simples Nacional</option>
+            </select>
+          </label>
           <button className="btn-ghost" onClick={() => ir('importar')}><Icon name="importar" />Importar mais</button>
           <button className="btn-gold" disabled={!!job} onClick={analisar}><Icon name="play" />Analisar agora</button>
         </>}>

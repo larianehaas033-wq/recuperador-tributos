@@ -112,8 +112,8 @@ def test_regime_identificado_por_competencia_e_conflito():
     con.executescript("""
         CREATE TABLE arquivos_sped (empresa_id, tipo, periodo_ini, regime);
         CREATE TABLE notas_fiscais (empresa_id, origem, ind_emit, periodo, crt_emit);
-        CREATE TABLE empresas (id, regime);
-        INSERT INTO empresas VALUES (1, NULL);
+        CREATE TABLE empresas (id, regime, regime_manual);
+        INSERT INTO empresas VALUES (1, NULL, NULL);
         INSERT INTO arquivos_sped VALUES (1,'EFD_CONTRIB','2022-01-01','LUCRO_PRESUMIDO'),
                                          (1,'EFD_CONTRIB','2023-01-01','LUCRO_REAL');
         INSERT INTO notas_fiscais VALUES (1,'XML','0','2021-05','1'), (1,'XML','0','2023-01','1');
@@ -125,7 +125,7 @@ def test_regime_identificado_por_competencia_e_conflito():
     vazio.row_factory = sqlite3.Row
     vazio.executescript("CREATE TABLE arquivos_sped (empresa_id, tipo, periodo_ini, regime);"
                         "CREATE TABLE notas_fiscais (empresa_id, origem, ind_emit, periodo, crt_emit);"
-                        "CREATE TABLE empresas (id, regime);")
+                        "CREATE TABLE empresas (id, regime, regime_manual);")
     assert regimes_por_periodo(vazio, 1) == ({}, [regimes_por_periodo(vazio, 1)[1][0]])
     assert "NÃO IDENTIFICADO" in regimes_por_periodo(vazio, 1)[1][0]
 

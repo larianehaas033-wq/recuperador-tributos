@@ -36,7 +36,7 @@ def _tributado(cst: str | None) -> bool:
 class MotorIcms:
     def __init__(self, base: BaseRegras, empresa: dict, sped_entradas: pl.DataFrame, xml_itens: pl.DataFrame,
                  sped_notas: pl.DataFrame, xml_notas: pl.DataFrame, periodos_sped_icms: set[str],
-                 revisoes: dict, hoje: date, produtos: dict | None = None):
+                 revisoes: dict, hoje: date, produtos: dict | None = None, analitico: list | None = None):
         self.base = base
         self.empresa = empresa
         self.sped_entradas = sped_entradas
@@ -52,6 +52,7 @@ class MotorIcms:
         self.fund = {k: v["fundamento"] for k, v in base.teses.items()}
         self.produtos = produtos or {}
         self.cfop_entrada = base.cfops("entrada_credito")
+        self.analitico = analitico or []
 
     def _destino_nota(self, chave: str) -> tuple[str, str]:
         """Comprova a destinação da compra pelos itens escriturados (C170) da própria nota na EFD ICMS/IPI."""
@@ -64,9 +65,37 @@ class MotorIcms:
                 return "BAIXA", f"Item {row['cod_item']} escriturado com CFOP {row['cfop']}: pode ser uso e consumo."
         return "ALTA", "Todos os itens da nota foram escriturados como revenda ou industrialização."
 
+    def _st_tributado_c190(self) -> list[Credito]:
+        """Pelo resumo de cada venda no SPED Fiscal (C190): linha que a própria empresa declarou como ST
+        (CST 60/CSOSN 500 ou CFOP 5405/6404) e mesmo assim debitou ICMS próprio."""
+        out = []
+        for a in self.analitico:
+            if (a.get("ind_oper") != "1" or a.get("ind_emit") != "0" or a.get("cancelada")
+                    or D(a.get("vl_icms")) <= 0):
+                continue
+            cst = a.get("cst_icms") or ""
+            cst_st = cst in ("500",) or (len(cst) == 3 and cst[1:] == "60")
+            cfop_st = a.get("cfop") in ("5405", "6404")
+            if not (cst_st or cfop_st):
+                continue
+            ambos = cst_st and cfop_st
+            out.append(Credito(
+                modulo="ICMS", tese="ICMS_ST_TRIBUTADO_C190", tributo="ICMS", periodo=a.get("periodo"),
+                data=a.get("data"), chave=a.get("chave"), num_doc=a.get("numero"), cfop=a.get("cfop"),
+                cst_escriturado=cst, cst_correto=cst if cst_st else "x60", base_original=D(a.get("vl_bc_icms")),
+                base_correta=ZERO, valor_pago=D(a.get("vl_icms")), valor_recuperar=D(a.get("vl_icms")),
+                natureza="RESTITUICAO", via="ADMINISTRATIVO_ESTADUAL",
+                fundamento=self.fund.get("ICMS_ST_TRIBUTADO_C190", ""), confianca="ALTA" if ambos else "BAIXA",
+                regra_codigo="C190_ST",
+                observacao=(f"Resumo da nota (C190): CST {cst}, CFOP {a.get('cfop')}, ICMS debitado "
+                            f"{D(a.get('vl_icms')):.2f}." + ("" if ambos else
+                            " Só um dos indicadores de ST (CST ou CFOP) está presente: confira se o produto tem ST."))))
+        return out
+
     def executar(self) -> tuple[list[Credito], list[str]]:
         avisos = []
         out: list[Credito] = []
+        out += self._st_tributado_c190()
         saidas = self.xml_itens.filter(pl.col("ind_oper") == "1")
         if not self.xml_itens.height:
             avisos.append("Sem XMLs importados: as teses de ICMS que dependem do item da venda não foram analisadas.")
