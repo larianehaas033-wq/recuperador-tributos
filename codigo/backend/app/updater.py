@@ -128,7 +128,12 @@ ESTADO_VERSAO = config.DATA_DIR / "atualizacao_programa.json"
 
 def verificar_versao(con=None) -> dict:
     """Consulta o versao.json publicado no repositório e guarda o resultado."""
-    info = json.loads(_get(config.URL_VERSAO).decode("utf-8"))
+    try:
+        req = urllib.request.Request(config.URL_VERSAO_API, headers={**UA, "Accept": "application/vnd.github.raw"})
+        with urllib.request.urlopen(req, timeout=20, context=ssl.create_default_context()) as r:
+            info = json.loads(r.read().decode("utf-8"))
+    except Exception:
+        info = json.loads(_get(config.URL_VERSAO).decode("utf-8"))
     nova = config.versao_tupla(info.get("versao")) > config.versao_tupla(config.VERSION)
     estado = {"atual": config.VERSION, "disponivel": info.get("versao"), "nova": nova,
               "notas": info.get("notas", []), "pacote": info.get("pacote"), "sha256": info.get("sha256"),
@@ -192,7 +197,7 @@ def baixar_versao(progress=None) -> dict:
     tmp.rename(destino)
     estado["baixada"] = True
     ESTADO_VERSAO.write_text(json.dumps(estado, ensure_ascii=False), encoding="utf-8")
-    return {"ok": True, "mensagem": f"Versão {estado['disponivel']} pronta. Feche e abra o programa para usar."}
+    return {"ok": True, "mensagem": f"Versão {estado['disponivel']} pronta.", "reiniciar": True}
 
 
 def monitorar_fontes(con) -> list[str]:

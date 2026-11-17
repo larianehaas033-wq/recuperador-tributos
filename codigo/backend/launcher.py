@@ -44,11 +44,35 @@ def aplicar_atualizacao_pendente() -> None:
         except OSError:
             pass
         return
-    subprocess.Popen([sys.executable, str(AQUI / "launcher.py")], cwd=str(raiz))
+    subprocess.Popen([sys.executable, str(AQUI / "launcher.py"), *sys.argv[1:]], cwd=str(raiz))
     sys.exit(0)
 
 
+def _porta_reinicio() -> int | None:
+    """'--reiniciar <porta>': reinício pedido pela própria tela após baixar uma versão nova."""
+    if "--reiniciar" in sys.argv:
+        try:
+            return int(sys.argv[sys.argv.index("--reiniciar") + 1])
+        except (IndexError, ValueError):
+            return 0
+    return None
+
+
+def _esperar_porta_livre(porta: int, segundos: float = 20) -> None:
+    """Espera o processo anterior sair (a porta dele fica livre) antes de trocar as pastas."""
+    fim = time.time() + segundos
+    while time.time() < fim:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", porta)) != 0:
+                time.sleep(1.0)  # dá tempo de o Windows soltar os arquivos do processo anterior
+                return
+        time.sleep(0.3)
+
+
 if __name__ == "__main__":
+    _p = _porta_reinicio()
+    if _p:
+        _esperar_porta_livre(_p)
     aplicar_atualizacao_pendente()
 
 sys.path.insert(0, str(AQUI))
@@ -69,6 +93,15 @@ def _ativo(porta: int) -> bool:
             return r.status == 200
     except Exception:
         return False
+
+
+def _porta_disponivel(porta: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", porta))
+            return True
+        except OSError:
+            return False
 
 
 def _porta_livre() -> int:
@@ -137,7 +170,8 @@ def aplicar_icone_atalho() -> None:
 
 
 def main() -> None:
-    if LOCK.exists():
+    reinicio = _porta_reinicio()
+    if LOCK.exists() and reinicio is None:
         try:
             porta = json.loads(LOCK.read_text())["porta"]
             if _ativo(porta):
@@ -151,7 +185,7 @@ def main() -> None:
     from app import updater
     from app.main import app
 
-    porta = _porta_livre()
+    porta = reinicio if reinicio and _porta_disponivel(reinicio) else _porta_livre()
     server = uvicorn.Server(uvicorn.Config(app, host="127.0.0.1", port=porta, log_level="warning",
                                            log_config=None))
     t = threading.Thread(target=server.run, daemon=True)
@@ -174,10 +208,29 @@ def main() -> None:
                 updater.atualizar_tudo()
         except Exception as e:  # sem internet, segue sem atualizar
             print("Atualização automática falhou:", e)
+        while True:  # com o programa aberto, procura versão nova a cada 30 minutos
+            time.sleep(30 * 60)
+            try:
+                updater.verificar_versao()
+            except Exception:
+                pass
 
     threading.Thread(target=auto_atualizar, daemon=True).start()
     threading.Thread(target=aplicar_icone_atalho, daemon=True).start()
 
+    # reinício na mesma porta com a janela ainda aberta: ela mesma recarrega, não abre outra
+    if reinicio and porta == reinicio and _janela_aberta():
+        janela = None
+        try:
+            while _janela_aberta():
+                time.sleep(2)
+        finally:
+            server.should_exit = True
+            try:
+                LOCK.unlink()
+            except FileNotFoundError:
+                pass
+        return
     janela = abrir_janela(f"http://127.0.0.1:{porta}/")
     try:
         if janela is not None:

@@ -1,6 +1,8 @@
 """API local do Recuperador de Tributos (FastAPI). Só escuta em 127.0.0.1."""
 from __future__ import annotations
 
+import os
+
 import json
 import subprocess
 import sys
@@ -10,7 +12,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import Request, FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -107,6 +109,21 @@ def verificar_versao_agora():
 @app.post("/api/atualizar-programa")
 def atualizar_programa():
     return {"job": _job(lambda progress: updater.baixar_versao(progress))}
+
+
+@app.post("/api/reiniciar")
+def reiniciar(request: Request):
+    """Reabre o programa para usar a versão baixada, sem o usuário fechar a janela: um novo launcher espera este
+    processo terminar, troca as pastas, sobe na mesma porta e a tela recarrega sozinha."""
+    import subprocess
+    import sys
+    import threading
+
+    porta = request.url.port or 0
+    subprocess.Popen([sys.executable, str(config.ROOT_DIR / "launcher.py"), "--reiniciar", str(porta)],
+                     cwd=str(config.ROOT_DIR.parent))
+    threading.Timer(1.0, lambda: os._exit(0)).start()
+    return {"ok": True}
 
 
 @app.get("/api/atualizacoes")

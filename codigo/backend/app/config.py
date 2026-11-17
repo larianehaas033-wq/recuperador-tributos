@@ -6,10 +6,12 @@ import sys
 from pathlib import Path
 
 APP_NAME = "RecuperadorTributos"
-VERSION = "1.4.3"
+VERSION = "1.4.4"
 
 REPO_RAW = "https://raw.githubusercontent.com/larianehaas033-wq/recuperador-tributos/main"
 URL_VERSAO = f"{REPO_RAW}/versao.json"
+# API do GitHub: entrega o arquivo na hora (o endereço "raw" fica até 5 minutos em cache)
+URL_VERSAO_API = "https://api.github.com/repos/larianehaas033-wq/recuperador-tributos/contents/versao.json"
 URL_REGRAS = f"{REPO_RAW}/regras/regras.json"
 
 

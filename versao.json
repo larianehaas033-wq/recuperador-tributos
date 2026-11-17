@@ -1,11 +1,11 @@
 {
-  "versao": "1.4.3",
+  "versao": "1.4.4",
   "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.3.zip",
-  "sha256": "4c4a8dc63895bb2c0e4727965f9e82dfdb5e505fee35d26223202f8c37c45ffa",
+  "pacote": "atualizacoes/sistema-1.4.4.zip",
+  "sha256": "5c990bfc16b45a7ce5fa0b85f96faa41479881139c56c9cd66e0c8db6410a90a",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.17.11",
   "notas": [
-    "Corrige erro 'RISCO_CRED_ALIQ_ZERO' na análise: versão das regras comparada como número, e regras baixadas completadas pela base do programa"
+    "Atualização em um clique: o programa baixa e se reinicia sozinho na mesma janela; nova versão aparece sem esperar o cache do GitHub"
   ]
 }

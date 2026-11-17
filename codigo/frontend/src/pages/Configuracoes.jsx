@@ -10,7 +10,8 @@ export default function Configuracoes({ status }) {
     setProcurando(true)
     try {
       const v = await api.post('/api/versao/verificar')
-      setMsg(v.nova ? { tipo: 'ok', texto: `Versão ${v.disponivel} disponível. Use o botão "Atualizar programa" no menu à esquerda (pode ser preciso recarregar a tela com F5).` }
+      window.dispatchEvent(new Event('versao-verificada'))
+      setMsg(v.nova ? { tipo: 'ok', texto: `Versão ${v.disponivel} disponível: clique em "Atualizar programa" no menu à esquerda. O programa se reinicia sozinho.` }
         : { tipo: 'ok', texto: `O programa já está na versão mais recente (${v.atual}).` })
     } catch (e) { setMsg({ tipo: 'erro', texto: e.message }) } finally { setProcurando(false) }
   }

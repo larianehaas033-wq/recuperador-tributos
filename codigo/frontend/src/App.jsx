@@ -20,20 +20,42 @@ export default function App() {
   const [versao, setVersao] = useState(null)
   const [baixando, setBaixando] = useState(false)
   const carregarVersao = useCallback(() => api.get('/api/versao').then(setVersao).catch(() => {}), [])
-  useEffect(() => { carregarVersao() }, [carregarVersao])
+  useEffect(() => {
+    carregarVersao()
+    const t = setInterval(carregarVersao, 5 * 60 * 1000)  // a verificação na internet roda em segundo plano
+    window.addEventListener('versao-verificada', carregarVersao)
+    return () => { clearInterval(t); window.removeEventListener('versao-verificada', carregarVersao) }
+  }, [carregarVersao])
+
+  // reabre o programa na mesma janela: o servidor reinicia com a versão nova e a tela recarrega sozinha
+  const reiniciar = async (alvo) => {
+    setBaixando('reiniciando')
+    try { await api.post('/api/reiniciar') } catch { /* o servidor sai logo em seguida */ }
+    const inicio = Date.now()
+    await new Promise((ok) => setTimeout(ok, 2500))
+    while (Date.now() - inicio < 90000) {
+      try {
+        const s = await api.get('/api/status')
+        if (!alvo || s.versao_programa === alvo) { window.location.reload(); return }
+      } catch { /* ainda reiniciando */ }
+      await new Promise((ok) => setTimeout(ok, 1000))
+    }
+    alert('O programa não voltou sozinho. Feche a janela e abra de novo pelo atalho.')
+    setBaixando(false)
+  }
 
   const atualizarPrograma = async () => {
     setBaixando(true)
     try {
       const { job } = await api.post('/api/atualizar-programa')
       const r = await aguardar(job)
+      if (r.ok && r.reiniciar) { await reiniciar(versao?.disponivel); return }
       alert(r.mensagem)
     } catch (e) {
       alert('Não foi possível atualizar: ' + e.message)
-    } finally {
-      setBaixando(false)
-      carregarVersao()
     }
+    setBaixando(false)
+    carregarVersao()
   }
 
   useEffect(() => {
@@ -109,13 +131,16 @@ export default function App() {
           <div className="mx-3 rounded-md border border-gold/60 bg-gold/10 p-3 text-xs">
             <div className="font-semibold text-gold">Nova versão {versao.disponivel}</div>
             {versao.baixada ? (
-              <div className="mt-1 text-white/80">Já baixada. Feche e abra o programa para usar.</div>
+              <button onClick={() => reiniciar(versao.disponivel)} disabled={!!baixando}
+                className="mt-2 w-full rounded bg-white py-1.5 font-semibold text-navy hover:bg-gold-100 disabled:opacity-60">
+                {baixando === 'reiniciando' ? 'Reiniciando...' : 'Reiniciar e usar a nova versão'}
+              </button>
             ) : (
               <>
                 {versao.notas?.length > 0 && <ul className="mt-1 list-disc space-y-0.5 pl-4 text-white/70">{versao.notas.slice(0, 3).map((n, i) => <li key={i}>{n}</li>)}</ul>}
                 <button onClick={atualizarPrograma} disabled={baixando}
                   className="mt-2 w-full rounded bg-white py-1.5 font-semibold text-navy hover:bg-gold-100 disabled:opacity-60">
-                  {baixando ? 'Baixando...' : 'Atualizar programa'}
+                  {baixando === 'reiniciando' ? 'Reiniciando...' : baixando ? 'Baixando...' : 'Atualizar programa'}
                 </button>
               </>
             )}
