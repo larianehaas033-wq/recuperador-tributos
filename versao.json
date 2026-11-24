@@ -1,13 +1,14 @@
 {
-  "versao": "1.4.22",
+  "versao": "1.4.23",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.22.zip",
-  "sha256": "d7dd7dcdb5c249cbb26784006772b8c9e707bd0dd9c870c75265099068cee26f",
+  "pacote": "atualizacoes/sistema-1.4.23.zip",
+  "sha256": "c99f2fd335877a7c65208dd31b181f60c77c24f13eb74e20c4272801280bc4f6",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.24.8",
   "notas": [
-    "Importa a planilha de itens do DF-e (SAT/SEF) no lugar dos XMLs de compra: crédito de ICMS, notas não escrituradas e malha",
-    "Entradas auditadas passam a contar as compras da EFD ICMS/IPI",
-    "Bonificação para revenda dá crédito de ICMS; Simples com ICMS em grupo normal dá crédito normal; ICMS próprio do substituto (ST retida) fora do crédito; observações longas não esticam mais a tabela"
+    "Com dois SPED do mesmo mês, vale o arquivo transmitido (com assinatura digital); o gerado pelo sistema da empresa é ignorado, com aviso",
+    "Tela de importação mostra se o SPED é o transmitido ou está sem assinatura",
+    "Aba Entradas auditadas: lista completa dos produtos de compra, com ICMS destacado x creditado e situação",
+    "Excel: nova aba Compras auditadas"
   ]
 }

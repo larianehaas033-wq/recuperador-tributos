@@ -200,6 +200,7 @@ def gerar_excel(analise_id: int) -> Path:
 
     # Malha fiscal (cruzamentos que o fisco faz com a escrituração do cliente)
     _aba_malha(wb, a["empresa_id"], cabecalho, base)
+    _aba_compras(wb, a, cabecalho)
 
     # Por competência
     ws = wb.create_sheet("Por competência")
@@ -296,6 +297,31 @@ def _aba_malha(wb, empresa_id: int, cabecalho, base) -> None:
             ws.cell(row=ws.max_row, column=1).font = Font(bold=True, color="B42318")
     if not alertas:
         ws.append(["", "Nenhum indício de malha encontrado nos arquivos importados."])
+    ws.auto_filter.ref = ws.dimensions
+
+
+def _aba_compras(wb, a, cabecalho) -> None:
+    """Todos os produtos de compra: ICMS destacado pelo fornecedor x creditado na EFD, item a item."""
+    from .. import db
+    from ..engine import compras as cp
+    with db.tx() as con:
+        linhas = cp.listar(con, a["empresa_id"], a["periodo_ini"], a["periodo_fim"])
+    ws = wb.create_sheet("Compras auditadas")
+    cabecalho(ws, ["Nº da nota", "Data", "Item", "Cód. item", "Produto", "NCM", "CFOP", "CST fornecedor", "CST na EFD",
+                   "Valor", "ICMS destacado", "ICMS creditado", "Diferença", "Situação", "Chave", "CNPJ emitente",
+                   "Visto do contador"],
+              [12, 11, 6, 10, 40, 11, 7, 12, 11, 12, 13, 13, 12, 44, 46, 16, 18])
+    for r in linhas:
+        num = r["nota"] or ""
+        ws.append([int(num) if str(num).isdigit() else num, r["data"], r["item"], r["cod_item"], r["descricao"],
+                   r["ncm"], r["cfop"], r["cst_fornecedor"], r["cst_efd"], r["valor"], r["destacado"], r["creditado"],
+                   r["diferenca"], cp.SITUACOES[r["situacao"]], r["chave"], r["cnpj_emit"], ""])
+        for c in (10, 11, 12, 13):
+            ws.cell(row=ws.max_row, column=c).number_format = "#,##0.00"
+        if r["situacao"] in ("MENOR", "FORA_EFD"):
+            ws.cell(row=ws.max_row, column=14).font = Font(bold=True, color="B42318")
+    if not linhas:
+        ws.append(["", "", "", "", "Nenhuma compra com itens no período (importe a EFD ICMS/IPI e os XMLs ou a planilha do DF-e)."])
     ws.auto_filter.ref = ws.dimensions
 
 

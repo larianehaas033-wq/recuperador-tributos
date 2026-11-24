@@ -399,6 +399,27 @@ def creditos(aid: int, tese: str | None = None, tributo: str | None = None, natu
     return {"total": total, "pagina": pagina, "itens": itens}
 
 
+@app.get("/api/analises/{aid}/compras")
+def compras(aid: int, situacao: str | None = None, busca: str | None = None, pagina: int = 1, por_pagina: int = 100):
+    """Todos os produtos de compra do período da análise: destacado pelo fornecedor x creditado na EFD."""
+    from .engine import compras as cp
+    with db.tx() as con:
+        a = con.execute("SELECT empresa_id, periodo_ini, periodo_fim FROM analises WHERE id=?", (aid,)).fetchone()
+        if not a:
+            raise HTTPException(404, "Análise não encontrada")
+        linhas = cp.listar(con, a["empresa_id"], a["periodo_ini"], a["periodo_fim"])
+    res = cp.resumo(linhas)
+    if situacao:
+        linhas = [r for r in linhas if r["situacao"] == situacao]
+    if busca:
+        b = busca.upper()
+        linhas = [r for r in linhas if any(b in str(r[c] or "").upper()
+                                           for c in ("descricao", "ncm", "nota", "chave", "cod_item"))]
+    ini = (pagina - 1) * por_pagina
+    return {"total": len(linhas), "pagina": pagina, "resumo": res, "situacoes": cp.SITUACOES,
+            "itens": linhas[ini:ini + por_pagina]}
+
+
 class Revisao(BaseModel):
     ncm: str
     tese: str

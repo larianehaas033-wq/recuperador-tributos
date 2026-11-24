@@ -426,6 +426,10 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
         ultima_atual = con.execute(
             "SELECT max(executado_em) m FROM atualizacoes WHERE status IN ('OK','SEM_MUDANCA','ALTERADA')").fetchone()["m"]
         pendentes = [r["nome"] for r in con.execute("SELECT nome FROM fontes_monitoradas WHERE pendente_revisao=1")]
+        nao_assinados = [f"{'EFD ICMS/IPI' if r['tipo'] == 'EFD_ICMS_IPI' else 'EFD-Contribuições'} "
+                         f"{r['periodo_ini'][5:7]}/{r['periodo_ini'][:4]} ({r['nome']})" for r in con.execute(
+            "SELECT tipo, periodo_ini, nome FROM arquivos_sped WHERE empresa_id=? AND assinado=0 "
+            "AND tipo IN ('EFD_ICMS_IPI','EFD_CONTRIB') ORDER BY periodo_ini", (empresa_id,))]
         if analise_id is None:
             cur = con.execute("INSERT INTO analises (empresa_id, status) VALUES (?, 'PROCESSANDO')", (empresa_id,))
             analise_id = cur.lastrowid
@@ -435,6 +439,11 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
     if not itens_contrib.height and not xml_itens.height and not entradas_icms.height:
         avisos.append("Nenhum dado importado para esta empresa.")
     avisos += avisos_regime
+    if nao_assinados:
+        avisos.append("ATENÇÃO: arquivo(s) SPED sem assinatura digital, ou seja, não são o arquivo transmitido ao fisco: "
+                      + "; ".join(nao_assinados[:6]) + ("…" if len(nao_assinados) > 6 else "")
+                      + ". Os cruzamentos valem para o arquivo importado; importe o transmitido (baixado do "
+                        "PVA/ReceitaNet) para conferir o que o fisco recebeu.")
     if not selic:
         avisos.append("Tabela Selic não carregada: valores sem correção. Use 'Atualizar base' com internet.")
     if pendentes:

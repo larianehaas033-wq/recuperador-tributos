@@ -101,11 +101,12 @@ export default function Importar({ ir }) {
                     <td className="td font-medium">{r.arquivo}</td>
                     <td className="td">{TIPO[r.tipo] || '—'}</td>
                     <td className="td">{r.nome || (r.tipo === 'XML_NFE' ? <>{r.importadas} notas novas{r.criadas?.length > 0 && <div className="mt-1 text-xs text-muted">Empresa cadastrada pelos XMLs: {r.criadas.join(', ')}</div>}</> : '—')}</td>
-                    <td className="td num">{r.periodo ? competencia(r.periodo) : '—'}{r.finalidade === 'retificadora' && <span className="chip ml-2 bg-navy-100 text-navy">retificadora</span>}</td>
+                    <td className="td num">{r.periodo ? competencia(r.periodo) : '—'}{r.finalidade === 'retificadora' && <span className="chip ml-2 bg-navy-100 text-navy">retificadora</span>}{r.assinado === true && <span className="chip ml-2 bg-emerald-50 text-emerald-700">transmitido</span>}{r.assinado === false && <span className="chip ml-2 bg-amber-50 text-warn">sem assinatura</span>}</td>
                     <td className="td num text-muted">{r.itens != null ? `${r.notas} notas · ${r.itens} itens` : r.lidas != null ? `${r.lidas} lidas · ${r.repetidas} repetidas · ${r.sem_empresa} de outros CNPJs` : ''}</td>
                     <td className="td">
                       <span className={`chip ${ST[r.status]?.[1]}`}>{ST[r.status]?.[0] || r.status}</span>
                       {(r.motivo || r.substituiu) && <div className="mt-1 text-xs text-muted">{r.motivo || `Substituiu ${r.substituiu}`}</div>}
+                      {r.avisos?.map((a, j) => <div key={j} className="mt-1 text-xs text-warn">{a}</div>)}
                     </td>
                   </tr>
                 ))}

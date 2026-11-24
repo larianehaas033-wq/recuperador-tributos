@@ -82,6 +82,18 @@ def gravar_produtos(con, empresa_id: int, produtos: dict) -> None:
     )
 
 
+def arquivo_assinado(path: Path) -> bool:
+    """O PVA anexa a assinatura digital depois do |9999| (bloco que começa com SBRCAAEPDR). Só o arquivo
+    transmitido a tem; o gerado pelo sistema da empresa ou do contador, antes de assinar, não."""
+    with open(path, "rb") as f:
+        f.seek(0, 2)
+        tam = f.tell()
+        f.seek(max(0, tam - 65536))
+        fim = f.read()
+    i = fim.rfind(b"|9999|")
+    return i >= 0 and b"SBRCAAEPDR" in fim[i:]
+
+
 def importar_sped(path: Path, progress: Progress | None = None) -> dict:
     tipo = identificar_tipo(path)
     if not tipo:
@@ -94,6 +106,7 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
     if progress:
         progress(f"Lendo {path.name}", 0.1)
     r = parse_efd(path, tipo)
+    assinado = arquivo_assinado(path)
     if not r.cnpj:
         return {"arquivo": path.name, "status": "ERRO", "motivo": "Arquivo sem CNPJ no registro 0000."}
 
@@ -103,20 +116,26 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
                                      r.ind_ativ if tipo == "EFD_CONTRIB" else None)
         substituido = None
         antigo = con.execute(
-            "SELECT id, nome, finalidade FROM arquivos_sped WHERE empresa_id=? AND tipo=? AND periodo_ini=?",
+            "SELECT id, nome, finalidade, assinado FROM arquivos_sped WHERE empresa_id=? AND tipo=? AND periodo_ini=?",
             (empresa_id, tipo, r.dt_ini),
         ).fetchone()
         if antigo:
             if antigo["finalidade"] == "retificadora" and r.finalidade == "original":
                 return {"arquivo": path.name, "status": "IGNORADO",
                         "motivo": f"Já existe retificadora para {r.dt_ini[:7]} ({antigo['nome']})."}
+            if antigo["assinado"] and not assinado:
+                return {"arquivo": path.name, "status": "IGNORADO", "tipo": tipo,
+                        "motivo": (f"Já existe o arquivo transmitido de {r.dt_ini[:7]} ({antigo['nome']}, com assinatura "
+                                   "digital). Este não tem assinatura: é uma cópia não entregue (ex.: arquivo gerado "
+                                   "pelo sistema da empresa) e não vale para o fisco. A análise usa o transmitido.")}
             con.execute("DELETE FROM arquivos_sped WHERE id = ?", (antigo["id"],))
             substituido = antigo["nome"]
 
         cur = con.execute(
             "INSERT INTO arquivos_sped (empresa_id, tipo, nome, caminho, hash, periodo_ini, periodo_fim, finalidade,"
-            " regime, qtd_registros) VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (empresa_id, tipo, path.name, str(path), h, r.dt_ini, r.dt_fin, r.finalidade, regime, r.registros),
+            " regime, qtd_registros, assinado) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (empresa_id, tipo, path.name, str(path), h, r.dt_ini, r.dt_fin, r.finalidade, regime, r.registros,
+             1 if assinado else 0),
         )
         atualizar_regime(con, empresa_id)
         con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (empresa_id,))
@@ -156,7 +175,10 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
     return {
         "arquivo": path.name, "status": "IMPORTADO", "tipo": tipo, "empresa_id": empresa_id, "cnpj": r.cnpj,
         "nome": r.nome, "periodo": (r.dt_ini or "")[:7], "finalidade": r.finalidade, "notas": len(r.notas),
-        "itens": len(r.itens), "substituiu": substituido, "avisos": r.avisos,
+        "itens": len(r.itens), "substituiu": substituido, "assinado": assinado,
+        "avisos": r.avisos + ([] if assinado else [
+            "Arquivo sem assinatura digital: não é o arquivo transmitido ao fisco. Se houver o transmitido "
+            "(baixado do PVA/ReceitaNet), importe-o: ele substitui este e é o que o fisco cruza."]),
     }
 
 

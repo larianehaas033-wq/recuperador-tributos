@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS arquivos_sped (
     periodo_fim   TEXT,
     finalidade    TEXT,                      -- original / retificadora
     regime        TEXT,                      -- EFD-Contribuições: regime do período (registro 0110)
+    assinado      INTEGER,                   -- 1 = tem a assinatura digital do PVA (arquivo transmitido)
     qtd_registros INTEGER,
     importado_em  TEXT DEFAULT CURRENT_TIMESTAMP
 );

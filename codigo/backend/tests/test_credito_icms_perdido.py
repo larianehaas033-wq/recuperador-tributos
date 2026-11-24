@@ -59,3 +59,13 @@ def test_credito_icms_nao_aproveitado():
     assert "fora da ST" in menor[0]["observacao"]
     nao = [c for c in cr if c["tese"] == "ICMS_CREDITO_NAO_APURADO"]
     assert len(nao) == 1 and nao[0]["valor_recuperar"] == 50.0
+
+
+def test_lista_de_compras_mostra_todos_os_produtos():
+    from app.engine import compras as cp
+    with db.tx() as con:
+        eid = con.execute("SELECT id FROM empresas WHERE cnpj=?", (EMP,)).fetchone()["id"]
+        linhas = cp.listar(con, eid, "2024-03", "2024-03")
+    dip = [r for r in linhas if r["chave"] == K1]
+    assert len(dip) == 1 and dip[0]["situacao"] == "MENOR"
+    assert dip[0]["destacado"] == 170.0 and dip[0]["creditado"] == 0.0 and dip[0]["diferenca"] == 170.0

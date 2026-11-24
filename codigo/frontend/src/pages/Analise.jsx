@@ -79,6 +79,77 @@ function Itens({ id, filtroInicial, teses, operacao }) {
   )
 }
 
+const COR_SIT = { MENOR: 'bg-red-50 text-bad', FORA_EFD: 'bg-red-50 text-bad', MAIOR: 'bg-amber-50 text-warn', SEM_C170: 'bg-amber-50 text-warn', SEM_XML: 'bg-amber-50 text-warn', CREDITADO: 'bg-emerald-50 text-emerald-700' }
+
+function Compras({ id }) {
+  const [sit, setSit] = useState('')
+  const [busca, setBusca] = useState('')
+  const [pag, setPag] = useState(1)
+  const [d, setD] = useState(null)
+  useEffect(() => {
+    const q = new URLSearchParams({ pagina: pag, por_pagina: 50 })
+    if (sit) q.set('situacao', sit)
+    if (busca) q.set('busca', busca)
+    api.get(`/api/analises/${id}/compras?${q}`).then(setD)
+  }, [id, sit, busca, pag])
+  if (!d) return null
+  const paginas = Math.max(1, Math.ceil(d.total / 50))
+  const v = (x) => (x == null ? '—' : brl(x))
+  return (
+    <div className="card overflow-hidden">
+      <div className="border-b border-line p-4">
+        <div className="mb-3 font-semibold">Todos os produtos de compra: destacado pelo fornecedor x creditado na EFD</div>
+        <div className="flex flex-wrap gap-2">
+          <button className={`chip ${!sit ? 'bg-navy text-white' : 'bg-navy-100 text-navy'}`} onClick={() => { setSit(''); setPag(1) }}>Todos</button>
+          {d.resumo.map((r) => (
+            <button key={r.situacao} className={`chip ${sit === r.situacao ? 'bg-navy text-white' : COR_SIT[r.situacao] || 'bg-navy-100 text-navy'}`}
+              onClick={() => { setSit(r.situacao); setPag(1) }}>
+              {r.nome}: {r.itens} itens · destacado {brl(r.destacado)} · creditado {brl(r.creditado)}
+            </button>
+          ))}
+        </div>
+        <input className="input mt-3 w-full md:w-96" placeholder="Buscar produto, NCM, nº da nota ou chave" value={busca}
+          onChange={(e) => { setBusca(e.target.value); setPag(1) }} />
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead><tr>
+            {['Nota', 'Data', 'Item', 'Produto', 'NCM', 'CFOP', 'CST fornecedor', 'CST na EFD', 'Valor', 'ICMS destacado', 'ICMS creditado', 'Diferença', 'Situação'].map((h) => <th key={h} className="th">{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {d.itens.map((r, i) => (
+              <tr key={i}>
+                <td className="td num">{r.nota}</td>
+                <td className="td num">{r.data}</td>
+                <td className="td num">{r.item}</td>
+                <td className="td">{r.descricao}</td>
+                <td className="td num">{r.ncm}</td>
+                <td className="td num">{r.cfop}</td>
+                <td className="td num">{r.cst_fornecedor || '—'}</td>
+                <td className="td num">{r.cst_efd || '—'}</td>
+                <td className="td num text-right">{v(r.valor)}</td>
+                <td className="td num text-right">{v(r.destacado)}</td>
+                <td className="td num text-right">{v(r.creditado)}</td>
+                <td className={`td num text-right ${r.diferenca > 0.009 ? 'font-semibold text-bad' : ''}`}>{v(r.diferenca)}</td>
+                <td className="td"><span className={`chip ${COR_SIT[r.situacao] || 'bg-navy-100 text-navy'}`}>{d.situacoes[r.situacao]}</span></td>
+              </tr>
+            ))}
+            {d.itens.length === 0 && <tr><td className="td py-8 text-center text-muted" colSpan={13}>Nenhum produto de compra no período.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex items-center justify-between border-t border-line px-4 py-3 text-sm text-muted">
+        <span className="num">{d.total} itens</span>
+        <div className="flex items-center gap-2">
+          <button className="btn-ghost !py-1" disabled={pag <= 1} onClick={() => setPag(pag - 1)}>Anterior</button>
+          <span className="num">{pag} / {paginas}</span>
+          <button className="btn-ghost !py-1" disabled={pag >= paginas} onClick={() => setPag(pag + 1)}>Próxima</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Operacao({ id, op, dados, teses }) {
   const saida = op === 'SAIDA'
   if (!dados) return <Aviso tipo="info">Analise de novo para ver este painel.</Aviso>
@@ -96,7 +167,9 @@ function Operacao({ id, op, dados, teses }) {
         <Kpi rotulo="Não comprovado" valor={brl(dados.nao_comprovado)} detalhe="Fora dos totais" tom="verificar" />
         <Kpi rotulo="Riscos comprovados" valor={brl(dados.riscos)} detalhe="Podem ser cobrados" tom="risco" />
       </div>
+      {!saida && <div className="text-sm font-semibold">Achados nas compras</div>}
       <Itens id={id} filtroInicial={{}} teses={teses} operacao={op} />
+      {!saida && <Compras id={id} />}
     </div>
   )
 }
