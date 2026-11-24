@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.3",
+ "versao": "2026.11.24.4",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -2890,8 +2890,2437 @@
     "2206",
     "2208"
    ],
-   "fundamento": "Decreto SC 982/2020 (DOE 11/12/2020), que retirou do Anexo 1-A e do Anexo 3 do RICMS/SC-01 as Seções III, XIV e XIX a partir de 01/01/2021; SC também deixou os protocolos/convênios de ST desses segmentos"
+   "fundamento": "Decreto SC 982/2020 (DOE 11/12/2020), que retirou do Anexo 1-A e do Anexo 3 do RICMS/SC-01 as Seções III, XIV e XIX a partir de 01/01/2021; SC também deixou os protocolos/convênios de ST desses segmentos",
+   "fim": "2024-03-31"
   }
  ],
- "icms_st_incluidos": []
+ "icms_st_incluidos": [
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.001.00",
+   "ncm_prefixos": [
+    "2205",
+    "22089000"
+   ],
+   "descricao": "Aperitivos, amargos, bitter e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "APERIT",
+    "AMARGO",
+    "BITTER",
+    "CAMPARI",
+    "CYNAR",
+    "FERNET"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.002.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Batida e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "BATIDA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.003.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Bebida ice",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ICE"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.004.00",
+   "ncm_prefixos": [
+    "220720",
+    "22084000"
+   ],
+   "descricao": "Cachaça e aguardentes",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "CACHA",
+    "AGUARD",
+    "PINGA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.005.00",
+   "ncm_prefixos": [
+    "2205",
+    "22060090",
+    "22089000"
+   ],
+   "descricao": "Catuaba e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "CATUABA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.006.00",
+   "ncm_prefixos": [
+    "22082000"
+   ],
+   "descricao": "Conhaque, brandy e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.007.00",
+   "ncm_prefixos": [
+    "22060090",
+    "22089000"
+   ],
+   "descricao": "Cooler",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "COOLER"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.008.00",
+   "ncm_prefixos": [
+    "22085000"
+   ],
+   "descricao": "Gim (gin) e genebra",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.009.00",
+   "ncm_prefixos": [
+    "2205",
+    "22060090",
+    "22089000"
+   ],
+   "descricao": "Jurubeba e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "JURUBEBA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.010.00",
+   "ncm_prefixos": [
+    "22087000"
+   ],
+   "descricao": "Licores e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.011.00",
+   "ncm_prefixos": [
+    "22082000"
+   ],
+   "descricao": "Pisco",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.012.00",
+   "ncm_prefixos": [
+    "22084000"
+   ],
+   "descricao": "Rum",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.013.00",
+   "ncm_prefixos": [
+    "22060090"
+   ],
+   "descricao": "Saquê",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.014.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Steinhaeger",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "STEINH"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.015.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Tequila",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "TEQUIL"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.016.00",
+   "ncm_prefixos": [
+    "220830"
+   ],
+   "descricao": "Uísque",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.017.00",
+   "ncm_prefixos": [
+    "2205"
+   ],
+   "descricao": "Vermute e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.018.00",
+   "ncm_prefixos": [
+    "22086000"
+   ],
+   "descricao": "Vodka",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.019.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Derivados de vodka",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "VODKA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.020.00",
+   "ncm_prefixos": [
+    "22089000"
+   ],
+   "descricao": "Arak",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ARAK"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.021.00",
+   "ncm_prefixos": [
+    "22082000"
+   ],
+   "descricao": "Aguardente vínica / grappa",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.022.00",
+   "ncm_prefixos": [
+    "22060010"
+   ],
+   "descricao": "Sidra e similares",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.023.00",
+   "ncm_prefixos": [
+    "2205",
+    "22060090",
+    "22089000"
+   ],
+   "descricao": "Sangrias e coquetéis",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "SANGRIA",
+    "COQUETEL",
+    "DRINK"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "III-A",
+   "segmento": "Bebidas alcoólicas, exceto cerveja e chope",
+   "cest": "02.999.00",
+   "ncm_prefixos": [
+    "2205",
+    "2206",
+    "2207",
+    "2208"
+   ],
+   "descricao": "Outras bebidas alcoólicas não especificadas nos itens anteriores",
+   "inicio": "2024-04-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção III-A (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "BEBIDA",
+    "VINHO",
+    "LICOR",
+    "DESTILAD",
+    "APERITIV",
+    "DRINK"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.007.00",
+   "ncm_prefixos": [
+    "22021000"
+   ],
+   "descricao": "Água aromatizada artificialmente, exceto os refrescos e refrigerantes",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "AGUA",
+    "ÁGUA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.008.00",
+   "ncm_prefixos": [
+    "22029900"
+   ],
+   "descricao": "Outras águas minerais, gasosa ou não, ou potável, naturais, inclusive gaseificadas ou aromatizadas artificialmente, exceto os refrescos e refrigerantes",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "AGUA",
+    "ÁGUA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.010.00",
+   "ncm_prefixos": [
+    "22021000",
+    "22029900"
+   ],
+   "descricao": "Refrigerante em vidro descartável",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "REFRI",
+    "SODA",
+    "GUARANA",
+    "GUARANÁ",
+    "COLA",
+    "TONICA",
+    "TÔNICA",
+    "SCHWEPPES",
+    "FANTA",
+    "SPRITE",
+    "PEPSI",
+    "SUKITA",
+    "KUAT",
+    "DOLLY",
+    "SPRITE",
+    "ITUBAINA",
+    "H2OH",
+    "LIMONADA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.010.01",
+   "ncm_prefixos": [
+    "22021000",
+    "22029900"
+   ],
+   "descricao": "Refrigerante em embalagem PET",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "REFRI",
+    "SODA",
+    "GUARANA",
+    "GUARANÁ",
+    "COLA",
+    "TONICA",
+    "TÔNICA",
+    "SCHWEPPES",
+    "FANTA",
+    "SPRITE",
+    "PEPSI",
+    "SUKITA",
+    "KUAT",
+    "DOLLY",
+    "SPRITE",
+    "ITUBAINA",
+    "H2OH",
+    "LIMONADA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.010.02",
+   "ncm_prefixos": [
+    "22021000",
+    "22029900"
+   ],
+   "descricao": "Refrigerante em embalagem PET",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "REFRI",
+    "SODA",
+    "GUARANA",
+    "GUARANÁ",
+    "COLA",
+    "TONICA",
+    "TÔNICA",
+    "SCHWEPPES",
+    "FANTA",
+    "SPRITE",
+    "PEPSI",
+    "SUKITA",
+    "KUAT",
+    "DOLLY",
+    "SPRITE",
+    "ITUBAINA",
+    "H2OH",
+    "LIMONADA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.011.00",
+   "ncm_prefixos": [
+    "22021000",
+    "22029900"
+   ],
+   "descricao": "Demais refrigerantes, exceto os classificados nos",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "REFRI",
+    "SODA",
+    "GUARANA",
+    "GUARANÁ",
+    "COLA",
+    "TONICA",
+    "TÔNICA",
+    "SCHWEPPES",
+    "FANTA",
+    "SPRITE",
+    "PEPSI",
+    "SUKITA",
+    "KUAT",
+    "DOLLY",
+    "SPRITE",
+    "ITUBAINA",
+    "H2OH",
+    "LIMONADA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.011.01",
+   "ncm_prefixos": [
+    "2202"
+   ],
+   "descricao": "Espumantes sem álcool",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.012.00",
+   "ncm_prefixos": [
+    "21069010"
+   ],
+   "descricao": "Xarope ou extrato concentrado destinados ao preparo de refrigerante em máquina “pré-mix” ou “post-mix”, exceto o classificado no",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "XAROPE",
+    "CONCENTRAD"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.012.01",
+   "ncm_prefixos": [
+    "21069010"
+   ],
+   "descricao": "Cápsula de refrigerante",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "CAPSULA",
+    "CÁPSULA"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.013.00",
+   "ncm_prefixos": [
+    "210690",
+    "22029900"
+   ],
+   "descricao": "Bebidas energéticas em lata",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ENERG",
+    "RED BULL",
+    "MONSTER",
+    "TNT",
+    "BURN",
+    "FUSION",
+    "REDBULL",
+    "BALY",
+    "VIBE",
+    "FLASH POWER",
+    "NIGHT POWER",
+    "BLUE ENERGY"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.013.01",
+   "ncm_prefixos": [
+    "210690",
+    "22029900"
+   ],
+   "descricao": "Bebidas energéticas em embalagem PET",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ENERG",
+    "RED BULL",
+    "MONSTER",
+    "TNT",
+    "BURN",
+    "FUSION",
+    "REDBULL",
+    "BALY",
+    "VIBE",
+    "FLASH POWER",
+    "NIGHT POWER",
+    "BLUE ENERGY"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.013.02",
+   "ncm_prefixos": [
+    "210690",
+    "22029900"
+   ],
+   "descricao": "Bebidas energéticas em vidro",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ENERG",
+    "RED BULL",
+    "MONSTER",
+    "TNT",
+    "BURN",
+    "FUSION",
+    "REDBULL",
+    "BALY",
+    "VIBE",
+    "FLASH POWER",
+    "NIGHT POWER",
+    "BLUE ENERGY"
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.015.00",
+   "ncm_prefixos": [
+    "210690",
+    "22029900"
+   ],
+   "descricao": "Bebidas hidroeletrolíticas",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ISOTON",
+    "HIDROELETROL",
+    "GATORADE",
+    "POWERADE",
+    "ISO "
+   ]
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.00",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em garrafa de vidro retornável",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.01",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em garrafa de vidro descartável",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.02",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em garrafa de alumínio",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.03",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em lata",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.04",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em barril",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.05",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em embalagem PET",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.021.06",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Cerveja em outras embalagens",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.00",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em garrafa de vidro retornável",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.01",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em garrafa de vidro descartável",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.02",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em garrafa de alumínio",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.03",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em lata",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.04",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em barril",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.05",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em embalagem PET",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.022.06",
+   "ncm_prefixos": [
+    "22029100"
+   ],
+   "descricao": "Cerveja sem álcool em outras embalagens",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "IV",
+   "segmento": "Cervejas, chopes, refrigerantes, águas e outras bebidas",
+   "cest": "03.023.00",
+   "ncm_prefixos": [
+    "22030000"
+   ],
+   "descricao": "Chope",
+   "inicio": "2021-06-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "V",
+   "segmento": "Cigarros e outros produtos derivados do fumo",
+   "cest": "04.001.00",
+   "ncm_prefixos": [
+    "2402"
+   ],
+   "descricao": "Charutos, cigarrilhas e cigarros, de tabaco ou dos seus sucedâneos",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção V (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "V",
+   "segmento": "Cigarros e outros produtos derivados do fumo",
+   "cest": "04.002.00",
+   "ncm_prefixos": [
+    "24031"
+   ],
+   "descricao": "Tabaco para fumar, mesmo contendo sucedâneos de tabaco em qualquer proporção",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção V (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VI",
+   "segmento": "Cimentos",
+   "cest": "05.001.00",
+   "ncm_prefixos": [
+    "2523"
+   ],
+   "descricao": "Cimento",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.001.01",
+   "ncm_prefixos": [
+    "22071090"
+   ],
+   "descricao": "Álcool etílico não desnaturado, com um teor alcoólico em volume igual ou superior a 80% vol - Outros (álcool etílico hidratado combustível)",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.003.00",
+   "ncm_prefixos": [
+    "27101251"
+   ],
+   "descricao": "Gasolina de aviação",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.004.00",
+   "ncm_prefixos": [
+    "27101919"
+   ],
+   "descricao": "Querosenes, exceto de aviação",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.005.00",
+   "ncm_prefixos": [
+    "27101911"
+   ],
+   "descricao": "Querosene de aviação",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.006.11",
+   "ncm_prefixos": [
+    "27101922"
+   ],
+   "descricao": "Óleo combustível pesado",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.007.00",
+   "ncm_prefixos": [
+    "2710193"
+   ],
+   "descricao": "Óleos lubrificantes",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.008.00",
+   "ncm_prefixos": [
+    "2710199"
+   ],
+   "descricao": "Outros óleos de petróleo ou de minerais betuminosos (exceto óleos brutos) e preparações não especificadas nem compreendidas noutras posições, que contenham, como constituintes básicos, 70% ou mais, em peso, de óleos de petróleo ou de minerais betuminosos, exceto os que contenham biodiesel, exceto os",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.008.01",
+   "ncm_prefixos": [
+    "2710199"
+   ],
+   "descricao": "Graxa lubrificante",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.009.00",
+   "ncm_prefixos": [
+    "27109"
+   ],
+   "descricao": "Resíduos de óleos",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.010.00",
+   "ncm_prefixos": [
+    "2711"
+   ],
+   "descricao": "Gás de petróleo e outros hidrocarbonetos gasosos, exceto GLP, GLGN, Gás Natural e Gás de xisto.",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.012.00",
+   "ncm_prefixos": [
+    "27111100"
+   ],
+   "descricao": "Gás Natural Liquefeito",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.013.00",
+   "ncm_prefixos": [
+    "27112100"
+   ],
+   "descricao": "Gás Natural Gasoso",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.014.00",
+   "ncm_prefixos": [
+    "27112990"
+   ],
+   "descricao": "Gás de xisto",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.015.00",
+   "ncm_prefixos": [
+    "2713"
+   ],
+   "descricao": "Coque de petróleo e outros resíduos de óleo de petróleo ou de minerais betuminosos",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.017.00",
+   "ncm_prefixos": [
+    "3403"
+   ],
+   "descricao": "Preparações lubrificantes, exceto as contendo, como constituintes de base, 70% ou mais, em peso, de óleos de petróleo ou de minerais betuminosos",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.018.00",
+   "ncm_prefixos": [
+    "27102000"
+   ],
+   "descricao": "Óleos de petróleo ou de minerais betuminosos (exceto óleos brutos) e preparações não especificadas nem compreendidas noutras posições, que contenham, como constituintes básicos, 70% ou mais, em peso, de óleos de petróleo ou de minerais betuminosos, que contenham biodiesel, exceto os resíduos de óleo",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VII",
+   "segmento": "Combustíveis e lubrificantes",
+   "cest": "06.019.00",
+   "ncm_prefixos": [
+    "27101249"
+   ],
+   "descricao": "Nafta não petroquímica",
+   "inicio": "2025-11-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "VIII",
+   "segmento": "Energia elétrica",
+   "cest": "07.001.00",
+   "ncm_prefixos": [
+    "27160000"
+   ],
+   "descricao": "Energia elétrica",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VIII (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.001.00",
+   "ncm_prefixos": [
+    "40111000"
+   ],
+   "descricao": "Pneus novos, dos tipos utilizados em automóveis de passageiros (incluídos os veículos de uso misto - camionetas e os automóveis de corrida)",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.002.00",
+   "ncm_prefixos": [
+    "4011"
+   ],
+   "descricao": "Pneus novos, dos tipos utilizados em caminhões (inclusive para os fora-de-estrada), ônibus, aviões, máquinas de terraplenagem, de construção e conservação de estradas, máquinas e tratores agrícolas, pá-carregadeira",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.003.00",
+   "ncm_prefixos": [
+    "40114000"
+   ],
+   "descricao": "Pneus novos para motocicletas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.004.00",
+   "ncm_prefixos": [
+    "4011"
+   ],
+   "descricao": "Outros tipos de pneus novos, exceto os itens classificados nos CEST 16.005.00",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.005.00",
+   "ncm_prefixos": [
+    "40115000"
+   ],
+   "descricao": "Pneus novos de borracha dos tipos utilizados em bicicletas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.007.00",
+   "ncm_prefixos": [
+    "401290"
+   ],
+   "descricao": "Protetores de borracha, exceto os itens classificados nos",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.007.01",
+   "ncm_prefixos": [
+    "401290"
+   ],
+   "descricao": "Protetores de borracha para bicicletas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.008.00",
+   "ncm_prefixos": [
+    "4013"
+   ],
+   "descricao": "Câmaras de ar de borracha, exceto os itens classificados nos CEST 16.009.00",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XVI",
+   "segmento": "Pneumáticos, câmaras de ar e protetores de borracha",
+   "cest": "16.009.00",
+   "ncm_prefixos": [
+    "40132000"
+   ],
+   "descricao": "Câmaras de ar de borracha dos tipos utilizados em bicicletas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XVI (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.001.00",
+   "ncm_prefixos": [
+    "87021000"
+   ],
+   "descricao": "Veículos automóveis para transporte de 10 pessoas ou mais, incluindo o motorista, unicamente com motor de pistão, de ignição por compressão (diesel ou semidiesel), com volume interno de habitáculo, destinado a passageiros e motorista, superior a 6 m³, mas inferior a 9 m³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.002.00",
+   "ncm_prefixos": [
+    "87024090"
+   ],
+   "descricao": "Veículos automóveis para transporte de 10 pessoas ou mais, incluindo o motorista, unicamente com motor elétrico para propulsão, com volume interno de habitáculo, destinado a passageiros e motorista, superior a 6 m³, mas inferior a 9 m³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.003.00",
+   "ncm_prefixos": [
+    "87032100"
+   ],
+   "descricao": "Automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada não superior a 1000 cm³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.004.00",
+   "ncm_prefixos": [
+    "87032210"
+   ],
+   "descricao": "Automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 1000 cm³, mas não superior a 1500 cm³, com capacidade de transporte de pessoas sentadas inferior ou igual a 6, incluído o condutor, exceto carro celular",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.005.00",
+   "ncm_prefixos": [
+    "87032290"
+   ],
+   "descricao": "Outros automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 1000 cm³, mas não superior a 1500 cm³, exceto carro celular",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.006.00",
+   "ncm_prefixos": [
+    "87032310"
+   ],
+   "descricao": "Automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 1500 cm³, mas não superior a 3000 cm³, com capacidade de transporte de pessoas sentadas inferior ou igual a 6, incluído o condutor, exceto carro celular, carro funerário e automóveis de",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.007.00",
+   "ncm_prefixos": [
+    "87032390"
+   ],
+   "descricao": "Outros automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 1500 cm³, mas não superior a 3000 cm³, exceto carro celular, carro funerário e automóveis de corrida",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.008.00",
+   "ncm_prefixos": [
+    "87032410"
+   ],
+   "descricao": "Automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 3000 cm³, com capacidade de transporte de pessoas sentadas inferior ou igual a 6, incluído o condutor, exceto carro celular, carro funerário e automóveis de corrida",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.009.00",
+   "ncm_prefixos": [
+    "87032490"
+   ],
+   "descricao": "Outros automóveis unicamente com motor de pistão alternativo de ignição por centelha (faísca*), de cilindrada superior a 3000 cm³, exceto carro celular, carro funerário e automóveis de corrida",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.010.00",
+   "ncm_prefixos": [
+    "87033210"
+   ],
+   "descricao": "Automóveis unicamente com motor diesel ou semidiesel, de cilindrada superior a 1500 cm³, mas não superior a 2500 cm³, com capacidade de transporte de pessoas sentadas inferior ou igual a 6, incluído o condutor, exceto ambulância, carro celular e carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.011.00",
+   "ncm_prefixos": [
+    "87033290"
+   ],
+   "descricao": "Outros automóveis unicamente com motor diesel ou semidiesel, de cilindrada superior a 1500 cm³, mas não superior a 2500 cm³, exceto ambulância, carro celular e carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.012.00",
+   "ncm_prefixos": [
+    "87033310"
+   ],
+   "descricao": "Automóveis unicamente com motor diesel ou semidiesel, de cilindrada superior a 2500 cm³, com capacidade de transporte de pessoas sentadas inferior ou igual a 6, incluído o condutor, exceto carro celular e carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.013.00",
+   "ncm_prefixos": [
+    "87033390"
+   ],
+   "descricao": "Outros automóveis unicamente com motor diesel ou semidiesel, de cilindrada superior a 2500 cm³, exceto carro celular e carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.014.00",
+   "ncm_prefixos": [
+    "87042110"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, chassis com motor diesel ou semidiesel e cabina, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.015.00",
+   "ncm_prefixos": [
+    "87042120"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, com motor diesel ou semidiesel com caixa basculante, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas.",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.016.00",
+   "ncm_prefixos": [
+    "87042130"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, frigoríficos ou isotérmicos com motor diesel ou semidiesel, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.017.00",
+   "ncm_prefixos": [
+    "87042190"
+   ],
+   "descricao": "Outros veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas com motor diesel ou semidiesel, exceto carro-forte para transporte de valores e caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas.",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.018.00",
+   "ncm_prefixos": [
+    "87043110"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, com motor a explosão, chassis e cabina, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.019.00",
+   "ncm_prefixos": [
+    "87043120"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, com motor explosão e caixa basculante, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.020.00",
+   "ncm_prefixos": [
+    "87043130"
+   ],
+   "descricao": "Veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, frigoríficos ou isotérmicos com motor explosão, exceto caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.021.00",
+   "ncm_prefixos": [
+    "87043190"
+   ],
+   "descricao": "Outros veículos automóveis para transporte de mercadorias, de peso em carga máxima não superior a 5 (cinco) toneladas, com motor a explosão, exceto carro-forte para transporte de valores e caminhão de peso em carga máxima superior a 3,9 (três virgula nove) toneladas.",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.022.00",
+   "ncm_prefixos": [
+    "87022000"
+   ],
+   "descricao": "Veículos automóveis para transporte de 10 pessoas ou mais, incluindo o motorista, com motor de pistão, de ignição por compressão (diesel ou semidiesel) e um motor elétrico, com volume interno de habitáculo, destinado a passageiros e motorista, superior a 6 m³, mas inferior a 9 m³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.023.00",
+   "ncm_prefixos": [
+    "87023000"
+   ],
+   "descricao": "Veículos automóveis para transporte de 10 pessoas ou mais, incluindo o motorista, com motor de pistão alternativo, de ignição por centelha (faísca) e um motor elétrico, com volume interno de habitáculo, destinado a passageiros e motorista, superior a 6 m³, mas inferior a 9 m³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.024.00",
+   "ncm_prefixos": [
+    "87029000"
+   ],
+   "descricao": "Outros veículos automóveis para transporte de 10 pessoas ou mais, incluindo o motorista, com volume interno de habitáculo, destinado a passageiros e motorista, superior a 6 m³, mas inferior a 9 m³",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.025.00",
+   "ncm_prefixos": [
+    "87034000"
+   ],
+   "descricao": "Automóveis equipados para propulsão, simultaneamente, com um motor de pistão alternativo de ignição por centelha (faísca*) e um motor elétrico, exceto os suscetíveis de serem carregados por conexão a uma fonte externa de energia elétrica, o carro celular e o carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.026.00",
+   "ncm_prefixos": [
+    "87035000"
+   ],
+   "descricao": "Automóveis equipados para propulsão, simultaneamente, com um motor de pistão por compressão (diesel ou semidiesel) e um motor elétrico, exceto os suscetíveis de serem carregados por conexão a uma fonte externa de energia elétrica, exceto o carro celular e o carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.027.00",
+   "ncm_prefixos": [
+    "87036000"
+   ],
+   "descricao": "Automóveis equipados para propulsão, simultaneamente, com um motor de pistão alternativo de ignição por centelha (faísca*) e um motor elétrico, suscetíveis de serem carregados por conexão a uma fonte externa de energia elétrica, exceto o carro celular e o carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.028.00",
+   "ncm_prefixos": [
+    "87037000"
+   ],
+   "descricao": "Automóveis equipados para propulsão, simultaneamente, com um motor de pistão por compressão (diesel ou semidiesel) e um motor elétrico, suscetíveis de serem carregados por conexão a uma fonte externa de energia elétrica, exceto o carro celular e o carro funerário",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.029.00",
+   "ncm_prefixos": [
+    "87038000"
+   ],
+   "descricao": "Outros veículos, equipados unicamente com motor elétrico para propulsão",
+   "inicio": "2018-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.030.00",
+   "ncm_prefixos": [
+    "87044100"
+   ],
+   "descricao": "Outros veículos para transportes de mercadorias equipados para propulsão, simultaneamente, com motor de pistão de ignição por compressão (diesel ou semidiesel) e motor elétrico de peso em carga máxima (bruto) não superior a 5 (cinco) toneladas, exceto caminhão de peso em carga máxima superior a 3,9",
+   "inicio": "2024-11-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.031.00",
+   "ncm_prefixos": [
+    "87045100"
+   ],
+   "descricao": "Outros veículos para transportes de mercadorias equipados para propulsão, simultaneamente, com motor de pistão de ignição por centelha (faísca) e motor elétrico de peso em carga máxima (bruto) não superior a 5 (cinco) toneladas, exceto caminhão de peso em carga máxima superior a 3,9 (três vírgula no",
+   "inicio": "2024-11-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXIV",
+   "segmento": "Veículos automotores",
+   "cest": "25.032.00",
+   "ncm_prefixos": [
+    "87046000"
+   ],
+   "descricao": "Outros veículos para transporte de mercadorias, unicamente com motor elétrico para propulsão, exceto veículo de peso em carga máxima superior a 3,9 toneladas (Convênio ICMS 174/24 )",
+   "inicio": "2025-03-31",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXIV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXV",
+   "segmento": "Veículos de duas e três rodas motorizados",
+   "cest": "26.001.00",
+   "ncm_prefixos": [
+    "8711"
+   ],
+   "descricao": "Motocicletas (incluídos os ciclomotores) e outros ciclos equipados com motor auxiliar, mesmo com carro lateral, exceto os classificados no CEST 26.001.01; carros laterais. (Convênio ICMS 4/22)",
+   "inicio": "2022-07-22",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXV",
+   "segmento": "Veículos de duas e três rodas motorizados",
+   "cest": "26.001.01",
+   "ncm_prefixos": [
+    "8711"
+   ],
+   "descricao": "Bicicletas e outros ciclos (incluídos os triciclos) com propulsão de motor elétrico auxiliar assistido pela força humana. (Convênio ICMS 4/22)",
+   "inicio": "2022-07-22",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXV (texto oficial da SEF/SC, versão de 25/06/2026)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.001.00",
+   "ncm_prefixos": [
+    "33030010"
+   ],
+   "descricao": "Perfumes (extratos)",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.002.00",
+   "ncm_prefixos": [
+    "33030020"
+   ],
+   "descricao": "Águas-de-colônia",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.003.00",
+   "ncm_prefixos": [
+    "33041000"
+   ],
+   "descricao": "Produtos de maquiagem para os lábios",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.004.00",
+   "ncm_prefixos": [
+    "33042010"
+   ],
+   "descricao": "Sombra, delineador, lápis para sobrancelhas e rímel",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.005.00",
+   "ncm_prefixos": [
+    "33042090"
+   ],
+   "descricao": "Outros produtos de maquiagem para os olhos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.006.00",
+   "ncm_prefixos": [
+    "33043000"
+   ],
+   "descricao": "Preparações para manicuros e pedicuros",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.007.00",
+   "ncm_prefixos": [
+    "33049100"
+   ],
+   "descricao": "Pós para maquiagem, incluindo os compactos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.008.00",
+   "ncm_prefixos": [
+    "33049910"
+   ],
+   "descricao": "Cremes de beleza, cremes nutritivos e loções tônicas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.009.00",
+   "ncm_prefixos": [
+    "33049990"
+   ],
+   "descricao": "Outros produtos de beleza ou de maquiagem preparados e preparações para conservação ou cuidados da pele, exceto as preparações antissolares e os bronzeadores",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.010.00",
+   "ncm_prefixos": [
+    "33049990"
+   ],
+   "descricao": "Preparações antissolares e os bronzeadores",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.011.00",
+   "ncm_prefixos": [
+    "33051000"
+   ],
+   "descricao": "Xampus para o cabelo",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.012.00",
+   "ncm_prefixos": [
+    "33052000"
+   ],
+   "descricao": "Preparações para ondulação ou alisamento, permanentes, dos cabelos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.013.00",
+   "ncm_prefixos": [
+    "33059000"
+   ],
+   "descricao": "Outras preparações capilares",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.014.00",
+   "ncm_prefixos": [
+    "33059000"
+   ],
+   "descricao": "Tintura para o cabelo",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.015.00",
+   "ncm_prefixos": [
+    "33071000"
+   ],
+   "descricao": "Preparações para barbear (antes, durante ou após)",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.016.00",
+   "ncm_prefixos": [
+    "33072010"
+   ],
+   "descricao": "Desodorantes corporais e antiperspirantes, líquidos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.017.00",
+   "ncm_prefixos": [
+    "33072090"
+   ],
+   "descricao": "Outros desodorantes corporais e antiperspirantes",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.018.00",
+   "ncm_prefixos": [
+    "33079000"
+   ],
+   "descricao": "Outros produtos de perfumaria ou de toucador preparados",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.019.00",
+   "ncm_prefixos": [
+    "33079000"
+   ],
+   "descricao": "Outras preparações cosméticas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.020.00",
+   "ncm_prefixos": [
+    "34011190"
+   ],
+   "descricao": "Sabões de toucador em barras, pedaços ou figuras moldados, exceto CEST 28.020.01",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.020.01",
+   "ncm_prefixos": [
+    "34011190"
+   ],
+   "descricao": "Lenços umedecidos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.021.00",
+   "ncm_prefixos": [
+    "34011900"
+   ],
+   "descricao": "Outros sabões, produtos e preparações orgânicos tensoativos, inclusive papel, pastas (ouates), feltros e falsos tecidos, impregnados, revestidos ou recobertos de sabão ou de detergentes",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.022.00",
+   "ncm_prefixos": [
+    "34012010"
+   ],
+   "descricao": "Sabões de toucador sob outras formas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.023.00",
+   "ncm_prefixos": [
+    "34013000"
+   ],
+   "descricao": "Produtos e preparações orgânicos tensoativos para lavagem da pele, em forma de líquido ou de creme, acondicionados para venda a retalho, mesmo contendo sabão",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.024.00",
+   "ncm_prefixos": [
+    "48182000"
+   ],
+   "descricao": "Lenços de papel, incluindo os de desmaquiar",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.024.01",
+   "ncm_prefixos": [
+    "48182000"
+   ],
+   "descricao": "Toalhas de mão",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.025.00",
+   "ncm_prefixos": [
+    "82141000"
+   ],
+   "descricao": "Apontadores de lápis para maquiagem",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.025.01",
+   "ncm_prefixos": [
+    "82141000"
+   ],
+   "descricao": "Espátulas, abre-cartas e raspadeiras",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.025.02",
+   "ncm_prefixos": [
+    "82141000"
+   ],
+   "descricao": "Lâminas de espátulas, de abre-cartas, de raspadeiras e de apontadores de lápis",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.026.00",
+   "ncm_prefixos": [
+    "82142000"
+   ],
+   "descricao": "Utensílios e sortidos de utensílios de manicuros ou de pedicuros (incluindo as limas para unhas)",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.027.00",
+   "ncm_prefixos": [
+    "96032900"
+   ],
+   "descricao": "Escovas e pincéis de barba, escovas para cabelos, para cílios ou para unhas e outras escovas de toucador de pessoas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.027.01",
+   "ncm_prefixos": [
+    "96032900"
+   ],
+   "descricao": "Vassouras e escovas, mesmo constituindo partes de máquinas, de aparelhos ou de veículos, vassouras mecânicas de uso manual não motorizadas, pincéis e espanadores; cabeças preparadas para escovas, pincéis e artigos semelhantes; bonecas e rolos para pintura; rodos de borracha ou de matérias flexíveis",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.028.00",
+   "ncm_prefixos": [
+    "96033000"
+   ],
+   "descricao": "Pincéis para aplicação de produtos cosméticos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.028.01",
+   "ncm_prefixos": [
+    "96033000"
+   ],
+   "descricao": "Pincéis e escovas, para artistas e pincéis de escrever",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.029.00",
+   "ncm_prefixos": [
+    "96161000"
+   ],
+   "descricao": "Vaporizadores de toucador, suas armações e cabeças de armações",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.030.00",
+   "ncm_prefixos": [
+    "96162000"
+   ],
+   "descricao": "Borlas ou esponjas para pós ou para aplicação de outros cosméticos ou de produtos de toucador",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.031.00",
+   "ncm_prefixos": [
+    "42021"
+   ],
+   "descricao": "Malas e maletas de toucador",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.032.00",
+   "ncm_prefixos": [
+    "9615"
+   ],
+   "descricao": "Pentes, travessas para cabelo e artigos semelhantes; grampos (alfinetes) para cabelo; pinças (“pinceguiches”), onduladores, bobs (rolos) e artefatos semelhantes para penteados, e suas partes",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.033.00",
+   "ncm_prefixos": [
+    "39233000",
+    "39249000",
+    "39241000",
+    "40149090",
+    "70102000"
+   ],
+   "descricao": "Mamadeiras",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.034.00",
+   "ncm_prefixos": [
+    "40149090"
+   ],
+   "descricao": "Chupetas e bicos para mamadeiras e para chupetas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.035.00",
+   "ncm_prefixos": [
+    "12119090"
+   ],
+   "descricao": "Outras plantas e partes, para perfumaria, medicina e semelhantes",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.036.00",
+   "ncm_prefixos": [
+    "39262000"
+   ],
+   "descricao": "Vestuário e seus acessórios, de plásticos, inclusive luvas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.037.00",
+   "ncm_prefixos": [
+    "39264000"
+   ],
+   "descricao": "Estatuetas e outros objetos de ornamentação, de plásticos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.038.00",
+   "ncm_prefixos": [
+    "39269090"
+   ],
+   "descricao": "Outras obras de plásticos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.039.00",
+   "ncm_prefixos": [
+    "42022210"
+   ],
+   "descricao": "Bolsas de folhas de plástico",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.040.00",
+   "ncm_prefixos": [
+    "42022220"
+   ],
+   "descricao": "Bolsas de matérias têxteis",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.041.00",
+   "ncm_prefixos": [
+    "42022900"
+   ],
+   "descricao": "Bolsas de outras matérias",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.042.00",
+   "ncm_prefixos": [
+    "42023900"
+   ],
+   "descricao": "Artigos de bolsos/bolsas, de outras matérias",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.043.00",
+   "ncm_prefixos": [
+    "42029200"
+   ],
+   "descricao": "Outros artefatos, de folhas de plásticos ou matérias têxteis",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.044.00",
+   "ncm_prefixos": [
+    "42029900"
+   ],
+   "descricao": "Outros artefatos, de outras matérias",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.045.00",
+   "ncm_prefixos": [
+    "48192000"
+   ],
+   "descricao": "Caixas e cartonagens, dobráveis, de papel/cartão, não ondulados",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.046.00",
+   "ncm_prefixos": [
+    "48194000"
+   ],
+   "descricao": "Outros sacos, bolsas e cartuchos, de papel ou cartão",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.047.00",
+   "ncm_prefixos": [
+    "48211000"
+   ],
+   "descricao": "Etiquetas de papel ou cartão, impressas",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.048.00",
+   "ncm_prefixos": [
+    "49111090"
+   ],
+   "descricao": "Outros impressos publicitários, catálogos comerciais e semelhantes",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.049.00",
+   "ncm_prefixos": [
+    "61159900"
+   ],
+   "descricao": "Outras meias de malha de outras matérias têxteis",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.050.00",
+   "ncm_prefixos": [
+    "62171000"
+   ],
+   "descricao": "Outros acessórios confeccionados, de vestuário",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.051.00",
+   "ncm_prefixos": [
+    "63026000"
+   ],
+   "descricao": "Roupas de toucador/cozinha, de tecidos atoalhados de algodão",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.052.00",
+   "ncm_prefixos": [
+    "63079090"
+   ],
+   "descricao": "Outros artefatos têxteis confeccionados",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.053.00",
+   "ncm_prefixos": [
+    "65069900"
+   ],
+   "descricao": "Chapéus e outros artefatos de outras matérias, exceto de malha",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXVI",
+   "segmento": "Venda de mercadorias pelo sistema porta a porta",
+   "cest": "28.054.00",
+   "ncm_prefixos": [
+    "95059000"
+   ],
+   "descricao": "Artigos para outras festas, carnaval ou outros divertimentos",
+   "inicio": "2020-01-01",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXVI (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "somente_porta_a_porta": true
+  },
+  {
+   "uf": "SC",
+   "secao": "XXII",
+   "segmento": "Sorvetes e preparados para fabricação de sorvetes em máquinas",
+   "cest": "23.001.00",
+   "ncm_prefixos": [
+    "210500"
+   ],
+   "descricao": "Sorvetes de qualquer espécie",
+   "inicio": "2018-01-01",
+   "fim": "2023-03-31",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXII (revogada pelo Decreto 74/2023 a partir de 01/04/2023)"
+  },
+  {
+   "uf": "SC",
+   "secao": "XXII",
+   "segmento": "Sorvetes e preparados para fabricação de sorvetes em máquinas",
+   "cest": "23.002.00",
+   "ncm_prefixos": [
+    "1806",
+    "1901"
+   ],
+   "descricao": "2106 Preparados para fabricação de sorvete em máquina",
+   "inicio": "2018-01-01",
+   "fim": "2023-03-31",
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção XXII (revogada pelo Decreto 74/2023 a partir de 01/04/2023)",
+   "palavras": [
+    "SORVETE"
+   ]
+  }
+ ],
+ "icms_st_cobertura": {
+  "SC": "2021-06-01"
+ }
 }

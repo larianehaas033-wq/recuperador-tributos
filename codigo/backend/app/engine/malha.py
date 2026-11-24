@@ -154,9 +154,10 @@ INFO = {
         corrigir="Corrigir o CST no cadastro, retificar a EFD-Contribuições e recolher a diferença."),
     "COMPRA_COMO_ST_FORA_DA_ST": dict(
         titulo="Compra escriturada como ST de produto que não tem mais ST", tributo="ICMS",
-        fundamento="Decreto SC 982/2020: medicamentos, perfumaria, higiene pessoal, cosméticos e bebidas quentes saíram "
-                   "da substituição tributária em SC a partir de 01/01/2021. A venda é tributada normalmente e a "
-                   "compra dá direito ao crédito do ICMS destacado (LC 87/96, art. 20).",
+        fundamento="RICMS/SC-01, Anexo 1-A: o produto não consta da lista de ST vigente na data (medicamentos, "
+                   "perfumaria, higiene e cosméticos saíram em 01/01/2021 pelo Decreto SC 982/2020; alimentos em "
+                   "01/04/2018; sorvetes em 01/04/2023, entre outros). A venda é tributada normalmente e a compra dá "
+                   "direito ao crédito do ICMS destacado (LC 87/96, art. 20).",
         corrigir="Corrigir o CST/acumulador de entrada desses produtos (CST 00/20). Crédito de ICMS (não de PIS/COFINS): "
                  "vale para empresa no regime normal de ICMS, seja Lucro Real ou Lucro Presumido, porque o regime do "
                  "IRPJ não muda a não cumulatividade do ICMS (LC 87/96, arts. 19 e 20); no Simples Nacional não há "
@@ -353,7 +354,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
             cst = r["cst_icms"] or ""
             if not ((len(cst) == 3 and cst[1:] == "60") or cst == "500"):
                 continue
-            seg = regras.fora_da_st(uf, r["ncm"], r["data"])
+            seg = regras.fora_da_st(uf, r["ncm"], r["data"], r["descricao"])
             if not seg:
                 continue
             g = grupo[r["periodo"]]

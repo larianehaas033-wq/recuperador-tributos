@@ -171,7 +171,7 @@ class MotorIcms:
                 continue
             data = row["data"] or ""
             conf = None
-            if self.base.fora_da_st(self.uf, row["ncm"], data):
+            if self.base.fora_da_st(self.uf, row["ncm"], data, row["descricao"]):
                 continue  # produto fora da ST na UF: venda tributada é o correto, mesmo que a compra tenha vindo com CST 60
             if row["cod_item"] in por_cod and por_cod[row["cod_item"]] <= data:
                 conf = "ALTA"
@@ -179,12 +179,15 @@ class MotorIcms:
                 conf = "MEDIA"
             if not conf or self.revisoes.get((row["ncm"] or "", "ICMS_ST_TRIBUTADO_SAIDA")) == "DESCARTADO":
                 continue
-            item_st = self.base.na_st(self.uf, row["ncm"], data)
+            item_st = self.base.na_st(self.uf, row["ncm"], data, row["descricao"])
             obs_st = ""
             if not item_st:
                 conf = "BAIXA"  # sem a lei dizendo que o produto tem ST na UF, a compra com CST 60 não basta
-                obs_st = (f" Não comprovado: o NCM não consta da lista de ST de {self.uf} na base do programa; "
-                          "a compra com CST 60 sozinha não prova que a venda deveria sair sem ICMS.")
+                obs_st = (f" Não comprovado: o NCM está na lista de ST de {self.uf}, mas a descrição não confere com o "
+                          "item da lista (conferir o CEST)." if self.base._tem_lista_st(self.uf, data) else
+                          f" Não comprovado: a lista de ST de {self.uf} ainda não está na base do programa.")
+            elif conf == "ALTA":
+                obs_st = f" CEST {item_st.get('cest', '')}: {item_st.get('descricao', '')[:90]}."
             out.append(Credito(
                 modulo="ICMS", tese="ICMS_ST_TRIBUTADO_SAIDA", tributo="ICMS", periodo=row["periodo"], data=data,
                 chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"], descricao=row["descricao"],
@@ -229,7 +232,7 @@ class MotorIcms:
             g["data"] = min(g["data"] or r["data"], r["data"] or g["data"])
         out = []
         for row in grupos.values():
-            if self.base.fora_da_st(self.uf, row["ncm"], row["data"]):
+            if self.base.fora_da_st(self.uf, row["ncm"], row["data"], row["descricao"]):
                 continue
             row["bc_presumida"] = row["bc_unit"] * row["qtd"]
             dif = row["bc_presumida"] - row["vl_venda"]
@@ -319,7 +322,7 @@ class MotorIcms:
         fora = []
         for r in linhas(itens):
             cst = r["cst_icms"] or ""
-            if _eh_st(cst) and self.base.fora_da_st(self.uf, r["ncm"], r["data"] or n["data"]):
+            if _eh_st(cst) and self.base.fora_da_st(self.uf, r["ncm"], r["data"] or n["data"], r["descricao"]):
                 fora.append(r["descricao"] or r["cod_item"])
         if not fora:
             return ""

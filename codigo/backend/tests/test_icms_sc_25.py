@@ -44,5 +44,14 @@ def test_medicamento_higiene_fora_da_st_em_sc():
     assert b.fora_da_st("SC", "96190000", "2026-10-17")      # absorvente
     assert b.fora_da_st("SC", "33061000", "2026-10-17")      # creme dental
     assert not b.fora_da_st("SC", "30049099", "2020-12-31")  # antes do Decreto 982/2020 ainda tinha ST
-    assert not b.fora_da_st("SC", "21050010", "2026-10-17")  # sorvete continua na ST
+    assert b.fora_da_st("SC", "21050010", "2026-10-17")      # sorvete saiu da ST em 01/04/2023 (Decreto 74/2023)
+    assert not b.fora_da_st("SC", "21050010", "2022-10-17")  # ...mas tinha ST antes
+    assert not b.fora_da_st("SC", "22030000", "2026-10-17")  # cerveja continua na ST (Seção IV)
+    assert b.fora_da_st("SC", "19011010", "2026-10-17")      # fórmula infantil: alimentos saíram em 2018
+    assert b.fora_da_st("SC", "85061010", "2026-10-17")      # pilhas: eletrônicos saíram em 2019
     assert not b.fora_da_st("PR", "30049099", "2026-10-17")
+    # energético na ST; suplemento com o mesmo NCM não
+    assert b.na_st("SC", "21069090", "2026-10-17", "ENERGETICO RED BULL 250ML")
+    assert not b.na_st("SC", "21069090", "2026-10-17", "WHEY PROTEIN 900G")
+    # cosméticos da Seção XXVI só na venda porta a porta
+    assert not b.na_st("SC", "33051000", "2026-10-17", "SHAMPOO SEDA")

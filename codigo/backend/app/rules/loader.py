@@ -52,24 +52,56 @@ class BaseRegras:
     coerencia: dict = field(default_factory=dict)
     icms_st_fora: list = field(default_factory=list)
     icms_st_dentro: list = field(default_factory=list)
+    icms_st_cobertura: dict = field(default_factory=dict)
     origem: str = "embutida"
     _cache: dict = field(default_factory=dict)
 
-    def fora_da_st(self, uf: str | None, ncm: str | None, data: str | None):
-        """Segmento excluído da substituição tributária na UF na data (a ST da compra não se estende à venda)."""
+    def fora_da_st(self, uf: str | None, ncm: str | None, data: str | None, descricao: str | None = None):
+        """Produto sem ST na UF na data. Com a lista positiva da UF (Anexo 1-A do RICMS/SC), fora dela = fora da ST
+        pela lei; além disso, os segmentos retirados por decreto (ex.: Decreto SC 982/2020)."""
+        data = data or ""
         for r in self.icms_st_fora:
-            if r.get("uf") == (uf or "").upper() and ncm and (data or "") >= r["inicio"] \
+            if r.get("uf") == (uf or "").upper() and ncm and r["inicio"] <= data <= r.get("fim", "9999") \
                     and any(ncm.startswith(x) for x in r["ncm_prefixos"]):
                 return r
+        if ncm and self._tem_lista_st(uf, data):
+            if not self._candidatos_st(uf, ncm, data):
+                return {"segmento": "Produto fora da lista de ST da UF na data",
+                        "fundamento": "RICMS/SC-01, Anexo 1-A (bens e mercadorias sujeitos à ST): o NCM não consta da "
+                                      "lista vigente na data da operação"}
+            if descricao and not self.na_st(uf, ncm, data, descricao):
+                return {"segmento": "Produto fora da lista de ST da UF na data",
+                        "fundamento": "RICMS/SC-01, Anexo 1-A: o NCM aparece na lista só para outro produto (ex.: 2106.90 "
+                                      "só para bebida energética ou hidroeletrolítica), e a descrição não é desse produto"}
         return None
 
-    def na_st(self, uf: str | None, ncm: str | None, data: str | None):
-        """Item da lista de ST da UF vigente na data (lista positiva do RICMS); None se não constar."""
-        for r in self.icms_st_dentro:
-            if r.get("uf") == (uf or "").upper() and ncm and r.get("inicio", "") <= (data or "") \
-                    and (data or "") <= r.get("fim", "9999") and any(ncm.startswith(x) for x in r["ncm_prefixos"]):
+    def _tem_lista_st(self, uf, data=None):
+        """A lista positiva da UF está completa a partir da data de cobertura (antes dela, só as exclusões valem)."""
+        ini = self.icms_st_cobertura.get((uf or "").upper())
+        return bool(ini) and (data is None or (data or "") >= ini)
+
+    def _candidatos_st(self, uf, ncm, data):
+        data = data or ""
+        return [r for r in self.icms_st_dentro
+                if r.get("uf") == (uf or "").upper() and not r.get("somente_porta_a_porta")
+                and r.get("inicio", "") <= data <= r.get("fim", "9999")
+                and any(ncm.startswith(x) for x in r["ncm_prefixos"])]
+
+    def na_st(self, uf: str | None, ncm: str | None, data: str | None, descricao: str | None = None):
+        """Item da lista de ST da UF vigente na data. Item com 'palavras' (NCM que também tem produto sem ST, ex.:
+        2106.90 energético x suplemento) só vale se a descrição confere. None se não constar."""
+        from ..engine.comum import contem, norm, termo  # noqa: PLC0415
+        if not ncm:
+            return None
+        desc = norm(descricao)
+        sem_palavra = None
+        for r in self._candidatos_st(uf, ncm, data):
+            pal = r.get("palavras")
+            if not pal:
+                sem_palavra = sem_palavra or r
+            elif desc and contem(desc, tuple(termo(x) for x in pal)):
                 return r
-        return None
+        return sem_palavra
 
     def classificar(self, ncm: str | None, data: str | None, tipo: str, descricao: str | None = None) -> Regra | None:
         """Devolve a regra do tipo pedido que melhor se aplica ao produto.
@@ -135,6 +167,7 @@ def _parse(data: dict, origem: str) -> BaseRegras:
         ibs=ibs, coerencia=data.get("coerencia_ncm", {}), origem=origem,
         icms_st_fora=data.get("icms_st_excluidos", []),
         icms_st_dentro=data.get("icms_st_incluidos", []),
+        icms_st_cobertura=data.get("icms_st_cobertura", {}),
     )
 
 

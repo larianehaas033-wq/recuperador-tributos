@@ -99,9 +99,9 @@ def test_selic(analise):
 
 def test_icms_st_tributado(analise):
     r = _find(analise, "ICMS_ST_TRIBUTADO_SAIDA", "ICMS", "P5")
-    # a lista positiva de ST de SC ainda não está na base: compra com CST 60 sozinha não comprova (vai a "não comprovado")
-    assert len(r) == 1 and r[0]["valor_recuperar"] == 17.0 and r[0]["confianca"] == "BAIXA"
-    assert "lista de ST" in r[0]["observacao"]
+    # cerveja está na ST de SC (Anexo 1-A, Seção IV) e entrou com ST com o mesmo código: comprovado
+    assert len(r) == 1 and r[0]["valor_recuperar"] == 17.0 and r[0]["confianca"] == "ALTA"
+    assert "CEST 03.021" in r[0]["observacao"]
 
 
 def test_ressarcimento_st(analise):

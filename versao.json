@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.16",
+  "versao": "1.4.17",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.16.zip",
-  "sha256": "c3fe3d280b927ea16eaf6dfd43b3fd62f1ec39a3f1f5a87201d0dd20f5c16ed3",
+  "pacote": "atualizacoes/sistema-1.4.17.zip",
+  "sha256": "3e365c3e5dfc8673941a88b22b5d888695e8d52c11791f3b2e671a248dfba89c",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.3",
+  "versao_regras": "2026.11.24.4",
   "notas": [
-    "ICMS-ST: só é crédito se o produto estiver na ST da UF na data; medicamentos, perfumaria/higiene/cosméticos e bebidas quentes fora da ST em SC desde 01/01/2021 (Decreto 982/2020)",
-    "Crédito de ICMS não aproveitado: compra lançada com CST 60 de produto fora da ST, fornecedor do Simples (vCredICMSSN) e crédito das notas não levado ao E110",
-    "Malha: novo alerta de compra como ST de produto sem ST; série 001 e 1 tratadas como a mesma"
+    "Lista oficial de ST de SC (RICMS/SC, Anexo 1-A, 178 itens com CEST, NCM e vigência): crédito de ST só com o produto na lista na data da venda",
+    "Produto fora da lista (ou com NCM listado só para outro produto) sai da tese de ST; cosméticos da venda porta a porta não valem para a venda normal",
+    "Bebidas alcoólicas de volta à ST em SC desde 01/04/2024"
   ]
 }
