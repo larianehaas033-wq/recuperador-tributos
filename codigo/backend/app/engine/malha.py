@@ -152,6 +152,17 @@ INFO = {
         fundamento="CST 04/06/07 exige previsão legal (Lei 10.147/2000, 10.925/2004, 10.865/2004 e outras). Sem ela, a "
                    "receita é tributada: PIS/COFINS declarado a menor.",
         corrigir="Corrigir o CST no cadastro, retificar a EFD-Contribuições e recolher a diferença."),
+    "COMPRA_COMO_ST_FORA_DA_ST": dict(
+        titulo="Compra escriturada como ST de produto que não tem mais ST", tributo="ICMS",
+        fundamento="Decreto SC 982/2020: medicamentos, perfumaria, higiene pessoal, cosméticos e bebidas quentes saíram "
+                   "da substituição tributária em SC a partir de 01/01/2021. A venda é tributada normalmente e a "
+                   "compra dá direito ao crédito do ICMS destacado (LC 87/96, art. 20).",
+        corrigir="Corrigir o CST/acumulador de entrada desses produtos (CST 00/20). Crédito de ICMS (não de PIS/COFINS): "
+                 "vale para empresa no regime normal de ICMS, seja Lucro Real ou Lucro Presumido, porque o regime do "
+                 "IRPJ não muda a não cumulatividade do ICMS (LC 87/96, arts. 19 e 20); no Simples Nacional não há "
+                 "crédito (LC 123/2006, art. 23). Se o fornecedor destacou ICMS próprio, o crédito não aproveitado pode "
+                 "ser recuperado como extemporâneo (5 anos); se reteve ST indevidamente, a restituição é pedida pelo "
+                 "fornecedor (substituto)."),
     "NUMERACAO_FALTANTE": dict(
         titulo="Números de nota próprios faltando na sequência", tributo="ICMS",
         fundamento="Ajuste SINIEF 07/2005 (cl. 14ª-A): número não utilizado deve ser inutilizado. Lacuna sem "
@@ -332,6 +343,30 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
                                f"{rotulo.capitalize()}: {valor:.2f}.", operacao=op,
                                numeros=sorted(set(numeros_grupo[(codigo, per)]), key=_ordem_num)))
 
+    # ---------------------------------------------------------------- compra como ST de produto fora da ST
+    if regras is not None:
+        uf = (con.execute("SELECT uf FROM empresas WHERE id=?", (empresa_id,)).fetchone() or {"uf": ""})["uf"]
+        grupo = defaultdict(lambda: [0.0, set(), set(), None])
+        for r in q("SELECT i.periodo, i.data, i.num_doc, i.ncm, i.descricao, i.cst_icms, i.vl_item, i.vl_desc "
+                   "FROM itens_nota i JOIN arquivos_sped a ON a.id=i.arquivo_id WHERE i.empresa_id=? "
+                   "AND a.tipo='EFD_ICMS_IPI' AND i.ind_oper='0' AND i.origem='C170'", empresa_id):
+            cst = r["cst_icms"] or ""
+            if not ((len(cst) == 3 and cst[1:] == "60") or cst == "500"):
+                continue
+            seg = regras.fora_da_st(uf, r["ncm"], r["data"])
+            if not seg:
+                continue
+            g = grupo[r["periodo"]]
+            g[0] += (r["vl_item"] or 0) - (r["vl_desc"] or 0)
+            g[1].add(r["num_doc"])
+            if len(g[2]) < 3:
+                g[2].add(f"{r['descricao']} (NCM {r['ncm']})")
+            g[3] = seg["segmento"]
+        for per, (valor, notas, ex, seg) in sorted(grupo.items()):
+            alertas.append(_alerta("COMPRA_COMO_ST_FORA_DA_ST", "MEDIA", per, f"{len(notas)} nota(s) de compra", valor,
+                                   f"Valor das compras {valor:.2f}. Ex.: {'; '.join(sorted(ex))}.", operacao="0",
+                                   numeros=sorted(notas - {None, ""}, key=_ordem_num)))
+
     # ---------------------------------------------------------------- apuração x documentos (E110)
     deb_docs = defaultdict(float)
     for r in linhas_icms:
@@ -425,7 +460,8 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
     for n in q("SELECT periodo, modelo, serie, numero FROM notas_fiscais WHERE empresa_id=? AND ind_emit='0' "
                "AND origem IN ('SPED_ICMS','XML') AND modelo IN ('55','65')", empresa_id):
         if n["numero"] and str(n["numero"]).isdigit() and n["periodo"] in tem_icms:
-            nums[(n["periodo"], n["modelo"], n["serie"] or "")].add(int(n["numero"]))
+            serie = (str(n["serie"] or "").lstrip("0")) or "0"  # EFD traz "001", XML traz "1"
+            nums[(n["periodo"], n["modelo"], serie)].add(int(n["numero"]))
     for (per, mod, serie), ns in sorted(nums.items()):
         if len(ns) < 2:
             continue
@@ -436,7 +472,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
                     continue
                 ant = max(x for x in ns if x < i)
                 prox = min(x for x in ns if x > i)
-                alertas.append(_alerta("NUMERACAO_FALTANTE", "MEDIA", per, f"Modelo {mod}, série {serie or '-'}", None,
+                alertas.append(_alerta("NUMERACAO_FALTANTE", "MEDIA", per, f"Modelo {mod}, série {serie}", None,
                                        f"Nº {i} sem nota (sequência vai do {ant} ao {prox}).",
                                        operacao="Saída (emissão própria)",
                                        numeros=[i]))

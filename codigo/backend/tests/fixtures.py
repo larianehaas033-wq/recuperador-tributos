@@ -63,7 +63,7 @@ def efd_icms(path: Path) -> Path:
            "", "", "A", "1"),
         _l("0150", "F1", "DISTRIB XYZ", "1058", FORN, "", "", "4202008", "", "", "", "", ""),
         _l("0200", "P3", "CHOCOLATE 90G", "", "", "UN", "00", "18063210", "", "", "", "", ""),
-        _l("0200", "P5", "PROTETOR SOLAR", "", "", "UN", "00", "33049910", "", "", "", "", ""),
+        _l("0200", "P5", "SORVETE POTE 2L", "", "", "UN", "00", "21050010", "", "", "", "", ""),
         _l("C100", "0", "1", "F1", "55", "00", "1", "900", "4224039988877700015555001000000900100000009",
            "05032024", "05032024", "1800,00", "0", "0,00", "0,00", "1800,00", "9", "0,00", "0,00", "0,00",
            "1000,00", "170,00", "120,00", "20,40", "0,00", "0,00", "0,00", "0,00", "0,00"),
@@ -125,8 +125,8 @@ def xmls(pasta: Path) -> Path:
         dict(cod="X7", desc="BISCOITO", ncm="19053100", cfop="5102", qtd=10, vl=117.65, cst="000", bc=117.65, aliq=17, icms=20)
     ], 20), encoding="utf-8")
     (pasta / "k4.xml").write_text(_nfe(k4, "65", "1", CNPJ, "12345678909", "2024-03-20", [
-        dict(cod="P5", desc="PROTETOR SOLAR", ncm="33049910", cfop="5102", qtd=1, vl=100, cst="000", bc=100, aliq=17, icms=17),
-        dict(cod="P5", desc="PROTETOR SOLAR", ncm="33049910", cfop="5405", qtd=10, vl=90, cst="060"),
+        dict(cod="P5", desc="SORVETE POTE 2L", ncm="21050010", cfop="5102", qtd=1, vl=100, cst="000", bc=100, aliq=17, icms=17),
+        dict(cod="P5", desc="SORVETE POTE 2L", ncm="21050010", cfop="5405", qtd=10, vl=90, cst="060"),
         dict(cod="P3", desc="CHOCOLATE 90G", ncm="18063210", cfop="5102", qtd=1, vl=100, cst="000", bc=100, aliq=25, icms=25,
              cclass="200034"),
     ], 42, cpf_dest=True), encoding="utf-8")

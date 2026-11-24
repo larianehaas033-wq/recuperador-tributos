@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.2",
+ "versao": "2026.11.24.3",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -1327,7 +1327,7 @@
    "nome": "Produto com ICMS-ST na compra tributado de novo na venda",
    "via": "ADMINISTRATIVO_ESTADUAL",
    "natureza": "RESTITUICAO",
-   "fundamento": "LC 87/1996, arts. 6º e 10: na substituição tributária o imposto da etapa seguinte já foi retido; destacar ICMS próprio na venda é pagamento em duplicidade. Restituição sujeita ao art. 166 do CTN (prova de não repasse ou autorização do adquirente).",
+   "fundamento": "LC 87/1996, arts. 6º e 10: na substituição tributária o imposto da etapa seguinte já foi retido; destacar ICMS próprio na venda é pagamento em duplicidade. Restituição sujeita ao art. 166 do CTN (prova de não repasse ou autorização do adquirente). Só vale se o produto estiver na substituição tributária da UF na data da venda.",
    "roteiro": [
     "Corrigir o CST de ICMS da venda para 60 (ou CSOSN 500) no cadastro do produto.",
     "Confirmar que o produto estava na substituição tributária na data da venda, pela legislação da UF.",
@@ -1416,6 +1416,16 @@
    "roteiro": [
     "Corrigir a alíquota no cadastro do produto.",
     "Avaliar denúncia espontânea da diferença antes de qualquer fiscalização (afasta a multa de ofício)."
+   ]
+  },
+  "ICMS_CREDITO_NAO_APURADO": {
+   "nome": "ICMS creditado nas notas de entrada e não levado à apuração",
+   "via": "ADMINISTRATIVO_ESTADUAL",
+   "natureza": "CREDITO_EXTEMPORANEO",
+   "fundamento": "LC 87/1996, arts. 19, 20 e 23: o ICMS das entradas escrituradas é crédito do mês; o que foi lançado nas notas (C190) e não chegou ao total de créditos da apuração (E110) não foi aproveitado e pode ser apropriado em até 5 anos.",
+   "roteiro": [
+    "Conferir se a diferença não foi estornada por ajuste (E111) ou por saída isenta/não tributada (estorno proporcional).",
+    "Lançar o crédito extemporâneo pela regra do RICMS/SC."
    ]
   }
  },
@@ -2826,5 +2836,62 @@
    "DESOSSA",
    "RECLASSIFIC"
   ]
- }
+ },
+ "icms_st_excluidos": [
+  {
+   "uf": "SC",
+   "inicio": "2021-01-01",
+   "segmento": "Medicamentos e produtos farmacêuticos (Seção XIV)",
+   "ncm_prefixos": [
+    "3001",
+    "3002",
+    "3003",
+    "3004",
+    "3005",
+    "3006",
+    "2936",
+    "90183",
+    "40151",
+    "40149090",
+    "39269030"
+   ],
+   "fundamento": "Decreto SC 982/2020 (DOE 11/12/2020), que retirou do Anexo 1-A e do Anexo 3 do RICMS/SC-01 as Seções III, XIV e XIX a partir de 01/01/2021; SC também deixou os protocolos/convênios de ST desses segmentos"
+  },
+  {
+   "uf": "SC",
+   "inicio": "2021-01-01",
+   "segmento": "Perfumaria, higiene pessoal e cosméticos (Seção XIX)",
+   "ncm_prefixos": [
+    "3303",
+    "3304",
+    "3305",
+    "3306",
+    "3307",
+    "3401",
+    "4818",
+    "9619",
+    "960321",
+    "960329",
+    "960390",
+    "5601",
+    "821210",
+    "821220",
+    "401410"
+   ],
+   "fundamento": "Decreto SC 982/2020 (DOE 11/12/2020), que retirou do Anexo 1-A e do Anexo 3 do RICMS/SC-01 as Seções III, XIV e XIX a partir de 01/01/2021; SC também deixou os protocolos/convênios de ST desses segmentos"
+  },
+  {
+   "uf": "SC",
+   "inicio": "2021-01-01",
+   "segmento": "Bebidas quentes (Seção III)",
+   "ncm_prefixos": [
+    "2204",
+    "2205",
+    "2206",
+    "2208"
+   ],
+   "fundamento": "Decreto SC 982/2020 (DOE 11/12/2020), que retirou do Anexo 1-A e do Anexo 3 do RICMS/SC-01 as Seções III, XIV e XIX a partir de 01/01/2021; SC também deixou os protocolos/convênios de ST desses segmentos"
+  }
+ ],
+ "icms_st_incluidos": []
 }

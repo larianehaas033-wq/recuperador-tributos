@@ -1,12 +1,13 @@
 {
-  "versao": "1.4.15",
+  "versao": "1.4.16",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.15.zip",
-  "sha256": "fe59d3151cfaeffd8b1a4b4cbc1993c147e00a9e894e426142c76086543e26e4",
+  "pacote": "atualizacoes/sistema-1.4.16.zip",
+  "sha256": "c3fe3d280b927ea16eaf6dfd43b3fd62f1ec39a3f1f5a87201d0dd20f5c16ed3",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.2",
+  "versao_regras": "2026.11.24.3",
   "notas": [
-    "Malha fiscal: colunas Entrada/Saída e Nº da nota",
-    "Cada número faltante na sequência vira uma linha própria, com as notas vizinhas"
+    "ICMS-ST: só é crédito se o produto estiver na ST da UF na data; medicamentos, perfumaria/higiene/cosméticos e bebidas quentes fora da ST em SC desde 01/01/2021 (Decreto 982/2020)",
+    "Crédito de ICMS não aproveitado: compra lançada com CST 60 de produto fora da ST, fornecedor do Simples (vCredICMSSN) e crédito das notas não levado ao E110",
+    "Malha: novo alerta de compra como ST de produto sem ST; série 001 e 1 tratadas como a mesma"
   ]
 }

@@ -50,8 +50,26 @@ class BaseRegras:
     teses: dict
     ibs: dict = field(default_factory=dict)
     coerencia: dict = field(default_factory=dict)
+    icms_st_fora: list = field(default_factory=list)
+    icms_st_dentro: list = field(default_factory=list)
     origem: str = "embutida"
     _cache: dict = field(default_factory=dict)
+
+    def fora_da_st(self, uf: str | None, ncm: str | None, data: str | None):
+        """Segmento excluído da substituição tributária na UF na data (a ST da compra não se estende à venda)."""
+        for r in self.icms_st_fora:
+            if r.get("uf") == (uf or "").upper() and ncm and (data or "") >= r["inicio"] \
+                    and any(ncm.startswith(x) for x in r["ncm_prefixos"]):
+                return r
+        return None
+
+    def na_st(self, uf: str | None, ncm: str | None, data: str | None):
+        """Item da lista de ST da UF vigente na data (lista positiva do RICMS); None se não constar."""
+        for r in self.icms_st_dentro:
+            if r.get("uf") == (uf or "").upper() and ncm and r.get("inicio", "") <= (data or "") \
+                    and (data or "") <= r.get("fim", "9999") and any(ncm.startswith(x) for x in r["ncm_prefixos"]):
+                return r
+        return None
 
     def classificar(self, ncm: str | None, data: str | None, tipo: str, descricao: str | None = None) -> Regra | None:
         """Devolve a regra do tipo pedido que melhor se aplica ao produto.
@@ -115,6 +133,8 @@ def _parse(data: dict, origem: str) -> BaseRegras:
         icms_modal={x["uf"]: x for x in data.get("icms_aliquota_modal", [])},
         icms_ncm=data.get("icms_aliquota_ncm", []), cfop=data.get("cfop", {}), teses=data.get("teses", {}),
         ibs=ibs, coerencia=data.get("coerencia_ncm", {}), origem=origem,
+        icms_st_fora=data.get("icms_st_excluidos", []),
+        icms_st_dentro=data.get("icms_st_incluidos", []),
     )
 
 

@@ -36,3 +36,13 @@ def test_excecoes_17():
     assert _esperada("33049990", "ANASOL LOCAO BRONZ FPS8 120G") == 25
     assert _esperada("33049990", "ISDIN CR FPS 99 ACTIVE 50G") == 17
     assert _esperada("30049069", "DIPIRONA 500MG") == 17
+
+
+def test_medicamento_higiene_fora_da_st_em_sc():
+    b = carregar()
+    assert b.fora_da_st("SC", "30049099", "2026-10-17")      # DESONIDA
+    assert b.fora_da_st("SC", "96190000", "2026-10-17")      # absorvente
+    assert b.fora_da_st("SC", "33061000", "2026-10-17")      # creme dental
+    assert not b.fora_da_st("SC", "30049099", "2020-12-31")  # antes do Decreto 982/2020 ainda tinha ST
+    assert not b.fora_da_st("SC", "21050010", "2026-10-17")  # sorvete continua na ST
+    assert not b.fora_da_st("PR", "30049099", "2026-10-17")

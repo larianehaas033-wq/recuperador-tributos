@@ -39,15 +39,17 @@ def _itens(con, empresa_id: int, tipo_arquivo: str, extra: str = "", params=()) 
 
 def _notas(con, empresa_id: int, origem: str) -> pl.DataFrame:
     rows = con.execute(
-        "SELECT chave, numero, data, periodo, ind_oper, ind_emit, cnpj_emit, cancelada, vl_doc, vl_icms "
+        "SELECT chave, numero, data, periodo, ind_oper, ind_emit, cnpj_emit, cancelada, vl_doc, vl_icms, crt_emit, "
+        "vl_cred_sn "
         "FROM notas_fiscais WHERE empresa_id=? AND origem=?", (empresa_id, origem)).fetchall()
     schema = {"chave": pl.Utf8, "numero": pl.Utf8, "data": pl.Utf8, "periodo": pl.Utf8, "ind_oper": pl.Utf8,
               "ind_emit": pl.Utf8, "cnpj_emit": pl.Utf8, "cancelada": pl.Int64, "vl_doc": pl.Float64,
-              "vl_icms": pl.Float64}
+              "vl_icms": pl.Float64, "crt_emit": pl.Utf8, "vl_cred_sn": pl.Float64}
     if not rows:
         return pl.DataFrame(schema=schema)
     return pl.DataFrame([tuple(r) for r in rows], schema=schema, orient="row").with_columns(
-        pl.col("vl_doc").fill_null(0.0), pl.col("vl_icms").fill_null(0.0), pl.col("cancelada").fill_null(0))
+        pl.col("vl_doc").fill_null(0.0), pl.col("vl_icms").fill_null(0.0), pl.col("cancelada").fill_null(0),
+        pl.col("vl_cred_sn").fill_null(0.0))
 
 
 def _produtos(con, empresa_id: int) -> dict:
@@ -448,8 +450,11 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
                       + " sem XMLs de venda: a exclusão do ICMS da base não pôde ser verificada nesses meses.")
     if progress:
         progress("Analisando ICMS e cruzamentos", 0.6)
+    with db.tx() as con:
+        apuracoes_icms = db.rows(con, "SELECT periodo, creditos FROM apuracoes WHERE empresa_id=? AND tributo='ICMS'",
+                                 (empresa["id"],))
     cred_icms, av_icms = MotorIcms(base, empresa, entradas_icms, xml_itens, sped_notas, xml_notas, periodos_icms,
-                                   revisoes, hoje, produtos, analitico).executar()
+                                   revisoes, hoje, produtos, analitico, apuracoes_icms).executar()
     creditos += cred_icms
     avisos += av_icms
 

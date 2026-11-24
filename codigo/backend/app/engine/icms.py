@@ -11,6 +11,7 @@ Teses:
 from __future__ import annotations
 
 from datetime import date
+from decimal import Decimal
 
 import polars as pl
 
@@ -20,6 +21,7 @@ from .comum import CENTAVO, ZERO, Credito, D, linhas, r2
 ST_CST = {"10", "30", "60", "70"}
 ST_CSOSN = {"201", "202", "203", "500"}
 TRIB_CST = {"00", "20"}
+USO_CONSUMO_CFOP = {"1407", "2407", "1556", "2556", "3556"}
 INICIO_TEMA_201 = "2016-10-19"
 
 
@@ -36,7 +38,8 @@ def _tributado(cst: str | None) -> bool:
 class MotorIcms:
     def __init__(self, base: BaseRegras, empresa: dict, sped_entradas: pl.DataFrame, xml_itens: pl.DataFrame,
                  sped_notas: pl.DataFrame, xml_notas: pl.DataFrame, periodos_sped_icms: set[str],
-                 revisoes: dict, hoje: date, produtos: dict | None = None, analitico: list | None = None):
+                 revisoes: dict, hoje: date, produtos: dict | None = None, analitico: list | None = None,
+                 apuracoes: list | None = None):
         self.base = base
         self.empresa = empresa
         self.sped_entradas = sped_entradas
@@ -53,6 +56,7 @@ class MotorIcms:
         self.produtos = produtos or {}
         self.cfop_entrada = base.cfops("entrada_credito")
         self.analitico = analitico or []
+        self.apuracoes = apuracoes or []
 
     def _destino_nota(self, chave: str) -> tuple[str, str]:
         """Comprova a destinação da compra pelos itens escriturados (C170) da própria nota na EFD ICMS/IPI."""
@@ -64,6 +68,32 @@ class MotorIcms:
             if row["cfop"] not in self.cfop_entrada or tipo in ("07", "08", "09"):
                 return "BAIXA", f"Item {row['cod_item']} escriturado com CFOP {row['cfop']}: pode ser uso e consumo."
         return "ALTA", "Todos os itens da nota foram escriturados como revenda ou industrialização."
+
+    def _credito_nao_apurado(self) -> list[Credito]:
+        """ICMS creditado nas notas de entrada (C190) que não chegou à apuração (E110, VL_TOT_CREDITOS):
+        o crédito foi escriturado no documento e não foi aproveitado no mês."""
+        if self.empresa.get("regime") == "SIMPLES_NACIONAL":
+            return []
+        docs: dict[str, Decimal] = {}
+        for a in self.analitico:
+            if a.get("ind_oper") == "0" and not a.get("cancelada") and a.get("cfop") not in USO_CONSUMO_CFOP:
+                docs[a["periodo"]] = docs.get(a["periodo"], ZERO) + D(a.get("vl_icms"))
+        out = []
+        for ap in self.apuracoes:
+            per = ap["periodo"]
+            dif = docs.get(per, ZERO) - D(ap.get("creditos"))
+            if dif <= max(D("1.00"), docs.get(per, ZERO) * D("0.005")):
+                continue
+            out.append(Credito(
+                modulo="ICMS", tese="ICMS_CREDITO_NAO_APURADO", tributo="ICMS", periodo=per, data=f"{per}-01",
+                base_original=r2(D(ap.get("creditos"))), base_correta=r2(docs[per]), valor_pago=ZERO,
+                valor_recuperar=r2(dif), natureza="CREDITO_EXTEMPORANEO", via="ADMINISTRATIVO_ESTADUAL",
+                fundamento=self.fund.get("ICMS_CREDITO_NAO_APURADO", ""), confianca="MEDIA", regra_codigo="E110_X_C190",
+                observacao=(f"ICMS das entradas escrituradas no mês {docs[per]:.2f}; créditos levados ao E110 "
+                            f"{D(ap.get('creditos')):.2f}. Confirme se a diferença não foi estornada por ajuste "
+                            "(E111) antes de lançar o crédito extemporâneo."),
+            ))
+        return out
 
     def _st_tributado_c190(self) -> list[Credito]:
         """Pelo resumo de cada venda no SPED Fiscal (C190): linha que a própria empresa declarou como ST
@@ -96,6 +126,7 @@ class MotorIcms:
         avisos = []
         out: list[Credito] = []
         out += self._st_tributado_c190()
+        out += self._credito_nao_apurado()
         saidas = self.xml_itens.filter(pl.col("ind_oper") == "1")
         if not self.xml_itens.height:
             avisos.append("Sem XMLs importados: as teses de ICMS que dependem do item da venda não foram analisadas.")
@@ -140,12 +171,20 @@ class MotorIcms:
                 continue
             data = row["data"] or ""
             conf = None
+            if self.base.fora_da_st(self.uf, row["ncm"], data):
+                continue  # produto fora da ST na UF: venda tributada é o correto, mesmo que a compra tenha vindo com CST 60
             if row["cod_item"] in por_cod and por_cod[row["cod_item"]] <= data:
                 conf = "ALTA"
             elif row["ncm"] in por_ncm and por_ncm[row["ncm"]] <= data:
                 conf = "MEDIA"
             if not conf or self.revisoes.get((row["ncm"] or "", "ICMS_ST_TRIBUTADO_SAIDA")) == "DESCARTADO":
                 continue
+            item_st = self.base.na_st(self.uf, row["ncm"], data)
+            obs_st = ""
+            if not item_st:
+                conf = "BAIXA"  # sem a lei dizendo que o produto tem ST na UF, a compra com CST 60 não basta
+                obs_st = (f" Não comprovado: o NCM não consta da lista de ST de {self.uf} na base do programa; "
+                          "a compra com CST 60 sozinha não prova que a venda deveria sair sem ICMS.")
             out.append(Credito(
                 modulo="ICMS", tese="ICMS_ST_TRIBUTADO_SAIDA", tributo="ICMS", periodo=row["periodo"], data=data,
                 chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"], descricao=row["descricao"],
@@ -153,8 +192,10 @@ class MotorIcms:
                 base_original=r2(row["vl_bc_icms"]), base_correta=0.0, valor_pago=r2(row["vl_icms"]),
                 valor_recuperar=r2(row["vl_icms"]), natureza="RESTITUICAO", via="ADMINISTRATIVO_ESTADUAL",
                 fundamento=self.fund["ICMS_ST_TRIBUTADO_SAIDA"], confianca=conf, regra_codigo="ST_ENTRADA",
-                observacao=("Produto entrou com ICMS-ST com o mesmo código." if conf == "ALTA" else
-                             "Não comprovado automaticamente: só o NCM coincide com uma compra com ST, não o código do produto."),
+                observacao=(("Produto entrou com ICMS-ST com o mesmo código." if row["cod_item"] in por_cod else
+                             "Só o NCM coincide com uma compra com ST, não o código do produto.") + obs_st
+                            + (f" Produto na ST: {item_st.get('segmento', '')} ({item_st.get('fundamento', '')})."
+                               if item_st else "")),
             ))
         return out
 
@@ -188,6 +229,8 @@ class MotorIcms:
             g["data"] = min(g["data"] or r["data"], r["data"] or g["data"])
         out = []
         for row in grupos.values():
+            if self.base.fora_da_st(self.uf, row["ncm"], row["data"]):
+                continue
             row["bc_presumida"] = row["bc_unit"] * row["qtd"]
             dif = row["bc_presumida"] - row["vl_venda"]
             if dif <= CENTAVO * row["bc_presumida"]:
@@ -262,6 +305,27 @@ class MotorIcms:
         return out
 
     # -------------------------------------------------------------- cruzamento XML x SPED
+    @staticmethod
+    def _simples(n) -> bool:
+        return (n.get("crt_emit") or "") in ("1", "4")
+
+    def _destaque(self, n):
+        """Crédito que a nota de compra permite: ICMS destacado; de fornecedor do Simples, o vCredICMSSN."""
+        return (n.get("vl_cred_sn") or 0) if self._simples(n) else (n["vl_icms"] or 0)
+
+    def _motivo_st(self, n) -> str:
+        """Itens lançados com CST de ST na entrada, mas que estão fora da ST na UF: causa típica do crédito perdido."""
+        itens = self.sped_entradas.filter(pl.col("chave") == n["chave"])
+        fora = []
+        for r in linhas(itens):
+            cst = r["cst_icms"] or ""
+            if _eh_st(cst) and self.base.fora_da_st(self.uf, r["ncm"], r["data"] or n["data"]):
+                fora.append(r["descricao"] or r["cod_item"])
+        if not fora:
+            return ""
+        return (f" Entrada lançada com CST de ST em produto fora da ST em {self.uf} (Decreto SC 982/2020): "
+                f"{', '.join(fora[:3])}{'…' if len(fora) > 3 else ''}.")
+
     def _cruzamento(self) -> list[Credito]:
         sped = {r["chave"]: r for r in linhas(self.sped_notas) if r["chave"]}
         out = []
@@ -278,16 +342,18 @@ class MotorIcms:
                         confianca="BAIXA", regra_codigo="XML_X_SPED",
                         observacao=f"Emitente {n['cnpj_emit']}. Confirmar entrada e destinação da mercadoria.",
                     ))
-                elif n["vl_icms"] > (s["vl_icms"] or 0) + CENTAVO:
+                elif self._destaque(n) > (s["vl_icms"] or 0) + CENTAVO:
                     conf, motivo = self._destino_nota(n["chave"])
+                    motivo = (motivo + self._motivo_st(n)).strip()
                     out.append(Credito(
                         modulo="CRUZAMENTO", tese="ICMS_CREDITO_MENOR_DESTAQUE", tributo="ICMS", periodo=n["periodo"],
                         data=n["data"], chave=n["chave"], num_doc=n["numero"], base_original=r2(s["vl_icms"] or 0),
-                        base_correta=r2(n["vl_icms"]), valor_pago=r2(n["vl_icms"]),
-                        valor_recuperar=r2(n["vl_icms"] - (s["vl_icms"] or 0)), natureza="CREDITO_EXTEMPORANEO",
+                        base_correta=r2(self._destaque(n)), valor_pago=r2(self._destaque(n)),
+                        valor_recuperar=r2(self._destaque(n) - (s["vl_icms"] or 0)), natureza="CREDITO_EXTEMPORANEO",
                         via="ADMINISTRATIVO_ESTADUAL", fundamento=self.fund["ICMS_CREDITO_MENOR_DESTAQUE"],
                         confianca=conf, regra_codigo="XML_X_SPED",
-                        observacao=f"XML destaca {n['vl_icms']:.2f}; EFD escriturou {(s['vl_icms'] or 0):.2f}. {motivo}",
+                        observacao=(f"{'Crédito permitido (Simples, vCredICMSSN)' if self._simples(n) else 'XML destaca'} "
+                                    f"{self._destaque(n):.2f}; EFD escriturou {(s['vl_icms'] or 0):.2f}. {motivo}"),
                     ))
             elif n["ind_oper"] == "1" and n["ind_emit"] == "0" and s is None:
                 out.append(Credito(
