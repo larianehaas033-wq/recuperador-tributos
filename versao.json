@@ -1,13 +1,12 @@
 {
-  "versao": "1.4.14",
+  "versao": "1.4.15",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.14.zip",
-  "sha256": "cf0c14747783ae51567eb75e0380efb72b74dc45b2b84bafc32bcbda3e18f2c9",
+  "pacote": "atualizacoes/sistema-1.4.15.zip",
+  "sha256": "fe59d3151cfaeffd8b1a4b4cbc1993c147e00a9e894e426142c76086543e26e4",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.24.2",
   "notas": [
-    "Alerta de possível malha fiscal ao importar a EFD ICMS/IPI e a EFD-Contribuições",
-    "Devoluções escrituradas erradas, notas não escrituradas, crédito vedado, duplicidade, apuração x documentos, faturamento divergente e numeração faltante",
-    "Aba Malha fiscal no Excel completo"
+    "Malha fiscal: colunas Entrada/Saída e Nº da nota",
+    "Cada número faltante na sequência vira uma linha própria, com as notas vizinhas"
   ]
 }

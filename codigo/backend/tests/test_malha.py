@@ -86,8 +86,14 @@ def test_alertas_de_malha():
         assert esperado in cod, (esperado, cod)
     apu = next(a for a in d["alertas"] if a["codigo"] == "APURACAO_MENOR_DOCUMENTOS")
     assert apu["valor"] == 17.0
-    num = next(a for a in d["alertas"] if a["codigo"] == "NUMERACAO_FALTANTE")
-    assert "11, 12" in num["detalhe"]
+    faltam = sorted(int(a["numero"]) for a in d["alertas"] if a["codigo"] == "NUMERACAO_FALTANTE")
+    assert faltam == [6, 7, 8, 9, 11, 12]
+    dev = next(a for a in d["alertas"] if a["codigo"] == "DEV_ESCRITURADA_COMO_COMPRA")
+    assert dev["numero"] == "77" and dev["operacao"] == "Entrada"
+    sai = next(a for a in d["alertas"] if a["codigo"] == "SAIDA_NAO_ESCRITURADA")
+    assert sai["numero"] == "5" and sai["operacao"] == "Saída"
+    uc = next(a for a in d["alertas"] if a["codigo"] == "CREDITO_ICMS_USO_CONSUMO")
+    assert uc["numero"] == "31" and uc["operacao"] == "Entrada"
     for a in d["alertas"]:
         assert a["fundamento"] and a["corrigir"]
 

@@ -23,7 +23,7 @@ export function ResumoMalha({ itens, ir }) {
           <ul className="mt-2 space-y-1 text-xs">
             {(m.principais || []).map((a, i) => (
               <li key={i}><span className={`mr-2 rounded px-1.5 py-0.5 font-semibold ${COR[a.gravidade]}`}>{a.gravidade === 'ALTA' ? 'Alta' : 'Média'}</span>
-                {a.titulo} — {competencia(a.periodo)} · {a.documento}{a.valor != null ? ` · ${brl(a.valor)}` : ''}</li>
+                {a.titulo} — {competencia(a.periodo)}{a.operacao ? ` · ${a.operacao}` : ''}{a.numero ? ` · nº ${a.numero}` : ''} · {a.documento}{a.valor != null ? ` · ${brl(a.valor)}` : ''}</li>
             ))}
           </ul>
           {m.erro && <div className="mt-1 text-xs text-bad">Não foi possível concluir a conferência: {m.erro}</div>}
@@ -49,18 +49,20 @@ export function MalhaEmpresa({ empresaId }) {
       {d.total > 0 && (
         <table className="w-full text-xs">
           <thead><tr className="bg-navy-50 text-left text-muted">
-            <th className="px-5 py-2">Gravidade</th><th>Alerta</th><th>Competência</th><th>Documento</th><th className="pr-5 text-right">Valor</th>
+            <th className="px-5 py-2">Gravidade</th><th>Alerta</th><th>Competência</th><th>Entrada/Saída</th><th>Nº da nota</th><th>Documento</th><th className="pr-5 text-right">Valor</th>
           </tr></thead>
           <tbody>
             {d.alertas.map((a, i) => (
               <React.Fragment key={i}>
                 <tr className="cursor-pointer border-t border-line hover:bg-navy-50/60" onClick={() => setAberto(aberto === i ? null : i)}>
                   <td className="px-5 py-2"><span className={`rounded px-1.5 py-0.5 font-semibold ${COR[a.gravidade]}`}>{a.gravidade === 'ALTA' ? 'Alta' : 'Média'}</span></td>
-                  <td>{a.titulo}</td><td>{competencia(a.periodo)}</td><td>{a.documento}</td>
+                  <td>{a.titulo}</td><td>{competencia(a.periodo)}</td><td>{a.operacao || '—'}</td>
+                  <td className="max-w-[160px] truncate" title={a.numero}>{a.numero || '—'}</td><td>{a.documento}</td>
                   <td className="num pr-5 text-right">{a.valor != null ? brl(a.valor) : '—'}</td>
                 </tr>
                 {aberto === i && (
-                  <tr className="bg-navy-50/40"><td colSpan={5} className="px-5 py-3 leading-relaxed">
+                  <tr className="bg-navy-50/40"><td colSpan={7} className="px-5 py-3 leading-relaxed">
+                    {a.numero && a.numero.includes(',') && <div><b>Notas:</b> {a.numero}</div>}
                     {a.detalhe && <div><b>Detalhe:</b> {a.detalhe}</div>}
                     {a.chave && <div><b>Chave:</b> {a.chave}</div>}
                     <div><b>Fundamento:</b> {a.fundamento}</div>

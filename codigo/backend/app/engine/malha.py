@@ -160,16 +160,27 @@ INFO = {
 }
 
 
-def _alerta(codigo, gravidade, periodo=None, documento=None, valor=None, detalhe="", **extra):
+OPERACAO = {"0": "Entrada", "1": "Saída"}
+
+
+def _alerta(codigo, gravidade, periodo=None, documento=None, valor=None, detalhe="", operacao=None, numeros=None,
+            **extra):
     i = INFO[codigo]
+    nums = [str(x) for x in (numeros or []) if x not in (None, "")]
     return dict(codigo=codigo, gravidade=gravidade, titulo=i["titulo"], tributo=i["tributo"], periodo=periodo,
-                documento=documento, valor=round(valor, 2) if valor is not None else None, detalhe=detalhe,
+                operacao=OPERACAO.get(operacao, operacao), numero=", ".join(nums), documento=documento,
+                valor=round(valor, 2) if valor is not None else None, detalhe=detalhe,
                 fundamento=i["fundamento"], corrigir=i["corrigir"], **extra)
 
 
 def _doc(n) -> str:
     num = n["numero"] or "s/n"
     return f"Nota {num}" + (f" (mod. {n['modelo']})" if n["modelo"] else "")
+
+
+def _ordem_num(x):
+    x = str(x or "")
+    return (0, int(x)) if x.isdigit() else (1, x)
 
 
 def verificar(con, empresa_id: int, regras=None) -> list[dict]:
@@ -205,7 +216,8 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
         if len(validos) > 1:
             n = validos[0]
             alertas.append(_alerta("CHAVE_DUPLICADA", "ALTA", n["periodo"], _doc(n), n["vl_doc"],
-                                   f"Escriturada {len(validos)} vezes.", chave=chave))
+                                   f"Escriturada {len(validos)} vezes.", chave=chave,
+                                   operacao=n["ind_oper"], numeros=[n["numero"]]))
     for chave, x in xml.items():
         if x["periodo"] not in tem_icms:
             continue
@@ -216,26 +228,28 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
                 continue
             if propria and x["ind_oper"] == "1":
                 alertas.append(_alerta("SAIDA_NAO_ESCRITURADA", "ALTA", x["periodo"], _doc(x), x["vl_doc"],
-                                       f"ICMS destacado {x['vl_icms'] or 0:.2f}.", chave=chave))
+                                       f"ICMS destacado {x['vl_icms'] or 0:.2f}.", chave=chave,
+                                       operacao="1", numeros=[x["numero"]]))
             elif not propria:
                 alertas.append(_alerta("ENTRADA_NAO_ESCRITURADA", "MEDIA", x["periodo"], _doc(x), x["vl_doc"],
                                        f"Emitente {x['cnpj_emit']}. Pode ter sido escriturada em mês seguinte "
-                                       "ainda não importado.", chave=chave))
+                                       "ainda não importado.", chave=chave,
+                                       operacao="0", numeros=[x["numero"]]))
             continue
         s = regs[0]
         sit_cancel = (s["cod_sit"] or "00") in CANCELADA_SPED
         if x["cancelada"] and not sit_cancel:
-            alertas.append(_alerta("CANCELADA_ESCRITURADA", "ALTA", s["periodo"], _doc(s), s["vl_doc"], chave=chave))
+            alertas.append(_alerta("CANCELADA_ESCRITURADA", "ALTA", s["periodo"], _doc(s), s["vl_doc"], chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
             continue
         if not x["cancelada"] and sit_cancel and (s["cod_sit"] or "") in ("02", "03"):
             alertas.append(_alerta("AUTORIZADA_ESCRITURADA_CANCELADA", "ALTA", s["periodo"], _doc(s), x["vl_doc"],
-                                   "O XML importado não tem evento de cancelamento.", chave=chave))
+                                   "O XML importado não tem evento de cancelamento.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
             continue
         if sit_cancel:
             continue
         if abs((s["vl_doc"] or 0) - (x["vl_doc"] or 0)) > TOL:
             alertas.append(_alerta("VALOR_DIVERGENTE", "MEDIA", s["periodo"], _doc(s), (s["vl_doc"] or 0) - (x["vl_doc"] or 0),
-                                   f"EFD {s['vl_doc'] or 0:.2f}; XML {x['vl_doc'] or 0:.2f}.", chave=chave))
+                                   f"EFD {s['vl_doc'] or 0:.2f}; XML {x['vl_doc'] or 0:.2f}.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
         icms_e, icms_x = s["vl_icms"] or 0, x["vl_icms"] or 0
         if s["ind_oper"] == "0":
             simples = (x["crt_emit"] or "") in ("1", "4")
@@ -243,35 +257,35 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
             if icms_e > permitido + TOL:
                 alertas.append(_alerta("CREDITO_MAIOR_DESTAQUE", "ALTA", s["periodo"], _doc(s), icms_e - permitido,
                                        f"Escriturado {icms_e:.2f}; permitido {permitido:.2f}"
-                                       + (" (fornecedor do Simples Nacional)." if simples else "."), chave=chave))
+                                       + (" (fornecedor do Simples Nacional)." if simples else "."), chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
         elif propria and icms_e < icms_x - TOL:
             alertas.append(_alerta("DEBITO_MENOR_DESTAQUE", "ALTA", s["periodo"], _doc(s), icms_x - icms_e,
-                                   f"Destacado {icms_x:.2f}; escriturado {icms_e:.2f}.", chave=chave))
+                                   f"Destacado {icms_x:.2f}; escriturado {icms_e:.2f}.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
 
         # devoluções pela finalidade do XML (finNFe 4)
         cf = {c for c in cfops.get(chave, set()) if c}
         if x["fin_nfe"] == "4" and cf:
             if s["ind_oper"] == "0" and not (cf & DEVOLUCAO):
                 alertas.append(_alerta("DEV_ESCRITURADA_COMO_COMPRA", "ALTA", s["periodo"], _doc(s), s["vl_doc"],
-                                       f"CFOP escriturado {', '.join(sorted(cf))}.", chave=chave))
+                                       f"CFOP escriturado {', '.join(sorted(cf))}.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
             elif s["ind_oper"] == "1" and not (cf & DEVOLUCAO):
                 alertas.append(_alerta("DEV_ESCRITURADA_COMO_VENDA", "ALTA", s["periodo"], _doc(s), s["vl_doc"],
-                                       f"CFOP escriturado {', '.join(sorted(cf))}.", chave=chave))
+                                       f"CFOP escriturado {', '.join(sorted(cf))}.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
         elif x["fin_nfe"] in ("1", "2", "3") and cf and cf <= DEVOLUCAO:
             alertas.append(_alerta("CFOP_DEV_SEM_FINALIDADE", "MEDIA", s["periodo"], _doc(s), s["vl_doc"],
-                                   f"CFOP {', '.join(sorted(cf))}; XML com finalidade {x['fin_nfe']}.", chave=chave))
+                                   f"CFOP {', '.join(sorted(cf))}; XML com finalidade {x['fin_nfe']}.", chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
         # devolução de venda: crédito limitado ao débito da venda original
         if s["ind_oper"] == "0" and (x["fin_nfe"] == "4" or cf & DEV_VENDA) and icms_e > TOL:
             orig = xml.get(x["chave_ref"]) if x["chave_ref"] else None
             if x["chave_ref"] and orig is None:
                 alertas.append(_alerta("DEV_SEM_NOTA_ORIGINAL", "MEDIA", s["periodo"], _doc(s), icms_e,
                                        f"Nota referenciada {x['chave_ref']} não está nos arquivos importados.",
-                                       chave=chave))
+                                       chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
             elif orig is not None and orig["ind_oper"] == "1" and icms_e > (orig["vl_icms"] or 0) + TOL:
                 alertas.append(_alerta("DEV_CREDITO_MAIOR_ORIGINAL", "ALTA", s["periodo"], _doc(s),
                                        icms_e - (orig["vl_icms"] or 0),
                                        f"Crédito {icms_e:.2f}; débito da venda {orig['numero']} {orig['vl_icms'] or 0:.2f}.",
-                                       chave=chave))
+                                       chave=chave, operacao=s["ind_oper"], numeros=[s["numero"]]))
 
     # ---------------------------------------------------------------- item / C190 da EFD ICMS
     linhas_icms = q(
@@ -279,6 +293,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
         "FROM analitico_icms a JOIN notas_fiscais n ON n.id=a.nota_id WHERE a.empresa_id=? "
         "AND coalesce(n.cod_sit,'00') NOT IN ('02','03','04','05')", empresa_id)
     agrup = defaultdict(lambda: [0.0, 0, None])
+    numeros_grupo = defaultdict(list)
     for r in linhas_icms:
         cfop, cst, icms = r["cfop"] or "", (r["cst_icms"] or "")[-2:], r["vl_icms"] or 0
         if r["ind_oper"] == "0" and icms > TOL:
@@ -294,23 +309,28 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
                 agrup[k][0] += icms
                 agrup[k][1] += 1
                 agrup[k][2] = agrup[k][2] or _doc(r)
+                numeros_grupo[k].append(r["numero"])
         if r["ind_oper"] == "1" and cfop in DEV_COMPRA and cst in ("00", "10", "20", "70", "90") and icms <= TOL \
                 and (r["vl_opr"] or 0) > TOL:
             k = ("DEV_COMPRA_SEM_ESTORNO", r["periodo"])
             agrup[k][0] += r["vl_opr"] or 0
             agrup[k][1] += 1
             agrup[k][2] = agrup[k][2] or _doc(r)
+            numeros_grupo[k].append(r["numero"])
         if r["ind_oper"] == "1" and r["ind_emit"] == "0" and (
                 (cst == "60" and cfop[1:] in ("102", "101")) or (cst in ("00", "20") and cfop[1:] in ("405", "403"))):
             k = ("CFOP_CST_ST_INCOERENTE", r["periodo"])
             agrup[k][0] += r["vl_opr"] or 0
             agrup[k][1] += 1
             agrup[k][2] = agrup[k][2] or _doc(r)
+            numeros_grupo[k].append(r["numero"])
     for (codigo, per), (valor, qtd, doc) in sorted(agrup.items(), key=lambda x: (x[0][1] or "", x[0][0])):
         grav = "MEDIA" if codigo == "CFOP_CST_ST_INCOERENTE" else "ALTA"
         rotulo = "valor das operações" if codigo in ("DEV_COMPRA_SEM_ESTORNO", "CFOP_CST_ST_INCOERENTE") else "ICMS creditado"
+        op = "1" if codigo in ("DEV_COMPRA_SEM_ESTORNO", "CFOP_CST_ST_INCOERENTE") else "0"
         alertas.append(_alerta(codigo, grav, per, doc if qtd == 1 else f"{qtd} lançamentos (ex.: {doc})", valor,
-                               f"{rotulo.capitalize()}: {valor:.2f}."))
+                               f"{rotulo.capitalize()}: {valor:.2f}.", operacao=op,
+                               numeros=sorted(set(numeros_grupo[(codigo, per)]), key=_ordem_num)))
 
     # ---------------------------------------------------------------- apuração x documentos (E110)
     deb_docs = defaultdict(float)
@@ -321,7 +341,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
         docs = deb_docs.get(a["periodo"], 0)
         if docs > (a["debitos"] or 0) + max(1.0, 0.005 * docs):
             alertas.append(_alerta("APURACAO_MENOR_DOCUMENTOS", "ALTA", a["periodo"], "E110", docs - (a["debitos"] or 0),
-                                   f"ICMS das saídas {docs:.2f}; débitos no E110 {a['debitos'] or 0:.2f}."))
+                                   f"ICMS das saídas {docs:.2f}; débitos no E110 {a['debitos'] or 0:.2f}.", operacao="1"))
 
     # ---------------------------------------------------------------- EFD-Contribuições
     itens_c = q("SELECT i.* FROM itens_nota i JOIN arquivos_sped a ON a.id=i.arquivo_id "
@@ -329,6 +349,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
     vendidos_sem_tributo = {r["cod_item"] for r in itens_c
                             if r["ind_oper"] == "1" and (r["cst_pis"] or "") in CST_PISCOF_SEM_TRIBUTO and r["cod_item"]}
     agrup = defaultdict(lambda: [0.0, 0, None])
+    numeros_c = defaultdict(list)
     for r in itens_c:
         cfop, cst, per = r["cfop"] or "", r["cst_pis"] or "", r["periodo"]
         cred = (r["vl_pis"] or 0) + (r["vl_cofins"] or 0)
@@ -344,9 +365,11 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
             agrup[(k, per)][0] += cred
             agrup[(k, per)][1] += 1
             agrup[(k, per)][2] = agrup[(k, per)][2] or f"Nota {r['num_doc'] or 's/n'}"
+            numeros_c[(k, per)].append(r["num_doc"])
     for (codigo, per), (valor, qtd, doc) in sorted(agrup.items(), key=lambda x: (x[0][1] or "", x[0][0])):
         alertas.append(_alerta(codigo, "ALTA", per, doc if qtd == 1 else f"{qtd} itens (ex.: {doc})", valor,
-                               f"PIS + COFINS: {valor:.2f}."))
+                               f"PIS + COFINS: {valor:.2f}.", operacao="1" if codigo == "DEV_COMPRA_COMO_RECEITA" else "0",
+                               numeros=sorted(set(numeros_c[(codigo, per)]), key=_ordem_num)))
 
     # saída sem tributo sem previsão legal (usa as regras do programa)
     if regras is not None:
@@ -366,6 +389,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
                 return None
             return base.classificar(cn.ncm, data, "MONOFASICO", desc) or base.classificar(cn.ncm, data, "ALIQ_ZERO", desc)
         agrup = defaultdict(lambda: [0.0, 0, set()])
+        nums_sai = defaultdict(set)
         for r in itens_c:
             if r["ind_oper"] != "1" or (r["cst_pis"] or "") not in ("04", "06", "07") or (r["cfop"] or "") in DEVOLUCAO:
                 continue
@@ -374,11 +398,13 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
             k = r["periodo"]
             agrup[k][0] += (r["vl_item"] or 0) - (r["vl_desc"] or 0)
             agrup[k][1] += 1
+            nums_sai[k].add(r["num_doc"])
             if len(agrup[k][2]) < 3:
                 agrup[k][2].add(f"{r['descricao'] or r['cod_item']} (NCM {r['ncm'] or '-'})")
         for per, (valor, qtd, ex) in sorted(agrup.items()):
             alertas.append(_alerta("SAIDA_SEM_TRIBUTO_INDEVIDA", "ALTA", per, f"{qtd} itens", valor,
-                                   f"Receita sem PIS/COFINS {valor:.2f}. Ex.: {'; '.join(sorted(ex))}."))
+                                   f"Receita sem PIS/COFINS {valor:.2f}. Ex.: {'; '.join(sorted(ex))}.", operacao="1",
+                                   numeros=sorted(nums_sai[per] - {None, ""}, key=_ordem_num)))
 
     # faturamento EFD ICMS x EFD-Contribuições
     rec_icms, rec_contrib = defaultdict(float), defaultdict(float)
@@ -392,7 +418,7 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
         a, b = rec_icms[per], rec_contrib[per]
         if a > 0 and b < a * 0.98:
             alertas.append(_alerta("RECEITA_DIVERGENTE_EFDS", "ALTA" if b < a * 0.9 else "MEDIA", per, "Saídas do mês",
-                                   a - b, f"EFD ICMS/IPI {a:.2f}; EFD-Contribuições {b:.2f}."))
+                                   a - b, f"EFD ICMS/IPI {a:.2f}; EFD-Contribuições {b:.2f}.", operacao="1"))
 
     # ---------------------------------------------------------------- numeração própria
     nums = defaultdict(set)
@@ -405,12 +431,19 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
             continue
         faltam = (max(ns) - min(ns) + 1) - len(ns)
         if 0 < faltam <= 5000:
-            falt = [str(i) for i in range(min(ns), max(ns) + 1) if i not in ns][:10]
-            alertas.append(_alerta("NUMERACAO_FALTANTE", "MEDIA", per, f"Modelo {mod}, série {serie or '-'}", None,
-                                   f"{faltam} número(s) sem nota: {', '.join(falt)}{'…' if faltam > 10 else ''}."))
+            for i in range(min(ns), max(ns) + 1):
+                if i in ns:
+                    continue
+                ant = max(x for x in ns if x < i)
+                prox = min(x for x in ns if x > i)
+                alertas.append(_alerta("NUMERACAO_FALTANTE", "MEDIA", per, f"Modelo {mod}, série {serie or '-'}", None,
+                                       f"Nº {i} sem nota (sequência vai do {ant} ao {prox}).",
+                                       operacao="Saída (emissão própria)",
+                                       numeros=[i]))
 
     ordem = {"ALTA": 0, "MEDIA": 1}
-    alertas.sort(key=lambda a: (ordem.get(a["gravidade"], 2), a["periodo"] or "", a["codigo"]))
+    alertas.sort(key=lambda a: (ordem.get(a["gravidade"], 2), a["periodo"] or "", a["codigo"],
+                                _ordem_num(a["numero"].split(",")[0] if a["numero"] else "")))
     return alertas
 
 

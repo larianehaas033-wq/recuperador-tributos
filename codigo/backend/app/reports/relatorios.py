@@ -283,13 +283,15 @@ def _aba_malha(wb, empresa_id: int, cabecalho, base) -> None:
     with db.tx() as con:
         alertas = malha.verificar(con, empresa_id, base)
     ws = wb.create_sheet("Malha fiscal")
-    cabecalho(ws, ["Gravidade", "Alerta", "Tributo", "Competência", "Documento", "Chave", "Valor", "Detalhe",
-                   "Fundamento", "Como corrigir", "Visto do contador"],
-              [10, 44, 12, 11, 26, 46, 14, 50, 70, 60, 18])
+    cabecalho(ws, ["Gravidade", "Alerta", "Tributo", "Competência", "Entrada/Saída", "Nº da nota", "Documento",
+                   "Chave", "Valor", "Detalhe", "Fundamento", "Como corrigir", "Visto do contador"],
+              [10, 44, 12, 11, 14, 16, 26, 46, 14, 50, 70, 60, 18])
     for al in alertas:
+        num = al.get("numero") or ""
         ws.append(["Alta" if al["gravidade"] == "ALTA" else "Média", al["titulo"], al["tributo"], al["periodo"],
-                   al["documento"], al.get("chave"), al["valor"], al["detalhe"], al["fundamento"], al["corrigir"], ""])
-        ws.cell(row=ws.max_row, column=7).number_format = "#,##0.00"
+                   al.get("operacao") or "", int(num) if num.isdigit() else num, al["documento"], al.get("chave"),
+                   al["valor"], al["detalhe"], al["fundamento"], al["corrigir"], ""])
+        ws.cell(row=ws.max_row, column=9).number_format = "#,##0.00"
         if al["gravidade"] == "ALTA":
             ws.cell(row=ws.max_row, column=1).font = Font(bold=True, color="B42318")
     if not alertas:
