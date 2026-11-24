@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.17",
+  "versao": "1.4.18",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.17.zip",
-  "sha256": "3e365c3e5dfc8673941a88b22b5d888695e8d52c11791f3b2e671a248dfba89c",
+  "pacote": "atualizacoes/sistema-1.4.18.zip",
+  "sha256": "53d78ad7a290799f80606dff6e8818f2a06924c27d387ccc667de47bbffcd825",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.4",
+  "versao_regras": "2026.11.24.5",
   "notas": [
-    "Lista oficial de ST de SC (RICMS/SC, Anexo 1-A, 178 itens com CEST, NCM e vigência): crédito de ST só com o produto na lista na data da venda",
-    "Produto fora da lista (ou com NCM listado só para outro produto) sai da tese de ST; cosméticos da venda porta a porta não valem para a venda normal",
-    "Bebidas alcoólicas de volta à ST em SC desde 01/04/2024"
+    "CST 500 da EFD lido como origem 5 + CST 00 (não é ST); CSOSN do Simples guardado com 4 dígitos",
+    "Soro fisiológico, lágrima e colírio com NCM de cosmético vão para conferência",
+    "Protetor solar decidido pelo FPS (mínimo 6, Anvisa); mais marcas de solução para lentes"
   ]
 }

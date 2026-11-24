@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.4",
+ "versao": "2026.11.24.5",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -1059,7 +1059,8 @@
     "ANTISSOLAR",
     "ANTI-SOLAR",
     "ANTI SOLAR",
-    " FPS"
+    " FPS",
+    "FPS"
    ],
    "palavras_excluir": [
     "POS SOL",
@@ -1068,8 +1069,9 @@
     "AUTOBRONZEADOR",
     " BRONZ"
    ],
-   "fundamento": "RICMS/SC-01, art. 26, I e § 3º (Lei SC 14.835/2009): protetores solares pagam 17%; bronzeador e pós-sol continuam em 25%",
-   "confianca": "ALTA"
+   "fundamento": "RICMS/SC-01, art. 26, I e § 3º (Lei SC 14.835/2009): protetores solares pagam 17%; bronzeador e pós-sol continuam em 25%. Protetor solar = produto com FPS mínimo 6 (Anvisa, RDC 629/2022, que substituiu a RDC 30/2012); abaixo disso é bronzeador",
+   "confianca": "ALTA",
+   "fps_minimo": 6
   },
   {
    "codigo": "SC_17_SOLUCAO_LENTES",
@@ -1081,10 +1083,40 @@
    "palavras": [
     "LENTE",
     "LENTES",
-    "OLHO ARTIFICIAL"
+    "LENS",
+    "OLHO ARTIFICIAL",
+    "RENU",
+    "OPTI FREE",
+    "OPTI-FREE",
+    "OPTIFREE",
+    "BIOTRUE",
+    "MULTIUSO",
+    "MULTI USO",
+    "MULTIPROPOSITO"
    ],
    "fundamento": "Consulta COPAT/SC 20/2021: solução para lentes de contato ou olhos artificiais (3307.90.00) não é produto supérfluo; alíquota geral de 17% (Lei 10.297/1996, art. 19, I)",
    "confianca": "ALTA"
+  },
+  {
+   "codigo": "SC_3307_DESCRICAO_MEDICAMENTO",
+   "uf": "SC",
+   "ncm_prefixos": [
+    "3304",
+    "3307"
+   ],
+   "aliquota": 25.0,
+   "palavras": [
+    "SORO FISIOL",
+    "SORO FIS",
+    "CLORETO DE SODIO",
+    "CLORETO SODIO",
+    "LAGRIMA",
+    "COLIRIO",
+    "SOLUCAO NASAL",
+    "SPRAY NASAL"
+   ],
+   "confianca": "BAIXA",
+   "fundamento": "Lei SC 10.297/1996, art. 19, II, b (25% só para perfumes e cosméticos das posições 3303 a 3307). A descrição é de medicamento ou correlato (soro fisiológico, lágrima artificial, colírio, solução nasal), não de cosmético: o NCM do cadastro provavelmente está errado. Com NCM de medicamento (capítulo 30) a alíquota é a geral de 17% (art. 19, I) e não há diferença a pagar; corrigir o NCM no cadastro"
   }
  ],
  "cfop": {
@@ -5323,5 +5355,5 @@
  "icms_st_cobertura": {
   "SC": "2021-06-01"
  },
- "programa_minimo": "1.4.17"
+ "programa_minimo": "1.4.18"
 }
