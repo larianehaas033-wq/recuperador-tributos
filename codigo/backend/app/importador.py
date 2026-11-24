@@ -197,10 +197,12 @@ def _criar_empresas_dos_xmls(con, notas: list[dict], empresas: dict[str, int]) -
     return criadas
 
 
-def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
+def importar_xmls(paths: list[Path], progress: Progress | None = None, notas_extra: list | None = None,
+                  rotulo: str = "XMLs") -> dict:
     """Importa XMLs (arquivos, pastas, zip). Cada nota vai para a empresa cujo CNPJ (raiz) é emitente
-    ou destinatário. Notas repetidas (mesma chave) são ignoradas."""
-    notas, cancel = [], set()
+    ou destinatário. Notas repetidas (mesma chave) são ignoradas. notas_extra: notas já lidas de outra fonte
+    com a mesma estrutura (planilha de itens do DF-e)."""
+    notas, cancel = list(notas_extra or []), set()
     for i, (nome, data) in enumerate(iter_xml_sources(paths)):
         n = parse_nfe_bytes(data, nome)
         if not n:
@@ -212,7 +214,7 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
         if progress and i % 500 == 0:
             progress(f"Lendo XMLs ({i})", 0.2)
 
-    resumo = {"arquivo": "XMLs", "status": "IMPORTADO", "tipo": "XML_NFE", "lidas": len(notas),
+    resumo = {"arquivo": rotulo, "status": "IMPORTADO", "tipo": "XML_NFE", "lidas": len(notas),
               "canceladas": len(cancel), "importadas": 0, "repetidas": 0, "sem_empresa": 0, "empresas": []}
     if not notas and not cancel:
         resumo["status"] = "IGNORADO"
@@ -302,17 +304,35 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
 
 def importar(paths: list[Path], progress: Progress | None = None) -> list[dict]:
     """Ponto de entrada: separa SPED e XML. SPED primeiro, para as empresas existirem quando os XMLs chegarem."""
-    sped, xml = [], []
+    from .parsers.dfe_excel import eh_planilha_dfe, eh_planilha_dfe_notas, ler_planilha_dfe
+    sped, xml, planilhas = [], [], []
+    resultados = []
     for p in paths:
         if p.is_dir():
             sped += [s for s in p.rglob("*.txt") if s.is_file()]
             if any(True for _ in p.rglob("*.xml")) or any(True for _ in p.rglob("*.zip")):
                 xml.append(p)
+            planilhas += [x for x in p.rglob("*.xlsx") if x.is_file()]
         elif p.suffix.lower() in (".xml", ".zip"):
             xml.append(p)
+        elif p.suffix.lower() in (".xlsx", ".xlsm"):
+            planilhas.append(p)
         else:
             sped.append(p)
-    resultados = []
+    for p in planilhas:
+        if eh_planilha_dfe(p):
+            try:
+                resultados.append(importar_xmls([], notas_extra=ler_planilha_dfe(p), rotulo=p.name))
+                resultados[-1]["tipo_fonte"] = "Planilha de itens do DF-e"
+            except Exception as e:  # noqa: BLE001
+                resultados.append({"arquivo": p.name, "status": "ERRO", "motivo": str(e)})
+        elif eh_planilha_dfe_notas(p):
+            resultados.append({"arquivo": p.name, "status": "IGNORADO",
+                               "motivo": "Esta é a planilha só de notas. Use a planilha de ITENS das notas do DF-e "
+                                         "(o crédito de ICMS depende do CST de cada produto)."})
+        else:
+            resultados.append({"arquivo": p.name, "status": "IGNORADO",
+                               "motivo": "Planilha não reconhecida (aceita a planilha de itens das NF-e do DF-e/SAT)."})
     total = len(sped) + (1 if xml else 0)
     for i, p in enumerate(sorted(sped)):
         if progress:

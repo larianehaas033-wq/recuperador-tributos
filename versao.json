@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.21",
+  "versao": "1.4.22",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.21.zip",
-  "sha256": "6027ccd0e7eaaaee539ec003ece22637b422b8e275f4900d2a62b719bd1b904f",
+  "pacote": "atualizacoes/sistema-1.4.22.zip",
+  "sha256": "d7dd7dcdb5c249cbb26784006772b8c9e707bd0dd9c870c75265099068cee26f",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.24.8",
   "notas": [
-    "PIS/COFINS: lê o resumo C175 da EFD-Contribuições; NFC-e com PIS/COFINS zerado no XML usa o valor pago no C175 da mesma nota",
-    "Cadastro de ICMS segue a lista oficial de ST de SC (energético e isotônico com CST 60; suco, chá e água de coco sem ST); NCM com item na ST sem confirmação pela descrição fica para conferir",
-    "Lista de ST: espumantes sem álcool e outras águas sem falsos positivos; gel lubrificante íntimo fora da ST de lubrificantes"
+    "Importa a planilha de itens do DF-e (SAT/SEF) no lugar dos XMLs de compra: crédito de ICMS, notas não escrituradas e malha",
+    "Entradas auditadas passam a contar as compras da EFD ICMS/IPI",
+    "Bonificação para revenda dá crédito de ICMS; Simples com ICMS em grupo normal dá crédito normal; ICMS próprio do substituto (ST retida) fora do crédito; observações longas não esticam mais a tabela"
   ]
 }

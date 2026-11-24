@@ -56,7 +56,7 @@ export default function Importar({ ir }) {
             className={`flex flex-col items-center rounded-lg border-2 border-dashed px-6 py-12 text-center transition ${arrastando ? 'border-gold bg-gold-100/40' : 'border-line'}`}>
             <Icon name="importar" className="h-8 w-8 text-navy-600" />
             <div className="mt-3 font-semibold text-navy">Arraste os arquivos aqui</div>
-            <div className="mt-1 text-sm text-muted">SPED (.txt), XMLs (.xml) ou pacotes .zip com XMLs</div>
+            <div className="mt-1 text-sm text-muted">SPED (.txt), XMLs (.xml), pacotes .zip com XMLs ou planilha de itens do DF-e (.xlsx)</div>
             <div className="mt-5 flex flex-wrap justify-center gap-2">
               <button className="btn-primary" disabled={!!job} onClick={() => escolher('pasta')}><Icon name="pasta" />Escolher pasta</button>
               <button className="btn-ghost" disabled={!!job} onClick={() => escolher('arquivos')}><Icon name="arquivo" />Escolher arquivos</button>
@@ -70,6 +70,7 @@ export default function Importar({ ir }) {
             <li><b className="text-ink">EFD-Contribuições</b> de cada mês: base de PIS/COFINS, créditos e valor recolhido.</li>
             <li><b className="text-ink">EFD ICMS/IPI</b> de cada mês: compras com ST, créditos de ICMS e notas escrituradas.</li>
             <li><b className="text-ink">XMLs</b> de compra e venda (NF-e e NFC-e): necessários para as teses de ICMS e para cruzar com o SPED.</li>
+            <li><b className="text-ink">Planilha de itens do DF-e</b> (SAT/SEF, "Excel Itens das notas NF-es"): substitui os XMLs de compra no cruzamento do crédito de ICMS. A planilha só de notas não serve.</li>
           </ul>
           <p className="mt-4 text-xs text-muted">Se importar a retificadora de um mês, ela substitui a original. O mesmo arquivo nunca entra duas vezes.</p>
         </div>

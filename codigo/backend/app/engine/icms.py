@@ -79,10 +79,19 @@ class MotorIcms:
         itens = self.sped_entradas.filter(pl.col("chave") == chave)
         if not itens.height:
             return "BAIXA", "Não comprovado automaticamente: a nota não tem itens escriturados (C170)."
+        bonif = False
         for row in linhas(itens):
             tipo = (self.produtos.get(row["cod_item"], {}).get("tipo_item") or "").zfill(2)
-            if row["cfop"] not in self.cfop_entrada or tipo in ("07", "08", "09"):
-                return "BAIXA", f"Item {row['cod_item']} escriturado com CFOP {row['cfop']}: pode ser uso e consumo."
+            if tipo in ("07", "08", "09"):
+                return "BAIXA", f"Item {row['cod_item']} cadastrado como uso e consumo/ativo (tipo {tipo})."
+            if row["cfop"] in ("1910", "2910"):
+                bonif = True  # bonificação/brinde recebido: mercadoria de revenda, a saída é tributada
+                continue
+            if row["cfop"] not in self.cfop_entrada:
+                return "BAIXA", f"Item {row['cod_item']} escriturado com CFOP {row['cfop']}: confira a destinação."
+        if bonif:
+            return "MEDIA", ("Nota com itens de bonificação (CFOP 1.910/2.910) de mercadoria cadastrada para revenda: "
+                             "o ICMS destacado dá crédito (LC 87/96, art. 20), pois a venda posterior é tributada.")
         return "ALTA", "Todos os itens da nota foram escriturados como revenda ou industrialização."
 
     def _credito_nao_apurado(self) -> list[Credito]:
@@ -333,8 +342,17 @@ class MotorIcms:
         return (n.get("crt_emit") or "") in ("1", "4")
 
     def _destaque(self, n):
-        """Crédito que a nota de compra permite: ICMS destacado; de fornecedor do Simples, o vCredICMSSN."""
-        return (n.get("vl_cred_sn") or 0) if self._simples(n) else (n["vl_icms"] or 0)
+        """Crédito que a nota de compra permite: ICMS destacado, sem o ICMS próprio do substituto nos itens com ST
+        retida (CST 10/30/70 — o varejista não credita); de fornecedor do Simples, o vCredICMSSN."""
+        if self._simples(n):
+            return n.get("vl_cred_sn") or 0
+        if not hasattr(self, "_icms_st_por_chave"):
+            self._icms_st_por_chave = {}
+            if self.xml_itens.height:
+                for r in linhas(self.xml_itens.filter(pl.col("ind_oper") == "0")):
+                    if _eh_st(r["cst_icms"] or ""):
+                        self._icms_st_por_chave[r["chave"]] = self._icms_st_por_chave.get(r["chave"], 0) + (r["vl_icms"] or 0)
+        return (n["vl_icms"] or 0) - self._icms_st_por_chave.get(n["chave"], 0)
 
     def _motivo_st(self, n) -> str:
         """Itens lançados com CST de ST na entrada, mas que estão fora da ST na UF: causa típica do crédito perdido."""

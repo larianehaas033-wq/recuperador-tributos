@@ -60,7 +60,7 @@ function Itens({ id, filtroInicial, teses, operacao }) {
                 <td className={`td num text-right font-semibold ${c.natureza === 'RISCO' ? 'text-bad' : ''}`}>{brl(c.valor_recuperar)}</td>
                 <td className="td num text-right">{c.natureza === 'RISCO' ? '—' : brl(c.valor_corrigido + c.valor_saldo_credor)}</td>
                 <td className="td text-xs">{teses[c.tese]?.nome || c.tese}{c.prescrito ? <span className="chip ml-1 bg-red-50 text-bad">prescrito</span> : ''}</td>
-                <td className="td"><Confianca v={c.confianca === 'ALTA' ? 'ALTA' : 'BAIXA'} />{c.confianca !== 'ALTA' && c.observacao && <div className="mt-1 max-w-[260px] whitespace-normal text-[11px] text-muted">{c.observacao}</div>}</td>
+                <td className="td"><Confianca v={c.confianca === 'ALTA' ? 'ALTA' : 'BAIXA'} />{c.confianca !== 'ALTA' && c.observacao && <Obs texto={c.observacao} />}</td>
               </tr>
             ))}
             {d.itens.length === 0 && <tr><td className="td py-8 text-center text-muted" colSpan={11}>Nenhum item com esses filtros.</td></tr>}
@@ -219,7 +219,7 @@ function Cadastro({ empresaId }) {
                   <td className="td"><Cel atual={l.atual_cclasstrib} novo={l.cclasstrib} /><div className="max-w-[200px] truncate text-[11px] text-muted">{l.grupo_ibscbs}</div></td>
                   <td className="td num">{l.reducao_ibscbs == null ? '—' : `${l.reducao_ibscbs}%`}</td>
                   <td className="td text-xs text-muted">{l.nbs}</td>
-                  <td className="td">{l.comprovacao === 'Revisar NCM' ? <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">Revisar NCM</span> : <Confianca v={l.comprovacao === 'ALTA' ? 'ALTA' : 'BAIXA'} />}{l.comprovacao !== 'ALTA' && <div className="mt-1 max-w-[240px] whitespace-normal text-[11px] text-muted">{l.observacao}</div>}</td>
+                  <td className="td">{l.comprovacao === 'Revisar NCM' ? <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">Revisar NCM</span> : <Confianca v={l.comprovacao === 'ALTA' ? 'ALTA' : 'BAIXA'} />}{l.comprovacao !== 'ALTA' && l.observacao && <Obs texto={l.observacao} />}</td>
                 </tr>
               ))}
               {vis.length === 0 && <tr><td className="td py-8 text-center text-muted" colSpan={10}>{so ? 'Nenhum produto com divergência.' : 'Nenhum produto.'}</td></tr>}
@@ -236,6 +236,22 @@ function Cadastro({ empresaId }) {
         </div>
       </div>
       <p className="text-xs text-muted">CST ICMS para empresas do regime normal; CSOSN para empresas do Simples Nacional. NBS só se aplica a serviços. cClassTrib conforme a tabela oficial da NF-e e os anexos da LC 214/2025 (texto com as alterações da LC 227/2026).</p>
+    </div>
+  )
+}
+
+// observação longa não pode esticar a linha da tabela: mostra o começo e abre o resto no clique
+function Obs({ texto }) {
+  const [aberto, setAberto] = React.useState(false)
+  const curto = texto.length > 140 && !aberto
+  return (
+    <div className="mt-1 w-[240px] whitespace-normal text-[11px] text-muted">
+      {curto ? texto.slice(0, 140) + '…' : texto}
+      {texto.length > 140 && (
+        <button className="ml-1 font-semibold text-navy underline" onClick={(e) => { e.stopPropagation(); setAberto(!aberto) }}>
+          {aberto ? 'menos' : 'ver tudo'}
+        </button>
+      )}
     </div>
   )
 }

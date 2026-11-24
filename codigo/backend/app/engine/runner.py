@@ -293,13 +293,21 @@ def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
     return regimes, avisos
 
 
-def _por_operacao(creditos: list[Credito], itens, base, sem_itens: list) -> dict:
-    """Painel separado de saídas e entradas auditadas: o que foi examinado e o que se achou em cada lado."""
+def _por_operacao(creditos: list[Credito], itens, base, sem_itens: list, entradas_icms=None) -> dict:
+    """Painel separado de saídas e entradas auditadas: o que foi examinado e o que se achou em cada lado.
+    Entradas: as da EFD ICMS/IPI (onde ficam todas as compras e o crédito de ICMS) somadas às da EFD-Contribuições
+    que não estão nela (a mesma nota conta uma vez só)."""
     vendas = base.cfops("saida_revenda") | base.cfops("saida_producao")
     out = {}
     for op, filtro in (("SAIDA", (pl.col("ind_oper") == "1") & pl.col("cfop").is_in(list(vendas))),
                        ("ENTRADA", pl.col("ind_oper") == "0")):
         df = itens.filter(filtro) if itens.height else itens
+        if op == "ENTRADA" and entradas_icms is not None and entradas_icms.height:
+            ent = entradas_icms.filter(pl.col("ind_oper") == "0")
+            ja = set(ent["chave"].drop_nulls().to_list())
+            extra = df.filter(~pl.col("chave").is_in(list(ja))) if df.height else df
+            cols = ["chave", "vl_item", "vl_desc"]
+            df = pl.concat([ent.select(cols), extra.select(cols)], how="vertical_relaxed") if extra.height else ent.select(cols)
         notas = df["chave"].drop_nulls().n_unique() if df.height else 0
         valor = r2(sum((D(a) - D(b) for a, b in zip(df["vl_item"].to_list(), df["vl_desc"].to_list())), ZERO)
                    ) if df.height else ZERO
@@ -496,7 +504,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
 
     _aplicar_limites(creditos, apuracoes, selic, hoje, avisos)
     resumo = _resumo(creditos, base)
-    resumo["operacoes"] = _por_operacao(creditos, itens_contrib, base, sem_itens_faltando)
+    resumo["operacoes"] = _por_operacao(creditos, itens_contrib, base, sem_itens_faltando, entradas_icms)
     periodos = sorted({c.periodo for c in creditos if c.periodo})
 
     if progress:

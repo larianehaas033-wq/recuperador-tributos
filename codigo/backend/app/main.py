@@ -209,8 +209,8 @@ def selecionar(tipo: str = "arquivos"):
                 resultado.append(p)
         else:
             ps = filedialog.askopenfilenames(
-                title="Escolha os arquivos SPED (.txt), XMLs ou .zip",
-                filetypes=[("Arquivos fiscais", "*.txt *.xml *.zip"), ("Todos", "*.*")])
+                title="Escolha os arquivos SPED (.txt), XMLs, .zip ou a planilha de itens do DF-e (.xlsx)",
+                filetypes=[("Arquivos fiscais", "*.txt *.xml *.zip *.xlsx"), ("Todos", "*.*")])
             resultado.extend(ps)
         root.destroy()
 
