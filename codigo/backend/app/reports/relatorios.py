@@ -198,6 +198,9 @@ def gerar_excel(analise_id: int) -> Path:
         ws.cell(row=ws.max_row, column=12).number_format = money
     ws.auto_filter.ref = ws.dimensions
 
+    # Malha fiscal (cruzamentos que o fisco faz com a escrituração do cliente)
+    _aba_malha(wb, a["empresa_id"], cabecalho, base)
+
     # Por competência
     ws = wb.create_sheet("Por competência")
     cabecalho(ws, ["Competência", "PIS", "COFINS", "ICMS", "Total"], [13, 16, 16, 16, 16])
@@ -272,6 +275,26 @@ CAD_COLS = [("Cód. item", "cod_item", 12), ("Descrição", "descricao", 34), ("
             ("Redução IBS/CBS (%)", "reducao_ibscbs", 9), ("Enquadramento IBS/CBS", "grupo_ibscbs", 30),
             ("Fundamento IBS/CBS", "fundamento_ibscbs", 45), ("NBS", "nbs", 22), ("Comprovação", "comprovacao", 12),
             ("Observação", "observacao", 60)]
+
+
+def _aba_malha(wb, empresa_id: int, cabecalho, base) -> None:
+    from .. import db
+    from ..engine import malha
+    with db.tx() as con:
+        alertas = malha.verificar(con, empresa_id, base)
+    ws = wb.create_sheet("Malha fiscal")
+    cabecalho(ws, ["Gravidade", "Alerta", "Tributo", "Competência", "Documento", "Chave", "Valor", "Detalhe",
+                   "Fundamento", "Como corrigir", "Visto do contador"],
+              [10, 44, 12, 11, 26, 46, 14, 50, 70, 60, 18])
+    for al in alertas:
+        ws.append(["Alta" if al["gravidade"] == "ALTA" else "Média", al["titulo"], al["tributo"], al["periodo"],
+                   al["documento"], al.get("chave"), al["valor"], al["detalhe"], al["fundamento"], al["corrigir"], ""])
+        ws.cell(row=ws.max_row, column=7).number_format = "#,##0.00"
+        if al["gravidade"] == "ALTA":
+            ws.cell(row=ws.max_row, column=1).font = Font(bold=True, color="B42318")
+    if not alertas:
+        ws.append(["", "Nenhum indício de malha encontrado nos arquivos importados."])
+    ws.auto_filter.ref = ws.dimensions
 
 
 def _aba_cadastro(wb, empresa_id: int, cabecalho) -> None:

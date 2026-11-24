@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.13",
+  "versao": "1.4.14",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.13.zip",
-  "sha256": "bdbb155eeedd520d71ddf7f86be8db170bcefae85b104c08928accef872d152c",
+  "pacote": "atualizacoes/sistema-1.4.14.zip",
+  "sha256": "cf0c14747783ae51567eb75e0380efb72b74dc45b2b84bafc32bcbda3e18f2c9",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.24.2",
   "notas": [
-    "Regra de SC: perfumes e cosméticos (3303, 3304, 3305, 3307) a 25%; protetor solar e solução para lentes a 17%",
-    "Cosmético vendido abaixo de 25% aparece em Riscos",
-    "Excel e PDF salvos também na pasta Downloads"
+    "Alerta de possível malha fiscal ao importar a EFD ICMS/IPI e a EFD-Contribuições",
+    "Devoluções escrituradas erradas, notas não escrituradas, crédito vedado, duplicidade, apuração x documentos, faturamento divergente e numeração faltante",
+    "Aba Malha fiscal no Excel completo"
   ]
 }

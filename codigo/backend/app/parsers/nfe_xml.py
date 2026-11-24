@@ -88,7 +88,8 @@ def parse_nfe_bytes(data: bytes, nome: str = "") -> dict | None:
         data=data,
         periodo=data[:7] if data else None,
         tp_nf=_t(ide, "tpNF"),               # 0 entrada, 1 saída (do ponto de vista do emitente)
-        fin_nfe=_t(ide, "finNFe"),
+        fin_nfe=_t(ide, "finNFe"),          # 1 normal, 2 complementar, 3 ajuste, 4 devolução
+        chave_ref=next((only_digits(r.text or "") for r in ide.findall("NFref/refNFe")) if ide is not None else iter(()), None),
         cnpj_emit=only_digits(_t(emit, "CNPJ") or _t(emit, "CPF")),
         nome_emit=_t(emit, "xNome"),
         uf_emit=_t(emit, "enderEmit/UF"),
@@ -135,6 +136,7 @@ def parse_nfe_bytes(data: bytes, nome: str = "") -> dict | None:
             vl_bc_icms=_f(icms, "vBC"),
             aliq_icms=_f(icms, "pICMS"),
             vl_icms=_f(icms, "vICMS"),
+            vl_cred_sn=_f(icms, "vCredICMSSN"),
             vl_bc_icms_st=_f(icms, "vBCST") or _f(icms, "vBCSTRet"),
             vl_icms_st=_f(icms, "vICMSST") or _f(icms, "vICMSSTRet"),
             vl_ipi=_f(ipi, "vIPI"),
@@ -149,6 +151,7 @@ def parse_nfe_bytes(data: bytes, nome: str = "") -> dict | None:
             cst_ibscbs=_t(ibscbs, "CST"),
             cclasstrib=_t(ibscbs, "cClassTrib"),
         ))
+    nota["vl_cred_sn"] = sum((it.get("vl_cred_sn") or 0) for it in nota["itens"])
     return nota
 
 

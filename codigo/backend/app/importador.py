@@ -20,7 +20,7 @@ ITEM_COLS = [
 NOTA_COLS = [
     "empresa_id", "arquivo_id", "origem", "chave", "modelo", "serie", "numero", "data", "periodo", "ind_oper",
     "ind_emit", "cnpj_emit", "cnpj_part", "crt_emit", "cod_sit", "cancelada", "vl_doc", "vl_icms", "vl_icms_st", "vl_pis",
-    "vl_cofins",
+    "vl_cofins", "fin_nfe", "chave_ref", "vl_cred_sn",
 ]
 
 REGIME = {"1": "LUCRO_REAL", "2": "LUCRO_PRESUMIDO", "3": "MISTO"}
@@ -222,6 +222,13 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
         resumo["criadas"] = _criar_empresas_dos_xmls(con, notas, empresas)
         existentes = {r["chave"] for r in con.execute("SELECT chave FROM notas_fiscais WHERE origem='XML'")}
         h = hashlib.sha256("|".join(sorted(n["chave"] for n in notas)).encode()).hexdigest()
+        # XMLs importados antes da 1.4.14 não guardaram finalidade, nota referenciada e crédito do Simples
+        resumo["completadas"] = 0
+        for n in notas:
+            c = con.execute("UPDATE notas_fiscais SET fin_nfe=?, chave_ref=?, vl_cred_sn=?, crt_emit=coalesce(crt_emit, ?)"
+                            " WHERE chave=? AND origem='XML' AND fin_nfe IS NULL",
+                            (n.get("fin_nfe"), n.get("chave_ref"), n.get("vl_cred_sn"), n.get("crt_emit"), n["chave"]))
+            resumo["completadas"] += c.rowcount
         if con.execute("SELECT 1 FROM arquivos_sped WHERE hash=?", (h,)).fetchone() and not cancel:
             resumo["status"] = "JA_IMPORTADO"
             return resumo
@@ -257,7 +264,8 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
                 empresa_id=empresa_id, arquivo_id=arquivos[empresa_id], origem="XML", chave=n["chave"],
                 modelo=n["modelo"], serie=n["serie"], numero=n["numero"], data=n["data"], periodo=n["periodo"],
                 ind_oper=ind_oper, ind_emit=ind_emit, cnpj_emit=n["cnpj_emit"], cnpj_part=part, cod_sit=n["cstat"],
-                crt_emit=n.get("crt_emit") if ind_emit == "0" else None,
+                crt_emit=n.get("crt_emit"),
+                fin_nfe=n.get("fin_nfe"), chave_ref=n.get("chave_ref"), vl_cred_sn=n.get("vl_cred_sn"),
                 cancelada=cancelada, vl_doc=n["vl_doc"], vl_icms=n["vl_icms"], vl_icms_st=n["vl_icms_st"],
                 vl_pis=n["vl_pis"], vl_cofins=n["vl_cofins"],
             )
@@ -318,4 +326,39 @@ def importar(paths: list[Path], progress: Progress | None = None) -> list[dict]:
             resultados.append(importar_xmls(xml, progress=progress))
         except Exception as e:
             resultados.append({"arquivo": "XMLs", "status": "ERRO", "motivo": str(e)})
+    _anexar_malha(resultados)
     return resultados
+
+
+def _anexar_malha(resultados: list[dict]) -> None:
+    """Ao subir EFD ICMS/IPI ou EFD-Contribuições, confere na hora os cruzamentos que podem levar o cliente à malha."""
+    from .engine import malha
+    from .rules.loader import carregar
+    empresas = {r["empresa_id"] for r in resultados if r.get("status") == "IMPORTADO" and r.get("empresa_id")
+                and r.get("tipo") in ("EFD_ICMS_IPI", "EFD_CONTRIB")}
+    for r in resultados:  # XMLs novos também mudam o cruzamento de quem já tem EFD
+        if r.get("tipo") == "XML_NFE" and r.get("status") == "IMPORTADO":
+            empresas |= set(r.get("empresas") or [])
+    if not empresas:
+        return
+    try:
+        regras = carregar()
+    except Exception:  # noqa: BLE001
+        regras = None
+    with db.tx() as con:
+        for eid in empresas:
+            if not con.execute("SELECT 1 FROM arquivos_sped WHERE empresa_id=? AND tipo IN ('EFD_ICMS_IPI','EFD_CONTRIB')",
+                               (eid,)).fetchone():
+                continue
+            try:
+                al = malha.verificar(con, eid, regras)
+            except Exception as e:  # noqa: BLE001 — o alerta nunca derruba a importação
+                al, erro = [], str(e)
+            else:
+                erro = None
+            nome = con.execute("SELECT nome FROM empresas WHERE id=?", (eid,)).fetchone()
+            item = dict(empresa_id=eid, nome=nome["nome"] if nome else "", **malha.resumo(al),
+                        principais=al[:8], erro=erro)
+            for r in resultados:
+                if r.get("empresa_id") == eid or eid in (r.get("empresas") or []):
+                    r["malha"] = item

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { aguardar, api, brl, cnpj, competencia, dataHora, REGIME } from '../api'
 import { Aviso, Icon, Progresso, Titulo } from '../ui'
+import { MalhaEmpresa } from './Malha'
 
 function meses60() {
   const out = []
@@ -89,6 +90,8 @@ export default function Empresa({ id, ir }) {
 
       {job && <div className="mb-4"><Progresso job={job} /></div>}
       {erro && <div className="mb-4"><Aviso tipo="erro">{erro}</Aviso></div>}
+
+      <MalhaEmpresa empresaId={id} />
 
       <div className="card mb-6 p-5">
         <div className="mb-3 flex items-baseline justify-between">

@@ -241,6 +241,16 @@ async def upload(files: list[UploadFile]):
     return {"job": _job(lambda progress: importar([destino], progress))}
 
 
+# ------------------------------------------------------------------------- malha fiscal
+@app.get("/api/empresas/{empresa_id}/malha")
+def malha_fiscal(empresa_id: int):
+    from .engine import malha
+    from .rules.loader import carregar
+    with db.tx() as con:
+        al = malha.verificar(con, empresa_id, carregar())
+    return {**malha.resumo(al), "alertas": al}
+
+
 # ------------------------------------------------------------------------- empresas e análises
 @app.get("/api/empresas")
 def empresas():

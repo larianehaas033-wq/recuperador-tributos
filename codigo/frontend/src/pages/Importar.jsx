@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { aguardar, api, competencia } from '../api'
 import { Aviso, Icon, Progresso, Titulo } from '../ui'
+import { ResumoMalha } from './Malha'
 
 const TIPO = { EFD_CONTRIB: 'EFD-Contribuições', EFD_ICMS_IPI: 'EFD ICMS/IPI', XML_NFE: 'XMLs NF-e/NFC-e' }
 const ST = {
@@ -77,6 +78,7 @@ export default function Importar({ ir }) {
       <div className="mt-6 space-y-4">
         {job && <Progresso job={job} />}
         {erro && <Aviso tipo="erro">{erro}</Aviso>}
+        {res && <ResumoMalha ir={ir} itens={Object.values(Object.fromEntries(res.filter((r) => r.malha).map((r) => [r.malha.empresa_id, r.malha])))} />}
         {res && (
           <div className="card overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4">
