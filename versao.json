@@ -4,7 +4,7 @@
   "pacote": "atualizacoes/sistema-1.4.11.zip",
   "sha256": "5860a1214b0ed8cbf08adccddb32dcca84d1ad74e1712bf8f6c864d1cb29912e",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.17.12",
+  "versao_regras": "2026.11.24.1",
   "notas": [
     "A janela sempre carrega a tela nova depois de atualizar (sem cache)"
   ]

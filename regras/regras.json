@@ -1,6 +1,6 @@
 {
- "versao": "2026.11.17.12",
- "publicado_em": "2026-11-17",
+ "versao": "2026.11.24.1",
+ "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
   {
@@ -1188,7 +1188,8 @@
     "Retificar a EFD-Contribuições de cada competência, com o CST 04 e a base zerada nos itens apontados.",
     "Retificar a DCTF/DCTFWeb das mesmas competências, reduzindo o débito declarado.",
     "Transmitir o PER/DCOMP Web como pagamento indevido ou a maior (códigos 6912 PIS e 5856 COFINS no regime não cumulativo; 8109 e 2172 no cumulativo), para restituir ou compensar.",
-    "Guardar a memória de cálculo deste relatório e os XMLs como prova."
+    "Guardar a memória de cálculo deste relatório e os XMLs como prova.",
+    "Mesmo depois da extinção do PIS/COFINS (01/01/2027), o pagamento indevido continua restituível ou compensável (inclusive com a CBS) pelo PER/DCOMP Web, dentro de 5 anos do pagamento (CTN, art. 168; LC 214/2025, art. 378)."
    ]
   },
   "PISCOF_ALIQ_ZERO_SAIDA": {
@@ -1201,7 +1202,8 @@
     "Retificar a EFD-Contribuições das competências apontadas.",
     "Retificar a DCTF/DCTFWeb, reduzindo o débito.",
     "Transmitir o PER/DCOMP Web como pagamento indevido ou a maior.",
-    "Guardar a memória de cálculo e os documentos."
+    "Guardar a memória de cálculo e os documentos.",
+    "Mesmo depois da extinção do PIS/COFINS (01/01/2027), o pagamento indevido continua restituível ou compensável (inclusive com a CBS) pelo PER/DCOMP Web, dentro de 5 anos do pagamento (CTN, art. 168; LC 214/2025, art. 378)."
    ]
   },
   "PISCOF_ICMS_BASE": {
@@ -1214,20 +1216,22 @@
     "Retificar a EFD-Contribuições, reduzindo a base de cálculo das saídas pelo ICMS destacado.",
     "Retificar a DCTF/DCTFWeb.",
     "Transmitir o PER/DCOMP Web como pagamento indevido ou a maior.",
-    "Conferir se a empresa tem ação judicial própria sobre o tema; se tiver, seguir o que a decisão definir."
+    "Conferir se a empresa tem ação judicial própria sobre o tema; se tiver, seguir o que a decisão definir.",
+    "Mesmo depois da extinção do PIS/COFINS (01/01/2027), o pagamento indevido continua restituível ou compensável (inclusive com a CBS) pelo PER/DCOMP Web, dentro de 5 anos do pagamento (CTN, art. 168; LC 214/2025, art. 378)."
    ]
   },
   "PISCOF_CREDITO_ENTRADA": {
    "nome": "Crédito de PIS/COFINS não aproveitado nas compras",
    "via": "ADMINISTRATIVO_FEDERAL",
    "natureza": "CREDITO_EXTEMPORANEO",
-   "fundamento": "Lei 10.637/2002 e Lei 10.833/2003, art. 3º, I e II (bens para revenda e insumos). Desde 05/2023 o ICMS da compra sai da base do crédito (Lei 14.592/2023). Prazo de 5 anos da aquisição.",
+   "fundamento": "Lei 10.637/2002 e Lei 10.833/2003, art. 3º, I e II (bens para revenda e insumos). Desde 05/2023 o ICMS da compra sai da base do crédito (Lei 14.592/2023). Prazo de 5 anos da aquisição. Transição: LC 214/2025, art. 378 (créditos não apropriados ou não utilizados até a extinção do PIS/COFINS continuam válidos se registrados na escrituração) e art. 383 (5 anos da apropriação).",
    "roteiro": [
     "Confirmar a destinação de cada compra (revenda ou insumo) e que o fornecedor é pessoa jurídica.",
     "Corrigir o CST de entrada para 50 (ou 51 a 56 conforme a receita vinculada) no cadastro.",
     "Lançar o crédito extemporâneo na EFD-Contribuições atual (registro 1101/1501 e M100/M500) ou retificar as competências de origem.",
     "Se a retificação reduzir contribuição já paga, pedir restituição/compensação no PER/DCOMP Web; se gerar saldo credor, usar nos meses seguintes.",
-    "Créditos não usados até 31/12/2026 seguem as regras de transição da LC 214/2025."
+    "PRAZO DA REFORMA: escriturar o crédito extemporâneo na EFD-Contribuições até a competência 12/2026 (LC 214/2025, art. 378: o crédito precisa estar registrado na escrituração; a Receita informou que o PER/DCOMP Web vai buscar automaticamente o saldo da EFD-Contribuições de dezembro/2026).",
+    "A partir de 2027 o saldo credor pode compensar a CBS, outros tributos federais ou ser ressarcido em dinheiro, pelo PER/DCOMP Web, em até 5 anos contados da apropriação (LC 214/2025, arts. 378 e 383)."
    ]
   },
   "RISCO_CRED_MONOFASICO": {
@@ -2433,7 +2437,7 @@
   ]
  },
  "coerencia_ncm": {
-  "_descricao": "Conferência do NCM informado com a descrição do produto, antes de aplicar qualquer regra.",
+  "_descricao": "Conferência do NCM informado com a descrição do produto, antes de aplicar qualquer regra. NCM extinto por atualização da nomenclatura é trocado pelo código sucessor sem perder o tratamento da lei: a mudança de código não altera o rol de produtos beneficiados (Solução de Consulta Disit/SRRF06 nº 6.013/2026; SC Cosit 266/2024).",
   "extintos": {
    "04031000": [
     "04032000",
