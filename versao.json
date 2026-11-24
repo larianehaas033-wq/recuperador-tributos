@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.18",
+  "versao": "1.4.19",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.18.zip",
-  "sha256": "53d78ad7a290799f80606dff6e8818f2a06924c27d387ccc667de47bbffcd825",
+  "pacote": "atualizacoes/sistema-1.4.19.zip",
+  "sha256": "799deee49b8fb04825361335ea21cb090db0e5885b6b010d7bf24ed430abda6f",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.5",
+  "versao_regras": "2026.11.24.6",
   "notas": [
-    "CST 500 da EFD lido como origem 5 + CST 00 (não é ST); CSOSN do Simples guardado com 4 dígitos",
-    "Soro fisiológico, lágrima e colírio com NCM de cosmético vão para conferência",
-    "Protetor solar decidido pelo FPS (mínimo 6, Anvisa); mais marcas de solução para lentes"
+    "Cadastro: fórmulas infantis 1901.10.10 com PIS/COFINS 06 e IBS/CBS 200003 (Lei 10.925, art. 1º, XI; LC 214, Anexo I, item 4)",
+    "Cadastro: 3401.11.90 monofásico (CST 04), exceto sabão (Ex 01, CST 06); lenços e toalhas umedecidos (Cosit 98.062/2020)",
+    "Quando a lei cobre o NCM mas a descrição não confirma, o cadastro não muda mais para tributado: mantém o atual e marca para conferir"
   ]
 }

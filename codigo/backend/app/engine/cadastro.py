@@ -23,17 +23,22 @@ TIPO_DESC = {"00": "Revenda", "01": "Matéria-prima", "02": "Embalagem", "03": "
 
 def classificar_ibs(base: BaseRegras, ncm: str, descricao: str) -> dict:
     desc = norm(descricao)
+    possivel = None
     for r in base.ibs.get("regras", []):
         if not ncm or not any(ncm.startswith(p) for p in r["ncm_prefixos"]):
             continue
         if any(ncm.startswith(e) for e in r.get("excecoes", [])):
             continue
-        if r.get("_palavras") and not contem(desc, r["_palavras"]):
-            continue
         if contem(desc, r.get("_excluir")):
             continue
+        if r.get("_palavras") and not contem(desc, r["_palavras"]):
+            possivel = possivel or r  # o NCM está na lei, mas a descrição não confirma: não é prova de que não está
+            continue
         return r
-    return dict(base.ibs.get("padrao", {}), codigo="IBS_PADRAO", grupo="Tributação integral", observacao="")
+    padrao = dict(base.ibs.get("padrao", {}), codigo="IBS_PADRAO", grupo="Tributação integral", observacao="")
+    if possivel:
+        padrao["possivel"] = possivel
+    return padrao
 
 
 def _moda(valores) -> str | None:
@@ -114,8 +119,6 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
             cst_regra = ("04" if not motor.industrial else "02") if mono else "06"
             if c == "ALTA":
                 cst_pc = cst_regra
-            elif not regra.exige_descricao and not contem(norm(desc), regra.palavras):
-                regra, cst_pc = None, "01"  # depende da destinação e nada indica o uso previsto na lei
             else:
                 # não sugere o que não comprovou: mantém o atual e explica a possibilidade
                 pc_comprovado = False
@@ -154,6 +157,14 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
                    "grupo": "NCM a corrigir", "fundamento": "", "observacao": ""}
         else:
             ibs = classificar_ibs(base, ncm, desc)
+        if ibs.get("possivel"):
+            pos = ibs["possivel"]
+            if _moda(u["cclasstrib"]) == pos["cclasstrib"]:
+                # o cliente já usa o enquadramento possível e nada o desmente: mantém, para o contador confirmar
+                ibs = dict(pos, observacao="")
+                conf = "BAIXA"
+            obs.append(f"IBS/CBS: pode ser {pos['grupo']} (cClassTrib {pos['cclasstrib']}); a descrição não permitiu "
+                       "confirmar o produto — conferir.")
         if ibs.get("observacao"):
             obs.append(f"IBS/CBS: {ibs['observacao']}")
 
