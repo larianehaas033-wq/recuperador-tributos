@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 APP_NAME = "RecuperadorTributos"
-VERSION = "1.4.11"
+VERSION = "1.4.12"
 
 REPO_RAW = "https://raw.githubusercontent.com/larianehaas033-wq/recuperador-tributos/main"
 URL_VERSAO = f"{REPO_RAW}/versao.json"

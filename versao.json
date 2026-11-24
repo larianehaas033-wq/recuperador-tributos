@@ -1,11 +1,12 @@
 {
-  "versao": "1.4.11",
-  "publicado_em": "2026-11-17",
-  "pacote": "atualizacoes/sistema-1.4.11.zip",
-  "sha256": "5860a1214b0ed8cbf08adccddb32dcca84d1ad74e1712bf8f6c864d1cb29912e",
+  "versao": "1.4.12",
+  "publicado_em": "2026-11-24",
+  "pacote": "atualizacoes/sistema-1.4.12.zip",
+  "sha256": "8371f0426fb4c817d1305f7a63057301751189fd1ec677d9a687b1d6fcf942b4",
   "exige_pacote_completo": false,
   "versao_regras": "2026.11.24.1",
   "notas": [
-    "A janela sempre carrega a tela nova depois de atualizar (sem cache)"
+    "Importar só XMLs (sem SPED) agora cadastra a empresa sozinho e libera a análise",
+    "Avisa quantas notas ficaram de fora por não serem de nenhuma empresa"
   ]
 }

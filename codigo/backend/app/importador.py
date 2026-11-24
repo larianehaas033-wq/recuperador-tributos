@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections import Counter
 from pathlib import Path
 from typing import Callable
 
@@ -157,6 +158,43 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
     }
 
 
+def _cnpjs_da_nota(n: dict) -> set[str]:
+    r = set()
+    if len(n["cnpj_emit"]) == 14:
+        r.add(n["cnpj_emit"][:8])
+    if len(n["cnpj_dest"]) == 14 and not n["dest_cpf"]:
+        r.add(n["cnpj_dest"][:8])
+    return r
+
+
+def _criar_empresas_dos_xmls(con, notas: list[dict], empresas: dict[str, int]) -> list[str]:
+    """Quem importa só XMLs (sem SPED) também precisa ver a empresa. A empresa do lote é o CNPJ que aparece
+    (como emitente ou destinatário) na maior parte das notas que ainda não são de nenhuma empresa cadastrada:
+    nas vendas ela é a emitente, nas compras a destinatária; um fornecedor aparece só nas notas dele.
+    Repete enquanto sobrar uma raiz presente em pelo menos 30% das notas restantes (lote com várias empresas)."""
+    criadas = []
+    restantes = [n for n in notas if not (_cnpjs_da_nota(n) & empresas.keys())]
+    while restantes:
+        conta = Counter(r for n in restantes for r in _cnpjs_da_nota(n))
+        if not conta:
+            break
+        raiz, qtd = conta.most_common(1)[0]
+        if qtd < max(1, 0.3 * len(restantes)):
+            break
+        dados = Counter()
+        for n in restantes:
+            if n["cnpj_emit"][:8] == raiz:
+                dados[(n["cnpj_emit"], n.get("nome_emit") or "", n.get("uf_emit") or "")] += 1
+            elif n["cnpj_dest"][:8] == raiz and not n["dest_cpf"]:
+                dados[(n["cnpj_dest"], n.get("nome_dest") or "", n.get("uf_dest") or "")] += 1
+        cnpj, nome, uf = dados.most_common(1)[0][0]
+        nome = nome or next((k[1] for k, _ in dados.most_common() if k[1]), "") or f"Empresa {cnpj}"
+        empresas[raiz] = _upsert_empresa(con, cnpj, nome, uf, None, None)
+        criadas.append(nome)
+        restantes = [n for n in restantes if raiz not in _cnpjs_da_nota(n)]
+    return criadas
+
+
 def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
     """Importa XMLs (arquivos, pastas, zip). Cada nota vai para a empresa cujo CNPJ (raiz) é emitente
     ou destinatário. Notas repetidas (mesma chave) são ignoradas."""
@@ -181,6 +219,7 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
 
     with db.tx() as con:
         empresas = {r["raiz_cnpj"]: r["id"] for r in con.execute("SELECT id, raiz_cnpj FROM empresas")}
+        resumo["criadas"] = _criar_empresas_dos_xmls(con, notas, empresas)
         existentes = {r["chave"] for r in con.execute("SELECT chave FROM notas_fiscais WHERE origem='XML'")}
         h = hashlib.sha256("|".join(sorted(n["chave"] for n in notas)).encode()).hexdigest()
         if con.execute("SELECT 1 FROM arquivos_sped WHERE hash=?", (h,)).fetchone() and not cancel:
@@ -242,6 +281,9 @@ def importar_xmls(paths: list[Path], progress: Progress | None = None) -> dict:
             con.executemany("UPDATE notas_fiscais SET cancelada=1 WHERE chave=? AND origem='XML'",
                             [(c,) for c in cancel])
         resumo["empresas"] = list(arquivos.keys())
+        if resumo["sem_empresa"]:
+            resumo["motivo"] = (f"{resumo['sem_empresa']} notas não são de nenhuma empresa cadastrada "
+                                "(nem emitente nem destinatário) e ficaram de fora.")
         for eid in arquivos:
             atualizar_regime(con, eid)
             con.execute("UPDATE analises SET desatualizada=1 WHERE empresa_id=?", (eid,))

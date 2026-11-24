@@ -97,7 +97,7 @@ export default function Importar({ ir }) {
                   <tr key={i}>
                     <td className="td font-medium">{r.arquivo}</td>
                     <td className="td">{TIPO[r.tipo] || '—'}</td>
-                    <td className="td">{r.nome || (r.tipo === 'XML_NFE' ? `${r.importadas} notas novas` : '—')}</td>
+                    <td className="td">{r.nome || (r.tipo === 'XML_NFE' ? <>{r.importadas} notas novas{r.criadas?.length > 0 && <div className="mt-1 text-xs text-muted">Empresa cadastrada pelos XMLs: {r.criadas.join(', ')}</div>}</> : '—')}</td>
                     <td className="td num">{r.periodo ? competencia(r.periodo) : '—'}{r.finalidade === 'retificadora' && <span className="chip ml-2 bg-navy-100 text-navy">retificadora</span>}</td>
                     <td className="td num text-muted">{r.itens != null ? `${r.notas} notas · ${r.itens} itens` : r.lidas != null ? `${r.lidas} lidas · ${r.repetidas} repetidas · ${r.sem_empresa} de outros CNPJs` : ''}</td>
                     <td className="td">
