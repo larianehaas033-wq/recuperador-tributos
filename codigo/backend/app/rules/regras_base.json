@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.1",
+ "versao": "2026.11.24.2",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -1027,7 +1027,66 @@
    "confianca": "ALTA"
   }
  ],
- "icms_aliquota_ncm": [],
+ "icms_aliquota_ncm": [
+  {
+   "codigo": "SC_25_PERFUMES_COSMETICOS",
+   "uf": "SC",
+   "ncm_prefixos": [
+    "3303",
+    "3304",
+    "3305",
+    "3307"
+   ],
+   "aliquota": 25.0,
+   "fundamento": "Lei SC 10.297/1996, art. 19, II, b, e Anexo I, Seção I, item 04 (perfumes e cosméticos das posições 3303, 3304, 3305 e 3307); RICMS/SC-01, art. 26, II",
+   "confianca": "ALTA"
+  },
+  {
+   "codigo": "SC_17_PROTETOR_SOLAR",
+   "uf": "SC",
+   "ncm_prefixos": [
+    "3304"
+   ],
+   "aliquota": 17.0,
+   "palavras": [
+    "PROTETOR SOLAR",
+    "PROT SOLAR",
+    "PROT. SOLAR",
+    "FILTRO SOLAR",
+    "FOTOPROTETOR",
+    "FOTOPROT",
+    "BLOQUEADOR SOLAR",
+    "ANTISSOLAR",
+    "ANTI-SOLAR",
+    "ANTI SOLAR",
+    " FPS"
+   ],
+   "palavras_excluir": [
+    "POS SOL",
+    "POS-SOL",
+    "BRONZEADOR",
+    "AUTOBRONZEADOR",
+    " BRONZ"
+   ],
+   "fundamento": "RICMS/SC-01, art. 26, I e § 3º (Lei SC 14.835/2009): protetores solares pagam 17%; bronzeador e pós-sol continuam em 25%",
+   "confianca": "ALTA"
+  },
+  {
+   "codigo": "SC_17_SOLUCAO_LENTES",
+   "uf": "SC",
+   "ncm_prefixos": [
+    "33079000"
+   ],
+   "aliquota": 17.0,
+   "palavras": [
+    "LENTE",
+    "LENTES",
+    "OLHO ARTIFICIAL"
+   ],
+   "fundamento": "Consulta COPAT/SC 20/2021: solução para lentes de contato ou olhos artificiais (3307.90.00) não é produto supérfluo; alíquota geral de 17% (Lei 10.297/1996, art. 19, I)",
+   "confianca": "ALTA"
+  }
+ ],
  "cfop": {
   "entrada_credito": [
    "1101",
@@ -1347,6 +1406,16 @@
     "Conferir no E110 se o débito foi efetivamente apurado e pago no mês.",
     "Pedir a restituição à SEF/SC ou estornar o débito na forma do RICMS/SC, com a lista de notas deste relatório.",
     "Corrigir no sistema de vendas o CST/CSOSN e a tributação dos produtos com ST."
+   ]
+  },
+  "ICMS_ALIQ_ABAIXO": {
+   "nome": "Alíquota de ICMS abaixo da prevista em lei",
+   "via": "ADMINISTRATIVO_ESTADUAL",
+   "natureza": "RISCO",
+   "fundamento": "Alíquota aplicada menor que a prevista na legislação da UF para o produto: a diferença é ICMS pago a menos e pode ser cobrada com multa e juros.",
+   "roteiro": [
+    "Corrigir a alíquota no cadastro do produto.",
+    "Avaliar denúncia espontânea da diferença antes de qualquer fiscalização (afasta a multa de ofício)."
    ]
   }
  },

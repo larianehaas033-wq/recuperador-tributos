@@ -1,12 +1,13 @@
 {
-  "versao": "1.4.12",
+  "versao": "1.4.13",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.12.zip",
-  "sha256": "8371f0426fb4c817d1305f7a63057301751189fd1ec677d9a687b1d6fcf942b4",
+  "pacote": "atualizacoes/sistema-1.4.13.zip",
+  "sha256": "bdbb155eeedd520d71ddf7f86be8db170bcefae85b104c08928accef872d152c",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.1",
+  "versao_regras": "2026.11.24.2",
   "notas": [
-    "Importar só XMLs (sem SPED) agora cadastra a empresa sozinho e libera a análise",
-    "Avisa quantas notas ficaram de fora por não serem de nenhuma empresa"
+    "Regra de SC: perfumes e cosméticos (3303, 3304, 3305, 3307) a 25%; protetor solar e solução para lentes a 17%",
+    "Cosmético vendido abaixo de 25% aparece em Riscos",
+    "Excel e PDF salvos também na pasta Downloads"
   ]
 }

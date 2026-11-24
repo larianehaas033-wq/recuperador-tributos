@@ -51,8 +51,8 @@ def _xml(pasta: Path) -> Path:
     pasta.mkdir(parents=True, exist_ok=True)
     (pasta / "nfce.xml").write_text(fx._nfe(K_COM_XML, "65", "1", CNPJ, "12345678909", "2024-03-20", [
         dict(cod="S1", desc="SHAMPOO SEDA 325ML", ncm="33051000", cfop="5102", qtd=1, vl=100, cst="000", bc=100,
-             aliq=17, icms=17),
-    ], 17, cpf_dest=True), encoding="utf-8")
+             aliq=25, icms=25),
+    ], 25, cpf_dest=True), encoding="utf-8")
     return pasta
 
 

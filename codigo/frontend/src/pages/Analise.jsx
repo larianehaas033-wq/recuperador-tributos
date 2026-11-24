@@ -155,7 +155,7 @@ function ArquivoGerado({ arquivo }) {
   if (arquivo.erro) return <Aviso tipo="erro">Não foi possível gerar o arquivo: {arquivo.erro}</Aviso>
   return (
     <Aviso tipo="ok">
-      <b>{arquivo.nome}</b> {arquivo.aberto ? 'foi aberto.' : 'foi salvo.'} Fica guardado em {arquivo.caminho}.{' '}
+      <b>{arquivo.nome}</b> foi salvo na sua pasta <b>Downloads</b>{arquivo.aberto ? ' e aberto' : ''}. Cópia em {arquivo.caminho}.{' '}
       <button className="font-semibold underline" onClick={() => api.post('/api/abrir-pasta')}>Abrir pasta</button>
     </Aviso>
   )
@@ -171,7 +171,7 @@ function Cadastro({ empresaId }) {
   useEffect(() => { setD(null); api.get(`/api/empresas/${empresaId}/cadastro`).then(setD) }, [empresaId])
   const baixar = async () => {
     setGerando(true); setArquivo(null)
-    try { setArquivo(await api.post(`/api/empresas/${empresaId}/cadastro/abrir`)) }
+    try { const r = await api.post(`/api/empresas/${empresaId}/cadastro/abrir`); baixar(r); setArquivo(r) }
     catch (err) { setArquivo({ erro: err.message }) }
     finally { setGerando(false) }
   }
@@ -240,6 +240,14 @@ function Cadastro({ empresaId }) {
   )
 }
 
+export function baixar(arquivo) {
+  if (!arquivo?.nome) return
+  const a = document.createElement('a')
+  a.href = `/api/relatorios/${encodeURIComponent(arquivo.nome)}`
+  a.download = arquivo.nome
+  document.body.appendChild(a); a.click(); a.remove()
+}
+
 export default function Analise({ id, ir }) {
   const [d, setD] = useState(null)
   const [aba, setAba] = useState('teses')
@@ -251,7 +259,9 @@ export default function Analise({ id, ir }) {
   const abrir = async (tipo) => {
     setGerando(tipo); setArquivo(null)
     try {
-      setArquivo(await api.post(`/api/analises/${id}/abrir`, { tipo }))
+      const r = await api.post(`/api/analises/${id}/abrir`, { tipo })
+      baixar(r)
+      setArquivo(r)
     } catch (err) {
       setArquivo({ erro: err.message })
     } finally { setGerando(null) }

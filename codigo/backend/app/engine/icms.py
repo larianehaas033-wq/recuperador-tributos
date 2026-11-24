@@ -175,7 +175,6 @@ class MotorIcms:
         vendas = vendas.filter(pl.col("cst_icms").map_elements(_eh_st, return_dtype=pl.Boolean))
         if not vendas.height:
             return []
-        aliq = D(self.modal["aliquota"])
         grupos: dict[tuple, dict] = {}
         for r in linhas(vendas):
             a = acum.get(r["cod_item"])
@@ -193,6 +192,7 @@ class MotorIcms:
             dif = row["bc_presumida"] - row["vl_venda"]
             if dif <= CENTAVO * row["bc_presumida"]:
                 continue
+            aliq = self._aliq_esperada(row["ncm"], row["descricao"])[0]
             valor = dif * aliq / 100
             out.append(Credito(
                 modulo="ICMS", tese="ICMS_ST_RESSARCIMENTO", tributo="ICMS", periodo=row["periodo"],
@@ -208,15 +208,25 @@ class MotorIcms:
         return out
 
     # -------------------------------------------------------------- alíquota
-    def _aliq_esperada(self, ncm: str | None):
-        melhor = None
+    def _aliq_esperada(self, ncm: str | None, descricao: str | None = None):
+        """Alíquota interna da UF para o produto. Regra com palavras (ex.: protetor solar dentro da 3304) só vale
+        quando a descrição confere com o texto legal e vence a regra geral do NCM; empate: prefixo mais longo."""
+        from .comum import contem, norm, termo
+        desc = norm(descricao)
+        melhor, nota = None, (-1, -1)
         for r in self.base.icms_ncm:
-            if r.get("uf") == self.uf and ncm and any(ncm.startswith(p) for p in r["ncm_prefixos"]):
-                if not melhor or max(map(len, r["ncm_prefixos"])) > max(map(len, melhor["ncm_prefixos"])):
-                    melhor = r
+            if r.get("uf") != self.uf or not ncm or not any(ncm.startswith(p) for p in r["ncm_prefixos"]):
+                continue
+            palavras = tuple(termo(x) for x in r.get("palavras", []))
+            if palavras and not (contem(desc, palavras)
+                                 and not contem(desc, tuple(termo(x) for x in r.get("palavras_excluir", [])))):
+                continue
+            n = (1 if palavras else 0, max(len(p) for p in r["ncm_prefixos"] if ncm.startswith(p)))
+            if n > nota:
+                melhor, nota = r, n
         if melhor:
-            return D(melhor["aliquota"]), melhor["fundamento"], melhor.get("confianca", "MEDIA")
-        return D(self.modal["aliquota"]), self.modal["fundamento"], "BAIXA"
+            return D(melhor["aliquota"]), melhor["fundamento"], melhor.get("confianca", "MEDIA"), True
+        return D(self.modal["aliquota"]), self.modal["fundamento"], "BAIXA", False
 
     def _aliquota(self, saidas: pl.DataFrame) -> list[Credito]:
         df = saidas.filter(pl.col("cfop").str.starts_with("5") & (pl.col("aliq_icms") > 0) & (pl.col("vl_bc_icms") > 0))
@@ -224,23 +234,28 @@ class MotorIcms:
         for row in linhas(df):
             if not _tributado(row["cst_icms"]):
                 continue
-            esperada, fund, conf = self._aliq_esperada(row["ncm"])
-            if row["aliq_icms"] <= esperada + CENTAVO:
+            esperada, fund, conf, especifica = self._aliq_esperada(row["ncm"], row.get("descricao"))
+            acima = row["aliq_icms"] > esperada + CENTAVO
+            # abaixo: só quando a lei fixa a alíquota do produto e ela é a de supérfluos (25%), que não tem a redução
+            # para 12% nas vendas a contribuinte nem outra alíquota menor por destinatário
+            abaixo = especifica and esperada >= 25 and row["aliq_icms"] < esperada - CENTAVO
+            if not (acima or abaixo):
                 continue
-            if self.revisoes.get((row["ncm"] or "", "ICMS_ALIQ_ACIMA")) == "DESCARTADO":
+            tese = "ICMS_ALIQ_ACIMA" if acima else "ICMS_ALIQ_ABAIXO"
+            if self.revisoes.get((row["ncm"] or "", tese)) == "DESCARTADO":
                 continue
-            if self.revisoes.get((row["ncm"] or "", "ICMS_ALIQ_ACIMA")) == "CONFIRMADO":
+            if self.revisoes.get((row["ncm"] or "", tese)) == "CONFIRMADO":
                 conf = "ALTA"
-            valor = row["vl_bc_icms"] * (row["aliq_icms"] - esperada) / 100
+            valor = row["vl_bc_icms"] * abs(row["aliq_icms"] - esperada) / 100
             out.append(Credito(
-                modulo="ICMS", tese="ICMS_ALIQ_ACIMA", tributo="ICMS", periodo=row["periodo"], data=row["data"],
+                modulo="ICMS", tese=tese, tributo="ICMS", periodo=row["periodo"], data=row["data"],
                 chave=row["chave"], num_doc=row["num_doc"], num_item=row.get("num_item"), cod_item=row["cod_item"], descricao=row["descricao"],
                 ncm=row["ncm"], cfop=row["cfop"], cst_escriturado=row["cst_icms"], cst_correto=row["cst_icms"],
                 base_original=r2(row["vl_bc_icms"]), base_correta=r2(row["vl_bc_icms"]), valor_pago=r2(row["vl_icms"]),
-                valor_recuperar=r2(valor), natureza="RESTITUICAO", via="ADMINISTRATIVO_ESTADUAL",
-                fundamento=f"{self.fund['ICMS_ALIQ_ACIMA']} Referência: {fund}.", confianca=conf,
+                valor_recuperar=r2(valor), natureza="RESTITUICAO" if acima else "RISCO", via="ADMINISTRATIVO_ESTADUAL",
+                fundamento=f"{self.fund[tese]} Referência: {fund}.", confianca=conf,
                 regra_codigo="ICMS_ALIQ",
-                observacao=f"Aplicada {row['aliq_icms']:.2f}%, esperada {esperada:.2f}%."
+                observacao=f"Aplicada {row['aliq_icms']:.2f}%, prevista em lei {esperada:.2f}%."
                            + (" Sem regra específica para o NCM: pode haver alíquota diferenciada legítima."
                               if conf == "BAIXA" else ""),
             ))

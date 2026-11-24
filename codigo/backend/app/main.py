@@ -473,9 +473,23 @@ def abrir_cadastro(eid: int):
 @app.post("/api/abrir-pasta")
 def abrir_pasta():
     pasta = config.DATA_DIR / "relatorios"
+    pasta.mkdir(parents=True, exist_ok=True)
     if sys.platform.startswith("win"):
-        subprocess.Popen(["explorer", str(pasta)])
+        try:
+            os.startfile(str(pasta))  # noqa: S606
+        except OSError:
+            subprocess.Popen(["explorer", str(pasta)])
     return {"pasta": str(pasta)}
+
+
+@app.get("/api/relatorios/{nome}")
+def baixar_relatorio(nome: str):
+    """Entrega o relatório pela própria janela: vai para a pasta Downloads, mesmo quando o Windows não abre o Excel."""
+    pasta = (config.DATA_DIR / "relatorios").resolve()
+    p = (pasta / nome).resolve()
+    if p.parent != pasta or not p.is_file():
+        raise HTTPException(404, "Relatório não encontrado.")
+    return FileResponse(p, filename=p.name)
 
 
 @app.exception_handler(Exception)
