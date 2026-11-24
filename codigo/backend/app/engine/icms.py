@@ -26,9 +26,25 @@ INICIO_TEMA_201 = "2016-10-19"
 
 
 def _eh_st(cst: str | None) -> bool:
+    """CST de ICMS com substituição tributária.
+    EFD e XML de regime normal: 3 dígitos = origem + CST (Tabela B) → ST se o CST for 10, 30, 60 ou 70.
+    "500" na EFD é origem 5 + CST 00 (tributado), NÃO o CSOSN 500.
+    CSOSN (Simples) vem com 4 dígitos (origem + CSOSN) → ST se 201, 202, 203 ou 500. Em XMLs antigos o CSOSN
+    veio sem a origem (3 dígitos): só 201/202/203 são inequívocos (não existe CST 01/02/03)."""
     if not cst:
         return False
-    return cst in ST_CSOSN or (len(cst) >= 2 and cst[-2:] in ST_CST and cst not in ("101", "102", "103", "300", "400", "900"))
+    if len(cst) == 4:
+        return cst[1:] in ST_CSOSN
+    if len(cst) == 3:
+        return cst[1:] in ST_CST or cst in ("201", "202", "203")
+    return cst in ST_CST
+
+
+def _fps(desc: str):
+    """Número do FPS na descrição (ex.: 'FPS 50', 'FPS50', 'FPS-30'); None se não houver."""
+    import re
+    m = re.search(r"\bFPS\s*-?\s*(\d{1,3})", desc or "")
+    return int(m.group(1)) if m else None
 
 
 def _tributado(cst: str | None) -> bool:
@@ -104,7 +120,7 @@ class MotorIcms:
                     or D(a.get("vl_icms")) <= 0):
                 continue
             cst = a.get("cst_icms") or ""
-            cst_st = cst in ("500",) or (len(cst) == 3 and cst[1:] == "60")
+            cst_st = _eh_st(cst)  # "500" no C190 é origem 5 + CST 00, não ST
             cfop_st = a.get("cfop") in ("5405", "6404")
             if not (cst_st or cfop_st):
                 continue
@@ -264,8 +280,12 @@ class MotorIcms:
             if r.get("uf") != self.uf or not ncm or not any(ncm.startswith(p) for p in r["ncm_prefixos"]):
                 continue
             palavras = tuple(termo(x) for x in r.get("palavras", []))
-            if palavras and not (contem(desc, palavras)
-                                 and not contem(desc, tuple(termo(x) for x in r.get("palavras_excluir", [])))):
+            fps = _fps(desc) if r.get("fps_minimo") else None
+            if fps is not None:  # o FPS informado decide (protetor solar x bronzeador), não o nome do produto
+                if fps < r["fps_minimo"]:
+                    continue
+            elif palavras and not (contem(desc, palavras)
+                                   and not contem(desc, tuple(termo(x) for x in r.get("palavras_excluir", [])))):
                 continue
             n = (1 if palavras else 0, max(len(p) for p in r["ncm_prefixos"] if ncm.startswith(p)))
             if n > nota:

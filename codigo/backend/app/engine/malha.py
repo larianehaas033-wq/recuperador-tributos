@@ -351,8 +351,8 @@ def verificar(con, empresa_id: int, regras=None) -> list[dict]:
         for r in q("SELECT i.periodo, i.data, i.num_doc, i.ncm, i.descricao, i.cst_icms, i.vl_item, i.vl_desc "
                    "FROM itens_nota i JOIN arquivos_sped a ON a.id=i.arquivo_id WHERE i.empresa_id=? "
                    "AND a.tipo='EFD_ICMS_IPI' AND i.ind_oper='0' AND i.origem='C170'", empresa_id):
-            cst = r["cst_icms"] or ""
-            if not ((len(cst) == 3 and cst[1:] == "60") or cst == "500"):
+            from .icms import _eh_st
+            if not _eh_st(r["cst_icms"] or ""):  # "500" na EFD = origem 5 + CST 00, não é ST
                 continue
             seg = regras.fora_da_st(uf, r["ncm"], r["data"], r["descricao"])
             if not seg:

@@ -31,9 +31,14 @@ def test_excecoes_17():
     assert _esperada("33049990", "PROTETOR SOLAR SUNDOWN FPS 50 200ML") == 17
     assert _esperada("33049990", "EPISOL SEC FPS70 TOQUE SECO") == 17
     assert _esperada("33079000", "RENU SOLUCAO P/ LENTES 355ML") == 17
-    assert _esperada("33049990", "BRONZEADOR CENOURA E BRONZE FPS 6") == 25
+    assert _esperada("33049990", "BRONZEADOR CENOURA E BRONZE FPS 6") == 17
     assert _esperada("33049990", "GEL POS SOL ALOE") == 25
-    assert _esperada("33049990", "ANASOL LOCAO BRONZ FPS8 120G") == 25
+    assert _esperada("33049990", "ANASOL LOCAO BRONZ FPS8 120G") == 17      # FPS >= 6 é protetor solar (Anvisa)
+    assert _esperada("33049990", "CENOURAEAMP;BRONZE FPS30 AERO") == 17
+    assert _esperada("33049990", "BRONZEADOR CENOURA FPS 4") == 25
+    assert _esperada("33079000", "TREALENS LEBON 120ML+360ML") == 17
+    assert _esperada("33079000", "RENU PLUS S/FRIC 355+120ML") == 17
+    assert _esperada("33049990", "BEPANTOL DERMA PROTETOR LABIAL") == 25
     assert _esperada("33049990", "ISDIN CR FPS 99 ACTIVE 50G") == 17
     assert _esperada("30049069", "DIPIRONA 500MG") == 17
 
@@ -55,3 +60,21 @@ def test_medicamento_higiene_fora_da_st_em_sc():
     assert not b.na_st("SC", "21069090", "2026-10-17", "WHEY PROTEIN 900G")
     # cosméticos da Seção XXVI só na venda porta a porta
     assert not b.na_st("SC", "33051000", "2026-10-17", "SHAMPOO SEDA")
+
+
+def test_soro_fisiologico_com_ncm_de_cosmetico_vai_para_conferencia():
+    m = MotorIcms.__new__(MotorIcms)
+    m.base, m.uf = carregar(), "SC"
+    m.modal = m.base.icms_modal["SC"]
+    aliq, fund, conf, _ = m._aliq_esperada("33079000", "SORO FISIOLOGICO 500 ML")
+    assert conf == "BAIXA" and "NCM do cadastro provavelmente está errado" in fund
+
+
+def test_cst_500_na_efd_e_origem_5_tributado_nao_st():
+    from app.engine.icms import _eh_st
+    assert not _eh_st("500")     # EFD: origem 5 + CST 00
+    assert not _eh_st("520")     # origem 5 + CST 20
+    assert _eh_st("560") and _eh_st("060") and _eh_st("010")
+    assert _eh_st("0500")        # XML do Simples: origem 0 + CSOSN 500
+    assert not _eh_st("0102")
+    assert _eh_st("201")         # XML antigo: CSOSN 201 sem origem (não existe CST 01)
