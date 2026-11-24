@@ -144,8 +144,29 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
 
         # ICMS / CSOSN
         orig = _moda(origem_cod.get(cod, [])) or "0"
+        uf = (empresa.get("uf") or "").upper()
+        dia = f"{hoje:%Y-%m-%d}"
+        lei_st = base._tem_lista_st(uf, dia) if ncm else False
+        item_st = base.na_st(uf, ncm, dia, desc) if lei_st else None
         if servico:
             cst_icms, csosn = "—", "—"
+        elif lei_st and item_st:
+            # a lei põe o produto na ST da UF (lista oficial): CST 60 na revenda, com ou sem compra com ST no período
+            cst_icms, csosn = f"{orig}60", "500"
+            obs.append(f"ICMS: produto na substituição tributária de {uf} — CEST {item_st.get('cest', '')}, "
+                       f"{item_st.get('descricao', '')[:80]} ({item_st.get('fundamento', '')}).")
+        elif lei_st and base._candidatos_st(uf, ncm, dia) and (_moda(u["cst_icms"]) or "")[-2:] == "60":
+            # o NCM tem item na lista de ST, a descrição não confirmou qual, e o cliente usa ST: não conclui
+            cst_icms, csosn = f"{orig}60", "500"
+            conf = "BAIXA"
+            itens = "; ".join(f"CEST {c['cest']} {c['descricao'][:40]}" for c in base._candidatos_st(uf, ncm, dia)[:3])
+            obs.append(f"ICMS: o NCM {ncm} tem produtos na ST de {uf} ({itens}), mas a descrição não permitiu "
+                       "confirmar que é um deles. Mantido CST 60 para conferir.")
+        elif lei_st and (cod in st_cod or ncm in st_ncm):
+            # comprou com ST, mas o produto não está na lista de ST da UF: a venda é tributada normalmente
+            cst_icms, csosn = f"{orig}00", "102"
+            obs.append(f"ICMS: comprado com ST, mas o produto não está na lista de ST de {uf} na data "
+                       "(RICMS/SC, Anexo 1-A): a venda é tributada.")
         elif cod in st_cod:
             cst_icms, csosn = f"{orig}60", "500"
         elif ncm in st_ncm:

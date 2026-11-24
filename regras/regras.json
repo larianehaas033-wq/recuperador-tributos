@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.7",
+ "versao": "2026.11.24.8",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -3392,6 +3392,13 @@
    "palavras": [
     "AGUA",
     "ÁGUA"
+   ],
+   "palavras_excluir": [
+    "COCO",
+    "SUCO",
+    "CHA ",
+    "LEITE",
+    "TONICO"
    ]
   },
   {
@@ -3408,6 +3415,13 @@
    "palavras": [
     "AGUA",
     "ÁGUA"
+   ],
+   "palavras_excluir": [
+    "COCO",
+    "SUCO",
+    "CHA ",
+    "LEITE",
+    "TONICO"
    ]
   },
   {
@@ -3441,6 +3455,12 @@
     "ITUBAINA",
     "H2OH",
     "LIMONADA"
+   ],
+   "palavras_excluir": [
+    "SUCO",
+    "CHA ",
+    "AGUA DE COCO",
+    "LEITE"
    ]
   },
   {
@@ -3474,6 +3494,12 @@
     "ITUBAINA",
     "H2OH",
     "LIMONADA"
+   ],
+   "palavras_excluir": [
+    "SUCO",
+    "CHA ",
+    "AGUA DE COCO",
+    "LEITE"
    ]
   },
   {
@@ -3507,6 +3533,12 @@
     "ITUBAINA",
     "H2OH",
     "LIMONADA"
+   ],
+   "palavras_excluir": [
+    "SUCO",
+    "CHA ",
+    "AGUA DE COCO",
+    "LEITE"
    ]
   },
   {
@@ -3540,6 +3572,12 @@
     "ITUBAINA",
     "H2OH",
     "LIMONADA"
+   ],
+   "palavras_excluir": [
+    "SUCO",
+    "CHA ",
+    "AGUA DE COCO",
+    "LEITE"
    ]
   },
   {
@@ -3552,7 +3590,14 @@
    ],
    "descricao": "Espumantes sem álcool",
    "inicio": "2021-06-01",
-   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)"
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção IV (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras": [
+    "ESPUMANTE",
+    "SPUMANTE",
+    "SIDRA",
+    "CHAMPANHE",
+    "SEM ALCOOL"
+   ]
   },
   {
    "uf": "SC",
@@ -4081,7 +4126,16 @@
    ],
    "descricao": "Preparações lubrificantes, exceto as contendo, como constituintes de base, 70% ou mais, em peso, de óleos de petróleo ou de minerais betuminosos",
    "inicio": "2018-01-01",
-   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)"
+   "fundamento": "RICMS/SC-01, Anexo 1-A, Seção VII (texto oficial da SEF/SC, versão de 25/06/2026)",
+   "palavras_excluir": [
+    "INTIMO",
+    "INTIMA",
+    "LUBRIFICANTE INT",
+    "GEL LUB",
+    "K-Y",
+    "K Y ",
+    "PRESERV"
+   ]
   },
   {
    "uf": "SC",
@@ -5453,5 +5507,5 @@
  "icms_st_cobertura": {
   "SC": "2021-06-01"
  },
- "programa_minimo": "1.4.20"
+ "programa_minimo": "1.4.21"
 }

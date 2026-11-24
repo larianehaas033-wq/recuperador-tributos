@@ -1,13 +1,13 @@
 {
-  "versao": "1.4.20",
+  "versao": "1.4.21",
   "publicado_em": "2026-11-24",
-  "pacote": "atualizacoes/sistema-1.4.20.zip",
-  "sha256": "dc119ab701c734da2c4646be7f63d7090a745e9034601762126bf6a9e1ca14ad",
+  "pacote": "atualizacoes/sistema-1.4.21.zip",
+  "sha256": "6027ccd0e7eaaaee539ec003ece22637b422b8e275f4900d2a62b719bd1b904f",
   "exige_pacote_completo": false,
-  "versao_regras": "2026.11.24.7",
+  "versao_regras": "2026.11.24.8",
   "notas": [
-    "Cadastro: CST de ICMS com isenção/redução do cliente é mantido para conferir enquanto os benefícios do RICMS/SC (Anexo 2) não estão na base",
-    "Cadastro: lenço/toalha umedecido com NCM 3401.19.00 pede correção de NCM (Cosit 98.062/2020); fórmula infantil fora do 1901.10.10 pela descrição; Ninho 3+ (composto lácteo) não é fórmula infantil",
-    "Cadastro: quando o cliente usa CST sem tributação e o NCM não está em lista legal, marca para conferir; absorvente de incontinência fora do código de saúde menstrual"
+    "PIS/COFINS: lê o resumo C175 da EFD-Contribuições; NFC-e com PIS/COFINS zerado no XML usa o valor pago no C175 da mesma nota",
+    "Cadastro de ICMS segue a lista oficial de ST de SC (energético e isotônico com CST 60; suco, chá e água de coco sem ST); NCM com item na ST sem confirmação pela descrição fica para conferir",
+    "Lista de ST: espumantes sem álcool e outras águas sem falsos positivos; gel lubrificante íntimo fora da ST de lubrificantes"
   ]
 }

@@ -155,6 +155,16 @@ def parse_efd(path: Path, tipo: str) -> EfdResultado:
             consolidado = None
         elif reg == "C170" and nota_atual is not None:
             r.itens.append(_c170(f, nota_atual, r.produtos, "C170"))
+        elif reg == "C175" and tipo == "EFD_CONTRIB" and nota_atual is not None:
+            # resumo da NFC-e por CFOP/CST (Guia Prático EFD-Contribuições, C175):
+            # CFOP|VL_OPR|VL_DESC|CST_PIS|VL_BC_PIS|ALIQ_PIS|QUANT|ALIQ_QUANT|VL_PIS|CST_COFINS|VL_BC_COFINS|
+            # ALIQ_COFINS|QUANT|ALIQ_QUANT|VL_COFINS|COD_CTA|INFO
+            nota_atual.setdefault("c175", []).append(dict(
+                cfop=campo(f, 2), vl_opr=num(campo(f, 3)), vl_desc=num(campo(f, 4)),
+                cst_pis=campo(f, 5), vl_bc_pis=num(campo(f, 6)), aliq_pis=num(campo(f, 7)), vl_pis=num(campo(f, 10)),
+                cst_cofins=campo(f, 11), vl_bc_cofins=num(campo(f, 12)), aliq_cofins=num(campo(f, 13)),
+                vl_cofins=num(campo(f, 16)),
+            ))
         elif reg == "C190" and tipo == "EFD_ICMS_IPI" and nota_atual is not None:
             # analítico do documento por CST/CFOP/alíquota (único detalhe de NFC-e e de NF-e própria)
             nota_atual.setdefault("analitico", []).append(dict(

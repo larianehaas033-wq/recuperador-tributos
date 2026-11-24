@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Callable
@@ -20,7 +21,7 @@ ITEM_COLS = [
 NOTA_COLS = [
     "empresa_id", "arquivo_id", "origem", "chave", "modelo", "serie", "numero", "data", "periodo", "ind_oper",
     "ind_emit", "cnpj_emit", "cnpj_part", "crt_emit", "cod_sit", "cancelada", "vl_doc", "vl_icms", "vl_icms_st", "vl_pis",
-    "vl_cofins", "fin_nfe", "chave_ref", "vl_cred_sn",
+    "vl_cofins", "fin_nfe", "chave_ref", "vl_cred_sn", "resumo_pis",
 ]
 
 REGIME = {"1": "LUCRO_REAL", "2": "LUCRO_PRESUMIDO", "3": "MISTO"}
@@ -125,7 +126,8 @@ def importar_sped(path: Path, progress: Progress | None = None) -> dict:
         nota_ids: dict[int, int] = {}
         for n in r.notas:
             vals = dict(n, empresa_id=empresa_id, arquivo_id=arquivo_id, origem=origem_doc,
-                        cnpj_emit=r.cnpj if n.get("ind_emit") == "0" else n.get("cnpj_part"))
+                        cnpj_emit=r.cnpj if n.get("ind_emit") == "0" else n.get("cnpj_part"),
+                        resumo_pis=json.dumps(n["c175"]) if n.get("c175") else None)
             cur = con.execute(
                 f"INSERT INTO notas_fiscais ({','.join(NOTA_COLS)}) VALUES ({','.join('?' * len(NOTA_COLS))})",
                 [vals.get(c) for c in NOTA_COLS],

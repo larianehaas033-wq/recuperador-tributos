@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS notas_fiscais (
     crt_emit      TEXT,                      -- XML: regime tributário do emitente (1/2/4 = Simples Nacional)
     fin_nfe       TEXT,                      -- XML: finalidade (1 normal, 2 complementar, 3 ajuste, 4 devolução)
     chave_ref     TEXT,                      -- XML: chave da nota referenciada (refNFe), ex.: a venda devolvida
-    vl_cred_sn    REAL,                      -- XML: crédito de ICMS permitido ao comprador de fornecedor do Simples
+    vl_cred_sn    REAL,
+    resumo_pis    TEXT,                      -- EFD-Contribuições: C175 da NFC-e (JSON por CFOP/CST)                      -- XML: crédito de ICMS permitido ao comprador de fornecedor do Simples
     cod_sit       TEXT,
     cancelada     INTEGER DEFAULT 0,
     vl_doc        REAL,

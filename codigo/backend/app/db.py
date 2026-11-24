@@ -27,7 +27,7 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
 
 MIGRACOES = {"itens_nota": [("cst_ibscbs", "TEXT"), ("cclasstrib", "TEXT")],
              "arquivos_sped": [("regime", "TEXT")], "notas_fiscais": [("crt_emit", "TEXT"), ("fin_nfe", "TEXT"), ("chave_ref", "TEXT"),
-                               ("vl_cred_sn", "REAL")],
+                               ("vl_cred_sn", "REAL"), ("resumo_pis", "TEXT")],
              "creditos_identificados": [("num_item", "TEXT")],
              "analises": [("desatualizada", "INTEGER DEFAULT 0")],
              "empresas": [("regime_manual", "TEXT")]}

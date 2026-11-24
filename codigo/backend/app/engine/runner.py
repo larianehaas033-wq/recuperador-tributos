@@ -186,6 +186,32 @@ def _preencher_regime_antigo(con, empresa_id: int) -> None:
             continue
 
 
+def _pis_pelo_resumo(do_xml: pl.DataFrame, resumos: dict) -> pl.DataFrame:
+    """NFC-e com PIS/COFINS zerado no XML, mas tributado no resumo da nota na EFD-Contribuições (C175): o que foi
+    pago está no C175. Rateia pelo valor do item, na mesma base (o C175 já pode excluir o ICMS) e alíquota do resumo,
+    só para itens com CST tributado no XML e quando o resumo da mesma nota tem CST tributado com valor."""
+    import json as _json
+    trib = {"01", "02", "03"}
+    linhas_out = []
+    for row in do_xml.iter_rows(named=True):
+        row = dict(row, pis_c175=False)
+        res = resumos.get(row["chave"])
+        if res and (row.get("vl_pis") or 0) <= 0 and (row.get("cst_pis") or "") in trib:
+            c = [x for x in _json.loads(res) if x.get("cst_pis") in trib and (x.get("vl_pis") or 0) > 0]
+            opr = sum(x["vl_opr"] for x in c)
+            if c and opr > 0:
+                fator = sum(x["vl_bc_pis"] for x in c) / opr
+                bruto = (row.get("vl_item") or 0) - (row.get("vl_desc") or 0)
+                bc = round(bruto * fator, 2)
+                ap = c[0]["aliq_pis"] or 0
+                ac = c[0]["aliq_cofins"] or 0
+                row.update(vl_bc_pis=bc, aliq_pis=ap, vl_pis=round(bc * ap / 100, 2),
+                           cst_cofins=row.get("cst_cofins") or row["cst_pis"], vl_bc_cofins=bc, aliq_cofins=ac,
+                           vl_cofins=round(bc * ac / 100, 2), pis_c175=True)
+        linhas_out.append(row)
+    return pl.DataFrame(linhas_out, schema_overrides={k: v for k, v in do_xml.schema.items()}, infer_schema_length=None)
+
+
 def regimes_por_periodo(con, empresa_id: int) -> tuple[dict, list[str]]:
     """Regime de cada competência. Fonte principal: registro 0110 da EFD-Contribuições do mês. Sem ela, o CRT das
     notas emitidas pela empresa (1, 2 ou 4 = Simples Nacional). Avisa mudança de regime e informação conflitante."""
@@ -383,7 +409,7 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
             FROM analitico_icms a JOIN notas_fiscais n ON n.id = a.nota_id WHERE a.empresa_id=?""", (empresa_id,))
         # notas de venda que a EFD-Contribuições traz só resumidas (NFC-e: C100 + C175, sem os produtos)
         sem_itens = db.rows(con, """
-            SELECT n.chave, n.periodo, n.modelo, n.vl_doc FROM notas_fiscais n
+            SELECT n.chave, n.periodo, n.modelo, n.vl_doc, n.resumo_pis FROM notas_fiscais n
             JOIN arquivos_sped a ON a.id = n.arquivo_id
             WHERE n.empresa_id=? AND a.tipo='EFD_CONTRIB' AND n.ind_oper='1' AND COALESCE(n.cancelada,0)=0
               AND NOT EXISTS (SELECT 1 FROM itens_nota i WHERE i.nota_id = n.id)""", (empresa_id,))
@@ -414,7 +440,8 @@ def executar_analise(empresa_id: int, hoje: date | None = None, progress=None, a
         do_xml = xml_saidas.filter(pl.col("chave").is_in(list(chaves)))
         cobertas = set(do_xml["chave"].unique().to_list()) if do_xml.height else set()
         if do_xml.height:  # os produtos dessas vendas vêm do XML da própria nota
-            itens_contrib = pl.concat([itens_contrib.drop("rid"), do_xml.drop("rid")], how="vertical_relaxed")
+            do_xml = _pis_pelo_resumo(do_xml, {r["chave"]: r["resumo_pis"] for r in sem_itens if r["chave"]})
+            itens_contrib = pl.concat([itens_contrib.drop("rid"), do_xml.drop("rid")], how="diagonal_relaxed")
             itens_contrib = itens_contrib.with_row_index("rid")
         faltam = [r for r in sem_itens if r["chave"] not in cobertas]
         sem_itens_faltando = faltam

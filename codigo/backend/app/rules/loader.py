@@ -96,6 +96,8 @@ class BaseRegras:
         desc = norm(descricao)
         sem_palavra = None
         for r in self._candidatos_st(uf, ncm, data):
+            if r.get("palavras_excluir") and desc and contem(desc, tuple(termo(x) for x in r["palavras_excluir"])):
+                continue
             pal = r.get("palavras")
             if not pal:
                 sem_palavra = sem_palavra or r

@@ -208,7 +208,10 @@ class MotorPisCofins:
                     valor_pago=r2(vl), valor_recuperar=r2(vl), natureza="RESTITUICAO",
                     via="ADMINISTRATIVO_FEDERAL", fundamento=regra.fundamento,
                     confianca=conf, regra_codigo=regra.codigo,
-                    observacao=f"{regra.grupo}. {motivo} {regra.observacao}".strip(),
+                    observacao=(f"{regra.grupo}. {motivo} {regra.observacao}"
+                                + (" Valor pago conforme o resumo da nota na EFD-Contribuições (C175), rateado pelo "
+                                   "valor do item: o XML da NFC-e veio sem PIS/COFINS." if row.get("pis_c175") else "")
+                                ).strip(),
                 ))
         return out
 

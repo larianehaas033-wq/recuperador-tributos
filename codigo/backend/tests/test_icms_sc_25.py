@@ -78,3 +78,14 @@ def test_cst_500_na_efd_e_origem_5_tributado_nao_st():
     assert _eh_st("0500")        # XML do Simples: origem 0 + CSOSN 500
     assert not _eh_st("0102")
     assert _eh_st("201")         # XML antigo: CSOSN 201 sem origem (não existe CST 01)
+
+
+def test_lista_st_sem_falso_positivo_em_bebidas_de_farmacia():
+    b = carregar()
+    d = "2026-11-24"
+    assert b.na_st("SC", "22029900", d, "MORMAII ENERGY DRINK ORIGINAL")      # energético: ST
+    assert b.na_st("SC", "22029900", d, "FLYNOW ISO FINI LIQ FR 500ML")       # hidroeletrolítico: ST
+    assert not b.na_st("SC", "22029900", d, "SUCO DE UVA INTEGRAL 300ML")     # suco: sem ST
+    assert not b.na_st("SC", "22029900", d, "AGUA DE COCO 200ML")             # água de coco não é água mineral
+    assert not b.na_st("SC", "22029900", d, "CHA PRONTO LEAO 450ML")
+    assert not b.na_st("SC", "34039900", d, "GEL LUBRIFICANTE INTIMO KY 50G")
