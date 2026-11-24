@@ -1,5 +1,5 @@
 {
- "versao": "2026.11.24.6",
+ "versao": "2026.11.24.7",
  "publicado_em": "2026-11-24",
  "descricao": "Regras com as listas exatas das leis e das Tabelas 4.3.10, 4.3.11 e 4.3.13 da EFD-Contribuições. Regras ALTA valem pelo NCM. Regras CONDICIONAL (itens com 'Ex' ou destinação) só contam quando a descrição do produto confere com o texto legal ou quando o fornecedor tratou o produto da mesma forma no XML de compra.",
  "regras": [
@@ -771,16 +771,13 @@
    "somente_revenda": false,
    "palavras": [],
    "palavras_excluir": [
-    "ADOCANTE",
-    "ADOCYL",
-    "ASPARTAME",
-    "CEREAL",
-    "ERITRITOL",
-    "FARINHA",
-    "MUCILON",
-    "NESTON",
-    "STEVIA",
-    "SUCRALOSE"
+    "COMPOSTO",
+    " 3 PBIO",
+    "FASES 3",
+    "FASES3",
+    " 3 ANOS",
+    "3 MAIS",
+    " 4 ANOS"
    ],
    "condicional": false,
    "exige_descricao": false
@@ -1015,12 +1012,12 @@
    "grupo": "Fórmulas infantis em 1901.10.90 / 2106.90.90 (depende do produto)",
    "ncm_prefixos": [
     "19011090",
-    "21069090"
+    "2106"
    ],
    "excecoes": [],
    "vigencia_ini": "2007-06-15",
    "vigencia_fim": "2026-12-31",
-   "fundamento": "Lei 10.925/2004, art. 1º, XI (fórmulas infantis, conforme previsão legal específica): alíquota zero, CST 06. O código 1901.10.10 da TIPI é o de leites modificados para alimentação de crianças (fórmulas infantis).",
+   "fundamento": "Lei 10.925/2004, art. 1º, XI: fórmulas infantis, assim definidas na legislação específica (Anvisa), têm alíquota zero independentemente do código; CST 06. Fora do 1901.10.10 só vale quando a descrição identifica a fórmula.",
    "confianca": "CONDICIONAL",
    "observacao": "Só fórmulas infantis; cereais infantis e outras preparações do código ficam fora.",
    "somente_revenda": false,
@@ -1061,7 +1058,7 @@
     "SUCRALOSE"
    ],
    "condicional": true,
-   "exige_descricao": false
+   "exige_descricao": true
   }
  ],
  "icms_aliquota_modal": [
@@ -1596,14 +1593,20 @@
      "TAMPOES"
     ],
     "palavras_excluir": [
-     "AMAMENT",
-     "FRALDA",
-     "GERIAT",
-     "GERIATR",
-     "LENCO",
+     "SEIOS",
+     "MASCULIN",
      "MAMA",
+     "FRALDA",
+     "BIGFRAL",
+     "GERIATR",
+     " MEN ",
+     "GERIAT",
+     "TENA",
+     "LENCO",
      "SEIO",
-     "SEIOS"
+     "INCONTIN",
+     "PLENITUD",
+     "AMAMENT"
     ]
    },
    {
@@ -2202,16 +2205,13 @@
     "excecoes": [],
     "palavras": [],
     "palavras_excluir": [
-     "ADOCANTE",
-     "ADOCYL",
-     "ASPARTAME",
-     "CEREAL",
-     "ERITRITOL",
-     "FARINHA",
-     "MUCILON",
-     "NESTON",
-     "STEVIA",
-     "SUCRALOSE"
+     "COMPOSTO",
+     " 3 PBIO",
+     "FASES 3",
+     "FASES3",
+     " 3 ANOS",
+     "3 MAIS",
+     " 4 ANOS"
     ],
     "fundamento": "LC 214/2025, art. 125 e Anexo I, item 4 (fórmulas infantis dos códigos 1901.10.10, 1901.10.90 e 2106.90.90): alíquota zero.",
     "observacao": ""
@@ -2941,6 +2941,21 @@
     ],
     "carne ou peixe in natura (capítulos 2 e 3)",
     "Carne ou peixe temperado é preparação de carne (posição 16.02 ou 16.04), não produto in natura do capítulo 2 ou 3: pelo entendimento da Receita Federal (Notas dos Capítulos 2 e 16), sai da alíquota zero da Lei 10.925 e da Cesta Básica do IBS/CBS. Confirme se leva só sal (fica no capítulo 2) ou outros temperos (capítulo 16) e corrija o NCM."
+   ],
+   [
+    [
+     "34011900"
+    ],
+    [
+     " LENCO",
+     " LENCOS",
+     " TOALHA",
+     " TOALHAS",
+     " TOALHINHA",
+     " LENC "
+    ],
+    "sabões e preparações em outras formas",
+    "Lenço/toalha umedecido não é 3401.19.00: a Receita classifica no 3401.11.90 sem o Ex 01 (Solução de Consulta Cosit 98.062/2020), que é monofásico (Lei 10.147/2000). Corrija o NCM antes de aplicar o enquadramento."
    ]
   ],
   "controle_interno": [
@@ -5438,5 +5453,5 @@
  "icms_st_cobertura": {
   "SC": "2021-06-01"
  },
- "programa_minimo": "1.4.19"
+ "programa_minimo": "1.4.20"
 }

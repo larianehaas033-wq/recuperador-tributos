@@ -131,6 +131,13 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
                 obs.append(f"PIS/COFINS: pode ser CST {cst_regra} ({regra.grupo}), mas {motivo[0].lower() + motivo[1:]}")
         else:
             cst_pc = "01"
+            atual_p = _moda(u["cst_pis"])
+            if atual_p in ("04", "06", "05", "07", "08", "09"):
+                # o cliente trata como sem tributação e o NCM não está em lista nenhuma: as fontes discordam
+                conf = "BAIXA"
+                obs.append(f"PIS/COFINS: o cliente usa CST {atual_p}, mas o NCM {ncm} não está em nenhuma lista legal "
+                           "(monofásico, alíquota zero, isenção). Ou o CST está errado (vai para 01), ou o NCM está "
+                           "errado (ex.: medicamento cadastrado com NCM de alimento). Confira o NCM antes de mudar.")
         regra_pc = ("NCM a corrigir" if ncm_grave else
                     (regra.grupo if pc_comprovado else "Não comprovado") if regra else "Tributação normal")
         fund_pc = regra.fundamento if (regra and pc_comprovado) else ""
@@ -147,6 +154,18 @@ def gerar(base: BaseRegras, empresa: dict, produtos: dict, itens_contrib: pl.Dat
             obs.append("ICMS: só o NCM coincide com uma compra com ST; confirme se o produto está na ST da UF.")
         else:
             cst_icms, csosn = f"{orig}00", "102"
+            atual_i = _moda(u["cst_icms"]) or ""
+            if (not simples and len(atual_i) == 3 and atual_i.isdigit()
+                    and atual_i[-2:] in ("20", "30", "40", "41", "50", "51", "90")
+                    and not base.icms_beneficios_uf(empresa.get("uf"))):
+                # o cliente aplica isenção/redução/suspensão e a base ainda não tem os benefícios da UF:
+                # sem a lei, não há como dizer que está errado — mantém e manda conferir
+                cst_icms = f"{orig}{atual_i[-2:]}"
+                conf = "BAIXA"
+                obs.append(f"ICMS: o cliente usa CST {atual_i} (isenção, redução de base, suspensão ou outras). Os "
+                           f"benefícios do RICMS/{empresa.get('uf') or 'UF'} (Anexo 2) ainda não estão na base do "
+                           "programa: mantido para o contador conferir (ex.: preservativos e medicamentos "
+                           "oncológicos têm isenção por convênio).")
 
         # IBS/CBS
         if servico:

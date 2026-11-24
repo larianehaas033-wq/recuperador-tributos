@@ -30,3 +30,25 @@ def test_ibs_sem_palavra_nao_vira_integral_as_cegas():
     b = carregar()
     r = classificar_ibs(b, "19011090", "PRODUTO X 400G")
     assert r["cclasstrib"] == "000001" and r.get("possivel", {}).get("cclasstrib") == "200003"
+
+
+def test_ninho_3_mais_e_composto_lacteo_nao_formula_infantil():
+    b = carregar()
+    assert b.classificar("19011010", "2026-10-20", "ALIQ_ZERO", "NINHO 3+ PBIO3 FASES 800G") is None or \
+        b.classificar("19011010", "2026-10-20", "ALIQ_ZERO", "NINHO 3+ PBIO3 FASES 800G").codigo != "ZERO_FORMULAS_INFANTIS"
+    assert b.classificar("19011010", "2026-10-20", "ALIQ_ZERO", "LEITE APTAMIL 2 800G").codigo == "ZERO_FORMULAS_INFANTIS"
+
+
+def test_neocate_fora_do_1901_e_refresco_nao():
+    b = carregar()
+    assert b.classificar("21069030", "2026-10-20", "ALIQ_ZERO", "NEOCATE LCP").codigo == "ZERO_FORMULAS_INFANTIS_OUTRAS"
+    r = b.classificar("21069010", "2026-10-20", "ALIQ_ZERO", "REFRESCO TANG 18G LAR")
+    assert r is None or r.codigo != "ZERO_FORMULAS_INFANTIS_OUTRAS"
+
+
+def test_ncm_que_contradiz_o_produto():
+    from app.engine.coerencia import conferir
+    b = carregar()
+    assert conferir("34011900", "LENCOS UMEDECIDOS HUGGIES 96UN", b).grave
+    assert not conferir("21069030", "CONDRES FORCE 80MG C/90 CAPS", b).grave   # suplemento: 2106 está certo
+    assert not conferir("21069010", "REFRESCO TANG 18G LAR", b).grave

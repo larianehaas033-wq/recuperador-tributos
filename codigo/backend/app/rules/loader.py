@@ -103,6 +103,10 @@ class BaseRegras:
                 return r
         return sem_palavra
 
+    def icms_beneficios_uf(self, uf: str | None) -> bool:
+        """A base já tem os benefícios de ICMS (isenção/redução/crédito presumido) da UF? Ainda não para nenhuma."""
+        return False
+
     def classificar(self, ncm: str | None, data: str | None, tipo: str, descricao: str | None = None) -> Regra | None:
         """Devolve a regra do tipo pedido que melhor se aplica ao produto.
 
